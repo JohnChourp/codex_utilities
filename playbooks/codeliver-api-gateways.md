@@ -71,6 +71,15 @@
 }
 ```
 
+## Manual updates (2026-02-18)
+
+- Added SAP route-control endpoints used by Control Panel fullscreen modal:
+  - `POST /prod/codeliver-sap-fetch-routes`
+  - `POST /prod/codeliver-sap-fetch-routes-paths`
+  - `POST /prod/codeliver-sap-handle-route`
+- Extended existing endpoint:
+  - `POST /prod/codeliver-sap-fetch-delivery-requests` with `type: "fetch-requests-by-route-id"` (requires `group` + `route_id` in body).
+
 ### codeliver-app (8sw8osiclf)
 
 #### RestApi

@@ -214,6 +214,24 @@ Rules:
   - `ShowRouteRoutedMapModalComponent`
   - `ShowRouteCompletedMapModalComponent`
 
+## 0.8) Cross-project parity rules (Control Panel: Panel ↔ SAP)
+
+- Keep these components/lambdas in **lockstep** between `projects/codeliver/codeliver-panel` and `projects/codeliver/codeliver-sap` for Control Panel behavior (UI/logic, HTML/SCSS/global classes and backend validation/behavior):
+  - `projects/codeliver/codeliver-panel/src/app/control-panel/control-panel.page.ts` ↔ `projects/codeliver/codeliver-sap/src/app/shared/modals/show-group-control-panel-modal/show-group-control-panel-modal.component.ts` (parity entry-point)
+  - `projects/codeliver/codeliver-panel/src/app/control-panel/control-panel.page.html` ↔ `projects/codeliver/codeliver-sap/src/app/shared/modals/show-group-control-panel-modal/show-group-control-panel-modal.component.html`
+  - `projects/codeliver/codeliver-panel/src/app/control-panel/control-panel.page.scss` ↔ `projects/codeliver/codeliver-sap/src/app/shared/modals/show-group-control-panel-modal/show-group-control-panel-modal.component.scss`
+  - `projects/codeliver/codeliver-panel/src/app/shared/common/map-route-requests-info-cards/map-route-requests-info-cards.component.ts` ↔ `projects/codeliver/codeliver-sap/src/app/shared/common/map-route-requests-info-cards/map-route-requests-info-cards.component.ts`
+  - `projects/codeliver/codeliver-panel/src/app/shared/common/map-route-requests-info-cards/map-route-requests-info-cards.component.html` ↔ `projects/codeliver/codeliver-sap/src/app/shared/common/map-route-requests-info-cards/map-route-requests-info-cards.component.html`
+  - `projects/codeliver/codeliver-panel/src/app/shared/common/map-route-requests-info-cards/map-route-requests-info-cards.component.scss` ↔ `projects/codeliver/codeliver-sap/src/app/shared/common/map-route-requests-info-cards/map-route-requests-info-cards.component.scss`
+  - `projects/codeliver/codeliver-panel/src/app/shared/modals/show-route-active-map-info-modal/show-route-active-map-info-modal.component.ts` ↔ `projects/codeliver/codeliver-sap/src/app/shared/modals/show-route-active-map-info-modal/show-route-active-map-info-modal.component.ts`
+  - `projects/codeliver/codeliver-panel/src/app/shared/modals/show-route-active-map-info-modal/show-route-active-map-info-modal.component.html` ↔ `projects/codeliver/codeliver-sap/src/app/shared/modals/show-route-active-map-info-modal/show-route-active-map-info-modal.component.html`
+  - `projects/codeliver/codeliver-panel/src/app/shared/modals/show-route-active-map-info-modal/show-route-active-map-info-modal.component.scss` ↔ `projects/codeliver/codeliver-sap/src/app/shared/modals/show-route-active-map-info-modal/show-route-active-map-info-modal.component.scss`
+  - `projects/codeliver/codeliver-panel/src/app/shared/utils/route-path-map-overlays.util.ts` ↔ `projects/codeliver/codeliver-sap/src/app/shared/utils/route-path-map-overlays.util.ts`
+  - `lambdas/codeliver_all/codeliver-panel-fetch-routes` ↔ `lambdas/codeliver_all/codeliver-sap-fetch-routes`
+  - `lambdas/codeliver_all/codeliver-panel-fetch-routes-paths` ↔ `lambdas/codeliver_all/codeliver-sap-fetch-routes-paths`
+  - `lambdas/codeliver_all/codeliver-panel-handle-route` ↔ `lambdas/codeliver_all/codeliver-sap-handle-route`
+  - `lambdas/codeliver_all/codeliver-panel-fetch-delivery-requests` ↔ `lambdas/codeliver_all/codeliver-sap-fetch-delivery-requests` (route-id mode parity)
+
 ## 1) Output style & working rules (always)
 
 - Keep replies concise and actionable.
@@ -222,6 +240,8 @@ Rules:
 - Prefer minimal, style-consistent changes; avoid large refactors unless explicitly requested.
 - When changes are needed in files under `ios/` or `android/` (regenerated on deploy), do **not** edit those files directly. Create/update a script (e.g., `build-before.js`, `build-after.js`, `capacitor-project.ts`) that applies the changes during build/deploy.
 - **Default mode autonomy (mandatory):** when **not** in Plan Mode, do **not** ask clarifying questions. Proceed autonomously with the best implementation and recommendations based on repository context and reasonable assumptions.
+- **Parity confirmation gate (mandatory):** before applying any cross-project sync/parity change, ask first whether parity is required and exactly which target project(s) must be kept in lockstep (e.g. `panel`, `sap`, `pos`, `app`).
+  - If the user requests scoped work (e.g. `sap-only` or `panel-only`), implement only that scope and state it explicitly as a parity exception in the response.
 - **Credentialed AWS access policy (mandatory):**
   - Do not run AWS API calls using user credentials (DynamoDB, S3, SQS, SNS, Lambda, CloudWatch, STS, etc.) unless the user explicitly requests it in the current prompt.
   - Approval is single-request only and does not persist to subsequent prompts.
@@ -277,6 +297,10 @@ Rules:
     - During those harden runs, perform full-lambda handled-error coverage (entire lambda, not partial): inspect all terminal paths and all handled `CustomError` branches and synchronize `custom_errors.policy.json` accordingly.
     - In those harden runs, `custom_errors.policy.json` must contain explicit per-entry booleans for `log_event` (`true` or `false`) across policy-controlled entries (`errors.<code>` and `flags.<path_or_outcome>`); do not leave per-entry logging behavior implicit.
     - In those harden runs, keep `emit_requestid_success` policy-controlled per terminal outcome as already required.
+    - In those harden runs, always stamp `package.json` `version` to show the latest harden timestamp. Keep the SemVer core (`X.Y.Z`) unchanged and set/replace build metadata to `+harden.YYYYMMDDHHmm` (Europe/Athens), e.g. `1.4.2+harden.20260218.1540`.
+    - In those harden-pr runs, update/create top-level `package.json.harden_pr_timestamp` as a string with format `YYYYMMDDHHmm` (Europe/Athens), e.g. `202602181540`.
+    - In those harden-deploy runs, update/create top-level `package.json.harden_deploy_timestamp` as a string with format `YYYYMMDDHHmm` (Europe/Athens), e.g. `202602181540`.
+    - Update only the timestamp key that corresponds to the active harden flow (`harden_pr_timestamp` for harden-pr, `harden_deploy_timestamp` for harden-deploy`) and never delete the other key when present.
     - Keep the Slack action marker implementation (`ACTION:SLACK_HANDLED_ERROR_HE1=...`) and encoding rules under that combined harden flow.
     - Outside those harden skills, do not add or modify Slack action marker behavior unless the user explicitly requests it.
 
@@ -674,17 +698,21 @@ This file describes a repeatable, task-agnostic workflow for handling engineerin
   - **end-to-end** (backend + frontend)
 - Confirm environments involved (dev/stage/prod) if that matters for the task.
 
-## 2) ClickUp: find the task and align status
+## 2) ClickUp: create and manage a task for every request
 
 Use ClickUp MCP tools (no manual browser required):
 
-- Search task by keywords:
-  - `clickup_search` with `filters.asset_types=["task"]`
-  - If a specific List is known, scope with `filters.location.subcategories=["<list_id>"]`
-- Read the task:
-  - `clickup_get_task`
-- Update the task status when appropriate:
-  - `clickup_update_task`
+- For every new user request (plan, implementation, bugfix, refactor, analysis with actionable output), create a new ClickUp task before implementation work starts.
+- Rewrite the user request into clean, readable Greek for the task title/description:
+  - fix spelling errors, missing characters, and unclear phrasing,
+  - keep meaning unchanged,
+  - make the final text concise and professional.
+- Include in the task description:
+  - short objective,
+  - scope (frontend/backend/both),
+  - expected deliverable.
+- Set the task status to `in-progress` immediately after task creation.
+- If the user explicitly provides an existing task ID/link and asks to use it, continue with that task instead of creating a new one.
 
 ### How Codex connects to ClickUp (MCP)
 
@@ -718,9 +746,9 @@ Troubleshooting:
 
 ### Status naming gotcha
 
-Statuses are list-specific and may not use English names like `testing`. If updating to a desired status fails, inspect what statuses exist in that list and pick the closest equivalent.
+Statuses are list-specific and may not use English names like `in-progress` or `completed`. If updating to a desired status fails, inspect what statuses exist in that list and pick the closest equivalent.
 
-Note (team convention): on the CLIENTS “Client tasks list”, the testing-equivalent status is `ΕΛΕΓΧΟΣ` (may appear as `ελεγχος` in API responses).
+Note (team convention): on the CLIENTS “Client tasks list”, use the list status that matches `in-progress` while working and the status that matches `completed` when work is fully finished.
 
 Language convention (team): unless the user explicitly asks otherwise, write ClickUp task descriptions, implementation plans, and comments in Greek.
 
@@ -735,7 +763,7 @@ Language convention (team): unless the user explicitly asks otherwise, write Cli
 
 ## 4) Write analytical steps into the ClickUp task description
 
-Before touching code, update the ClickUp task description with a concrete plan:
+Before touching code, write a concrete plan in the ClickUp task description:
 
 - Goal and scope (frontend/backend/both).
 - Data model changes (names, types, nullability) if any.
@@ -751,14 +779,14 @@ If any ambiguity exists, ask clarifying questions **before** implementing.
 
 ### Mandatory approval gate (do not skip)
 
-After updating the ClickUp task description:
+After creating/updating the ClickUp task description:
 
 - Paste the proposed implementation plan back to the user (short + scannable).
 - Ask any clarifying questions needed to remove ambiguity.
 - Explicitly ask the user to review the ClickUp plan and confirm.
 - **Do not start implementing** until the user replies with an explicit go-ahead (e.g. “proceed”).
-- When the user replies with “proceed” (or equivalent), immediately:
-  - `clickup_update_task` → move the task status to the list’s “in progress” equivalent, and
+- When the user replies with “proceed” (or equivalent):
+  - ensure the task is still in the list’s `in-progress` equivalent status,
   - start manual time tracking locally (see section 9; use Europe/Athens timestamps).
 
 ## 5) Implement with minimal changes (only after explicit user approval)
@@ -799,7 +827,7 @@ Never `git push` or deploy on your own. Always ask which option the user wants a
 - Push to the correct default branch (`main` vs `master` varies).
 - Prefer repo-provided deploy scripts when available; otherwise ask for the intended procedure.
 
-## 9) ClickUp: time tracking and move to testing
+## 9) ClickUp: time tracking and completion
 
 - **Time tracking policy (manual; do not start/stop timers):**
   - When you begin implementing: record a `start` timestamp (Europe/Athens).
@@ -808,10 +836,8 @@ Never `git push` or deploy on your own. Always ask which option the user wants a
   - Add a ClickUp time entry for the task using `clickup_add_time_entry` with:
     - `start` = **now** (Europe/Athens), and
     - `duration` = the elapsed time you calculated.
-- Move status to a testing-like status when appropriate:
-  - `clickup_update_task`
 - When implementation is complete:
-  - `clickup_update_task` → move the task to the list’s “testing” (or closest) status,
+  - `clickup_update_task` → move the task to the list’s `completed` (or closest) status,
   - add a ClickUp comment/activity note summarizing what changed (repos/files, key behavior, tests run, and any follow-ups).
 
 ## 10) Close out: summary to user

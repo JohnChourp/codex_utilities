@@ -220,6 +220,65 @@ Source: `/home/dm-soft-1/Downloads/projects/codeliver/codeliver-sap/src/app/shar
 }
 ```
 
+Source: `/home/dm-soft-1/Downloads/projects/codeliver/codeliver-sap/src/app/shared/data.storage.service.ts`
+```ts
+{
+  type: "fetch-requests-by-route-id",
+  group,
+  route_id,
+  exclusiveStartKey,
+}
+```
+
+## codeliver-sap-fetch-routes
+
+- Normalized: `codeliver-sap/prod/codeliver-sap-fetch-routes`
+
+Observed payloads (body)
+
+Source: `/home/dm-soft-1/Downloads/projects/codeliver/codeliver-sap/src/app/shared/data.storage.service.ts`
+```ts
+{
+  group,
+  type, // "fetch-routes-by-group" | "fetch-routes-by-delivery-guy-id" | "fetch-route-info-by-route-id" | ...
+  lastKey,
+  route_id,
+  ...extraPayload
+}
+```
+
+## codeliver-sap-fetch-routes-paths
+
+- Normalized: `codeliver-sap/prod/codeliver-sap-fetch-routes-paths`
+
+Observed payloads (body)
+
+Source: `/home/dm-soft-1/Downloads/projects/codeliver/codeliver-sap/src/app/shared/data.storage.service.ts`
+```ts
+{
+  group,
+  type: "fetch-route-paths-by-route-id",
+  route_id
+}
+```
+
+## codeliver-sap-handle-route
+
+- Normalized: `codeliver-sap/prod/codeliver-sap-handle-route`
+
+Observed payloads (body)
+
+Source: `/home/dm-soft-1/Downloads/projects/codeliver/codeliver-sap/src/app/shared/data.storage.service.ts`
+```ts
+{
+  group,
+  type, // "assign-route-to-delivery-guy" | "cancel-route-and-make-requests-pending-and-remove-route-id-from-delivery-guy" | ...
+  route,
+  route_id,
+  delivery_guy_id
+}
+```
+
 ## codeliver-sap-fetch-groups
 
 - Normalized: `codeliver-sap/prod/codeliver-sap-fetch-groups`

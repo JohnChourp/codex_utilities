@@ -1,0 +1,4 @@
+interface:
+  display_name: "CodeDeliver Link Missing Cloud Repos"
+  short_description: "Find and link missing codeliver repos"
+  default_prompt: "Use $codeliver-link-missing-cloud-repos to find codeliver-* repos missing from the codeliver project and link them automatically to the best feature."
