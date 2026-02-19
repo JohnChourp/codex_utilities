@@ -1,4 +1,0 @@
-interface:
-  display_name: "CodeDeliver Audit Frontend Lambdas From Services To Refs"
-  short_description: "Sync frontend lambdas to refs from services"
-  default_prompt: "Use $codeliver-audit-frontend-lambdas-from-services-to-refs to sync frontend lambda usage into refs."

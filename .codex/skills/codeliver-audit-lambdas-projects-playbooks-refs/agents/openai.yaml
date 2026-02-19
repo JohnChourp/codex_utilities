@@ -1,4 +1,0 @@
-interface:
-  display_name: "CodeDeliver Audit Lambdas Projects Playbooks Refs"
-  short_description: "Audit CodeDeliver contracts and refs coverage"
-  default_prompt: "Use $codeliver-audit-lambdas-projects-playbooks-refs to scan CodeDeliver and propose new playbooks/refs."

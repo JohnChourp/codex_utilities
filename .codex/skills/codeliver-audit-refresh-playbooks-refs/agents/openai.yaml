@@ -1,0 +1,4 @@
+interface:
+  display_name: "CodeDeliver Audit + Refresh Playbooks Refs"
+  short_description: "Unified audit and refresh for frontend lambdas, playbooks, refs"
+  default_prompt: "Use $codeliver-audit-refresh-playbooks-refs to audit and/or refresh CodeDeliver playbooks/refs and frontend-lambda mappings from services."

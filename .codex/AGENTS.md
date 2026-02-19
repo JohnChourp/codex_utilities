@@ -293,7 +293,7 @@ Rules:
     - For every lambda execution completion path (all terminal branches: early return, success return, handled error return, catch/failure return, and any other final outcome), always add distinct policy-controlled keys in `custom_errors.policy.json` (prefer `flags.*`) so each terminal path can independently control `RequestId SUCCESS` emission.
     - Event logging must remain policy-driven by `log_event`; when enabled, log the incoming event once (redacted, keep `event.body` intact).
     - Quick self-check: `rg -n "custom_errors\\.policy\\.json|handled_errors\\.js" -S .`
-  - **Harden skill composition (mandatory):** when the active run uses `crp-repos-harden-pr` or `crp-repos-harden-deploy`, automatically run the `codeliver-add-slack-comment-error-context` skill instructions in the same flow (combined execution).
+  - **Harden skill composition (mandatory):** when the active run uses `crp-repos-harden-pr` or `crp-repos-harden-deploy`, apply the embedded `ACTION:SLACK_COMMENT` error-context workflow in the same harden flow (combined execution).
     - During those harden runs, perform full-lambda handled-error coverage (entire lambda, not partial): inspect all terminal paths and all handled `CustomError` branches and synchronize `custom_errors.policy.json` accordingly.
     - In those harden runs, `custom_errors.policy.json` must contain explicit per-entry booleans for `log_event` (`true` or `false`) across policy-controlled entries (`errors.<code>` and `flags.<path_or_outcome>`); do not leave per-entry logging behavior implicit.
     - In those harden runs, keep `emit_requestid_success` policy-controlled per terminal outcome as already required.

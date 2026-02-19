@@ -5,8 +5,9 @@ description: >-
   (`crp repos harden-deploy`). Use when you need to explain what the deploy flow
   does, choose safe flags (debug, handoff), infer deploy target (`AWS_PROFILE`),
   or execute the flow with post-deploy verification (CloudWatch scan + smoke
-  invoke), including preflight (npm auth, `whc` updates before `la`) and
-  troubleshooting. For PR-only, use `crp-repos-harden-pr`.
+  invoke), including preflight (npm auth, `whc` updates before `la`), embedded
+  ACTION:SLACK_COMMENT error-context rules, and troubleshooting. For PR-only,
+  use `crp-repos-harden-pr`.
 ---
 
 # CRP repos harden-deploy
@@ -95,6 +96,36 @@ Only when you have explicit approval to merge+deploy.
 Notes:
 - If you need to pass the exact session file explicitly, use `--session <path>` (see the `crp ... --help` text; the handoff JSON lives under `./.codecheck/output/`).
 - In agent-mode, do **not** call `la run harden` / `la run handled-errors-policy`. Use the policy references directly (below).
+
+### Embedded ACTION:SLACK_COMMENT workflow (mandatory in harden runs)
+
+When the harden scope touches Node.js lambda error handling, apply this within the same run:
+- Keep business behavior stable. Do not change success/failure payload shapes or handled-error branching.
+- Preserve existing `ACTION:SLACK_HANDLED_ERROR_HE1=...` and `RequestId SUCCESS` behavior.
+- Add/extend reusable helpers in `index.js` (before handler export) to:
+  - parse optional `event.body` safely (JSON when possible),
+  - collect high-signal IDs from existing inputs only (no extra fetches),
+  - sanitize values (`|` replacement, whitespace normalization, length cap).
+- Build `ACTION:SLACK_COMMENT=...` from available fields only, preferred order:
+  - `group`, `delivery_guy_id`, `store_id`, `request_id`, `path_id`, `route_id`, `device_id`, `batch_id`, `customer_id`, `timestamp`, `day`, `zone_id`, `server_id`, `connection`, `notification_id`, `user_id`, `calculation_id`, `apikey_date`, `comment_id`.
+- Resolve key fallbacks in this order where applicable:
+  - `event.<key>`
+  - parsed `event.body.<key>`
+  - `event.pathParameters.<key>`
+  - `event.queryStringParameters.<key>`
+  - `event.requestContext.authorizer.<key>`
+  - `event.requestContext.authorizer.claims.<key>`
+  - request id: `event.requestContext.requestId` then `context.awsRequestId`
+  - connection: `connection`, `connection_id`, `connectionId`, `requestContext.connectionId`
+  - apikey date: `apikey-date`, `apikey_date`, and lowercase header variants
+- Emit the marker in `catch` before handled/unhandled branch decisions:
+  - log only if payload is non-empty,
+  - always append `comment_id` in marker payload.
+- Sensitive-data rule:
+  - never include passwords/tokens/cookies/raw secrets,
+  - never dump full bodies into `ACTION:SLACK_COMMENT`.
+- Marker format must stay single-token:
+  - `ACTION:SLACK_COMMENT=key1:value1|key2:value2|...|comment_id:<code>`
 
 ## Post-deploy verification (log scan pitfalls + recommended queries)
 

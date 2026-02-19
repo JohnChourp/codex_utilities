@@ -1,4 +1,0 @@
-interface:
-  display_name: "CodeDeliver Slack Comment Context"
-  short_description: "Add ACTION:SLACK_COMMENT context to lambda errors"
-  default_prompt: "Apply ACTION:SLACK_COMMENT error-context logging to the target lambda."
