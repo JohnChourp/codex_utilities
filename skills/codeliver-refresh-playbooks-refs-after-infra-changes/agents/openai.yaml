@@ -1,0 +1,4 @@
+interface:
+  display_name: "CodeDeliver Refresh Playbooks Refs After Infra Changes"
+  short_description: "Refresh CodeDeliver docs after infra changes"
+  default_prompt: "Use $codeliver-refresh-playbooks-refs-after-infra-changes to refresh playbooks/refs after infra changes."

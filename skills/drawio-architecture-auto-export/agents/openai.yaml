@@ -1,0 +1,4 @@
+interface:
+  display_name: "DrawIO Architecture Auto Export"
+  short_description: "Generate drawio page-flow maps and auto-export PNG"
+  default_prompt: "Use $drawio-architecture-auto-export to build ARCHITECTURE.drawio from ARCHITECTURE.md and auto-export ARCHITECTURE.png."

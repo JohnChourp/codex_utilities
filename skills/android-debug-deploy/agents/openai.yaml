@@ -1,0 +1,4 @@
+interface:
+  display_name: "Android Debug Deploy"
+  short_description: "Build, install, archive APK, and launch on connected phone"
+  default_prompt: "Build debug APK, install on my connected Android device, archive the APK, and launch the app."

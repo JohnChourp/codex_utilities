@@ -1,0 +1,4 @@
+interface:
+  display_name: "LearnByzantine Release"
+  short_description: "Auto bump, tag, build, publish, and write release notes"
+  default_prompt: "Create a new LearnByzantineMusic release with patch bump, tag push, pretty release notes, and publish release packages."
