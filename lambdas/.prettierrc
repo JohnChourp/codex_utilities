@@ -1,0 +1,20 @@
+{
+  "printWidth": 150,
+  "bracketSameLine": true,
+  "useEditorConfig": false,
+  "semi": true,
+  "trailingComma": "none",
+  "arrowParens": "avoid",
+  "tabWidth": 2,
+  "endOfLine": "lf",
+  "quoteProps": "as-needed",
+  "jsxSingleQuote": false,
+  "overrides": [
+    {
+      "files": "*.html",
+      "options": {
+        "parser": "angular"
+      }
+    }
+  ]
+}
