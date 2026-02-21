@@ -19,9 +19,27 @@ REFS_DIR_DEFAULT = "/home/dm-soft-1/.codex/refs"
 INDEX_FILENAME_DEFAULT = "refs-frontend-index.generated.md"
 
 EXECUTE_API_RE = re.compile(
-    r"https?://([a-z0-9]+)\\.execute-api\\.[^/]+/([^/\\s\"'`]+)(/[^\\s\"'`]+)?",
+    r"https?://([a-z0-9]+)\.execute-api\.[^/]+/([^/\s\"'`]+)(/[^\s\"'`]+)?",
     re.IGNORECASE,
 )
+
+HTTP_CALL_RE = re.compile(
+    r"this\.http\s*\.\s*(get|post|put|delete|patch)\s*(?:<[^>]*>)?\s*\(",
+    re.IGNORECASE,
+)
+
+CAPACITOR_HTTP_CALL_RE = re.compile(
+    r"CapacitorHttp\.(get|post|put|delete|patch)\s*(?:<[^>]*>)?\s*\(",
+    re.IGNORECASE,
+)
+
+CONST_EXECUTE_API_URL_RE = re.compile(
+    r"\b(?:const|let|var)\s+([A-Za-z_]\w*)\s*=\s*(\"https?://[^\"]*execute-api[^\"]*\"|'https?://[^']*execute-api[^']*')",
+    re.IGNORECASE,
+)
+
+URL_VAR_RE = re.compile(r"\burl\s*:\s*([A-Za-z_]\w*)")
+URL_SHORTHAND_RE = re.compile(r"(?<![A-Za-z0-9_])url(?![A-Za-z0-9_])")
 
 
 def iter_service_files(root: Path):
@@ -45,21 +63,27 @@ def detect_project(path: Path):
 
 def find_calls(text: str):
     results = []
-    for method in METHODS:
-        needle = f"http.{method}("
-        start = 0
-        while True:
-            idx = text.find(needle, start)
-            if idx == -1:
-                break
-            args_start = idx + len(needle)
-            args_end = find_matching_paren(text, args_start - 1)
-            if args_end == -1:
-                start = args_start
-                continue
-            args = text[args_start:args_end].strip()
-            results.append((method, idx, args))
-            start = args_end + 1
+    for match in HTTP_CALL_RE.finditer(text):
+        method = match.group(1).lower()
+        args_start = match.end()
+        args_end = find_matching_paren(text, args_start - 1)
+        if args_end == -1:
+            continue
+        args = text[args_start:args_end].strip()
+        results.append((method, match.start(), args))
+    return results
+
+
+def find_capacitor_calls(text: str):
+    results = []
+    for match in CAPACITOR_HTTP_CALL_RE.finditer(text):
+        method = match.group(1).lower()
+        args_start = match.end()
+        args_end = find_matching_paren(text, args_start - 1)
+        if args_end == -1:
+            continue
+        args = text[args_start:args_end].strip()
+        results.append((method, match.start(), args))
     return results
 
 
@@ -140,7 +164,7 @@ def load_api_map(path: Path):
     for line in path.read_text(encoding="utf-8", errors="ignore").splitlines():
         if not line.startswith("### "):
             continue
-        match = re.match(r"###\\s+(.+?)\\s+\\(([^)]+)\\)", line)
+        match = re.match(r"###\s+(.+?)\s+\(([^)]+)\)", line)
         if match:
             name = match.group(1).strip()
             api_id = match.group(2).strip()
@@ -190,6 +214,61 @@ def parse_url(expr: str, api_map: dict):
     if api_id:
         api_name = api_map.get(api_id)
     return api_id, api_name, stage, route
+
+
+def parse_default_execute_api(text: str, api_map: dict):
+    match = EXECUTE_API_RE.search(text)
+    if not match:
+        return None, None, None
+    api_id = match.group(1)
+    stage = match.group(2)
+    api_name = api_map.get(api_id)
+    return api_id, api_name, stage
+
+
+def build_const_url_bindings(text: str):
+    bindings = []
+    for match in CONST_EXECUTE_API_URL_RE.finditer(text):
+        var_name = match.group(1)
+        quoted_url = match.group(2)
+        url = quoted_url[1:-1]
+        bindings.append((match.start(), var_name, url))
+    return bindings
+
+
+def resolve_url_expression(expr: str, call_pos: int, const_url_bindings: list):
+    if "execute-api" in expr:
+        return expr
+
+    match = URL_VAR_RE.search(expr)
+    if match:
+        var_name = match.group(1)
+    elif URL_SHORTHAND_RE.search(expr):
+        var_name = "url"
+    else:
+        return expr
+    best_url = None
+    best_pos = -1
+    for pos, name, url in const_url_bindings:
+        if name == var_name and pos <= call_pos and pos > best_pos:
+            best_pos = pos
+            best_url = url
+
+    if best_url:
+        return f"\"{best_url}\""
+    return expr
+
+
+def extract_data_from_options(options_expr: str):
+    expr = options_expr.strip()
+    if not (expr.startswith("{") and expr.endswith("}")):
+        return ""
+    inner = expr[1:-1].strip()
+    for part in split_top_level(inner):
+        item = part.strip()
+        if item.startswith("data:"):
+            return item.split(":", 1)[1].strip()
+    return ""
 
 
 def normalized_path(api_name: str, stage: str, route: str):
@@ -314,11 +393,21 @@ def main():
     for path in iter_service_files(root):
         text = path.read_text(encoding="utf-8", errors="ignore")
         project = detect_project(path)
+        default_api_id, default_api_name, default_stage = parse_default_execute_api(text, api_map)
+        const_url_bindings = build_const_url_bindings(text)
         for method, idx, args_str in find_calls(text):
             parts = split_top_level(args_str)
             url = parts[0] if parts else ""
             body = parts[1] if len(parts) > 1 else ""
             api_id, api_name, stage, route = parse_url(url, api_map)
+            if not api_id and route and default_api_id:
+                api_id = default_api_id
+                api_name = default_api_name
+                stage = default_stage
+            if not route:
+                continue
+            if not (route.startswith("codeliver-") or route == "test-connection"):
+                continue
             rows.append(
                 {
                     "project": project,
@@ -326,6 +415,36 @@ def main():
                     "line": line_for_index(text, idx),
                     "method": method,
                     "url": url,
+                    "body": body,
+                    "raw_args": args_str,
+                    "api_id": api_id,
+                    "api_name": api_name,
+                    "stage": stage,
+                    "route": route,
+                    "normalized": normalized_path(api_name, stage, route),
+                }
+            )
+        for method, idx, args_str in find_capacitor_calls(text):
+            parts = split_top_level(args_str)
+            options_expr = parts[0] if parts else ""
+            url_expr = resolve_url_expression(options_expr, idx, const_url_bindings)
+            body = extract_data_from_options(options_expr)
+            api_id, api_name, stage, route = parse_url(url_expr, api_map)
+            if not api_id and route and default_api_id:
+                api_id = default_api_id
+                api_name = default_api_name
+                stage = default_stage
+            if not route:
+                continue
+            if not (route.startswith("codeliver-") or route == "test-connection"):
+                continue
+            rows.append(
+                {
+                    "project": project,
+                    "file": str(path),
+                    "line": line_for_index(text, idx),
+                    "method": method,
+                    "url": url_expr,
                     "body": body,
                     "raw_args": args_str,
                     "api_id": api_id,
