@@ -192,7 +192,13 @@ Observed payloads (body)
 
 Source: `/home/dm-soft-1/Downloads/projects/codeliver/codeliver-sap/src/app/shared/data.storage.service.ts:1256`
 ```ts
-{ delivery_guy_id, group }
+{
+  delivery_guy_id,
+  group,
+  date_from?,   // epoch ms
+  date_to?,     // epoch ms
+  action_type?, // string
+}
 ```
 
 ## codeliver-sap-fetch-delivery-requests

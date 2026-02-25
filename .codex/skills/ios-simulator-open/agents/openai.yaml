@@ -1,0 +1,4 @@
+interface:
+  display_name: "iOS Simulator Open"
+  short_description: "Create/boot iPhone 17 Pro Max simulator and keep it open"
+  default_prompt: "Create or reuse an iPhone 17 Pro Max simulator, boot it, open Simulator, and leave it running."

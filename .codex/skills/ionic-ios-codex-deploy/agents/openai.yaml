@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ionic iOS Codex Deploy"
+  short_description: "Build, sync, install .app, and launch on Codex iPhone simulator"
+  default_prompt: "Build this Ionic Capacitor project, sync iOS, install the app, and launch it on the Codex iPhone simulator."

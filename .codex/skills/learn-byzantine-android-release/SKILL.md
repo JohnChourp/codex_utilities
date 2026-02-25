@@ -27,9 +27,22 @@ description: Create a new Android app release for LearnByzantineMusic by bumping
 
 3. Με το push του tag, παραμένει ενεργό και το GitHub Actions workflow `Android Tag Release` ως επιπλέον fallback.
 
+## Preflight που κάνει πλέον το skill (για να μη σπάει σε macOS)
+
+- Επιλέγει αυτόματα GNU Bash `>=4` (π.χ. `/Users/john/.homebrew/bin/bash`) ώστε το `release-and-tag.sh` να υποστηρίζει `mapfile` και associative arrays.
+- Ελέγχει/φορτώνει local release signing env από:
+  - `~/.android/learnbyzantine/release-signing.env`
+- Αν λείπουν signing vars, τρέχει:
+  - `scripts/setup-release-signing.sh`
+- Αν το setup script αποτύχει στο macOS `base64 -w`, δημιουργεί compatibility fallback:
+  - `~/.android/learnbyzantine/release-upload-key.base64` με `base64 < keystore > file`
+- Αν λείπει `gh auth login`, κάνει αυτόματα fallback σε:
+  - `--skip-gh-release`
+  ώστε να ολοκληρωθεί το release commit + tag + push και να αναλάβει το GitHub Actions tag workflow.
+
 ## Options
 
-- `--project <path>`: path του Android project (default: `/home/john/Downloads/projects/LearnByzantineMusic`)
+- `--project <path>`: path του Android project (default: `/Users/john/Downloads/projects/LearnByzantineMusic`)
 - `--bump patch|minor|major`: semantic bump (default: `patch`)
 - `--version X.Y.Z`: explicit version (αντί για bump)
 - `--code N`: explicit versionCode
@@ -42,3 +55,4 @@ description: Create a new Android app release for LearnByzantineMusic by bumping
 - Χρησιμοποίησε `--version` μόνο όταν χρειάζεται συγκεκριμένο release number.
 - Για direct release publish απαιτείται ενεργό `gh auth login`.
 - Για Google Play production signing, πρέπει να έχουν οριστεί τα GitHub Secrets keystore.
+- Αν έχει προηγηθεί αποτυχημένο release run μετά από bump, ξανατρέξε με explicit `--version X.Y.Z --code N` για να μη γίνει δεύτερο bump.

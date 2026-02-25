@@ -12,6 +12,7 @@ Options:
   --package <id>         Override package/applicationId detection
   --activity <name>      Activity to launch (e.g. .MainActivity)
   --serial <id>          ADB serial for target device
+  --avd <name>           Preferred Android Virtual Device name for auto-launch fallback
   --archive-dir <path>   Output directory for archived APK copies
   --clean                Run clean before installDebug
   --skip-launch          Do not launch app after install
@@ -30,6 +31,12 @@ SERIAL="${ADB_SERIAL:-}"
 ARCHIVE_DIR=""
 CLEAN_BUILD=0
 SKIP_LAUNCH=0
+ADB_BIN=""
+EMULATOR_BIN=""
+AVD_NAME="${ANDROID_AVD_NAME:-}"
+EMULATOR_LOG=""
+EMULATOR_STARTED=0
+EMULATOR_PID=""
 
 while (($# > 0)); do
     case "$1" in
@@ -47,6 +54,10 @@ while (($# > 0)); do
             ;;
         --serial)
             SERIAL="${2:-}"
+            shift 2
+            ;;
+        --avd)
+            AVD_NAME="${2:-}"
             shift 2
             ;;
         --archive-dir)
@@ -85,10 +96,183 @@ if [[ ! -f "$PROJECT_DIR/gradlew" ]]; then
     exit 1
 fi
 
-if ! command -v adb >/dev/null 2>&1; then
-    echo "adb not found in PATH." >&2
+sanitize_filename_part() {
+    local value="$1"
+    echo "$value" | tr -cs 'A-Za-z0-9._-' '_'
+}
+
+collect_lines() {
+    local __dest="$1"
+    shift
+    local lines=()
+    local line
+    while IFS= read -r line; do
+        [[ -n "$line" ]] && lines+=("$line")
+    done < <("$@")
+    eval "$__dest=(\"\${lines[@]}\")"
+}
+
+ensure_adb() {
+    if command -v adb >/dev/null 2>&1; then
+        ADB_BIN="$(command -v adb)"
+        return 0
+    fi
+
+    local candidates=()
+    if [[ -n "${ANDROID_HOME:-}" ]]; then
+        candidates+=("${ANDROID_HOME}/platform-tools/adb")
+    fi
+    if [[ -n "${ANDROID_SDK_ROOT:-}" ]]; then
+        candidates+=("${ANDROID_SDK_ROOT}/platform-tools/adb")
+    fi
+    candidates+=(
+        "${HOME}/Library/Android/sdk/platform-tools/adb"
+        "/Users/${USER}/Library/Android/sdk/platform-tools/adb"
+    )
+
+    local candidate
+    for candidate in "${candidates[@]}"; do
+        if [[ -x "$candidate" ]]; then
+            export PATH="$(dirname "$candidate"):$PATH"
+            ADB_BIN="$candidate"
+            log "Using adb from fallback path: $candidate"
+            return 0
+        fi
+    done
+    return 1
+}
+
+ensure_emulator() {
+    if command -v emulator >/dev/null 2>&1; then
+        EMULATOR_BIN="$(command -v emulator)"
+        return 0
+    fi
+
+    local candidates=()
+    if [[ -n "${ANDROID_HOME:-}" ]]; then
+        candidates+=("${ANDROID_HOME}/emulator/emulator")
+    fi
+    if [[ -n "${ANDROID_SDK_ROOT:-}" ]]; then
+        candidates+=("${ANDROID_SDK_ROOT}/emulator/emulator")
+    fi
+    candidates+=(
+        "${HOME}/Library/Android/sdk/emulator/emulator"
+        "/Users/${USER}/Library/Android/sdk/emulator/emulator"
+    )
+
+    local candidate
+    for candidate in "${candidates[@]}"; do
+        if [[ -x "$candidate" ]]; then
+            EMULATOR_BIN="$candidate"
+            return 0
+        fi
+    done
+    return 1
+}
+
+pick_avd() {
+    collect_lines avds "$EMULATOR_BIN" -list-avds
+    if [[ ${#avds[@]} -eq 0 ]]; then
+        echo "No Android Virtual Devices found. Create one from Android Studio Device Manager." >&2
+        return 1
+    fi
+
+    local avd
+    if [[ -n "$AVD_NAME" ]]; then
+        for avd in "${avds[@]}"; do
+            if [[ "$avd" == "$AVD_NAME" ]]; then
+                echo "$avd"
+                return 0
+            fi
+        done
+        echo "Requested AVD '$AVD_NAME' was not found." >&2
+        printf 'Available AVDs:\n' >&2
+        printf '  - %s\n' "${avds[@]}" >&2
+        return 1
+    fi
+
+    for avd in "${avds[@]}"; do
+        if [[ "$avd" == "Motorola_Edge_40_Neo_API_35" ]]; then
+            echo "$avd"
+            return 0
+        fi
+    done
+
+    echo "${avds[0]}"
+}
+
+wait_for_online_device() {
+    local serial=""
+    local boot=""
+    local i
+
+    for i in {1..120}; do
+        serial="$("$ADB_BIN" devices | awk 'NR>1 && $2=="device" {print $1; exit}')"
+        if [[ -n "$serial" ]]; then
+            break
+        fi
+        sleep 2
+    done
+
+    if [[ -z "$serial" ]]; then
+        return 1
+    fi
+
+    for i in {1..120}; do
+        boot="$("$ADB_BIN" -s "$serial" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')"
+        if [[ "$boot" == "1" ]]; then
+            break
+        fi
+        sleep 2
+    done
+
+    echo "$serial"
+}
+
+launch_emulator_fallback() {
+    local selected_avd safe_avd timestamp log_dir
+    if ! ensure_emulator; then
+        echo "emulator binary not found in PATH or common SDK locations." >&2
+        return 1
+    fi
+    selected_avd="$(pick_avd)" || return 1
+    safe_avd="$(sanitize_filename_part "$selected_avd")"
+    timestamp="$(date +%Y%m%d_%H%M%S)"
+    log_dir="$PROJECT_DIR/build-artifacts/emulator-logs"
+    mkdir -p "$log_dir"
+    EMULATOR_LOG="$log_dir/emulator-${safe_avd}-${timestamp}.log"
+
+    log "No connected device detected. Launching emulator AVD: $selected_avd"
+    nohup "$EMULATOR_BIN" -avd "$selected_avd" -no-snapshot-load -no-boot-anim </dev/null >"$EMULATOR_LOG" 2>&1 &
+    EMULATOR_PID="$!"
+    disown "$EMULATOR_PID" 2>/dev/null || true
+    EMULATOR_STARTED=1
+
+    local serial
+    if ! serial="$(wait_for_online_device)"; then
+        echo "Emulator did not become ready in time." >&2
+        if [[ -f "$EMULATOR_LOG" ]]; then
+            echo "Emulator log: $EMULATOR_LOG" >&2
+            tail -n 40 "$EMULATOR_LOG" >&2 || true
+        fi
+        return 1
+    fi
+
+    SERIAL="$serial"
+    log "Emulator ready on serial: $SERIAL"
+    log "Emulator PID: $EMULATOR_PID"
+    if [[ -n "$EMULATOR_LOG" ]]; then
+        log "Emulator log: $EMULATOR_LOG"
+    fi
+}
+
+if ! ensure_adb; then
+    echo "adb not found in PATH or common SDK locations." >&2
+    echo "Try: export PATH=\"\$HOME/Library/Android/sdk/platform-tools:\$PATH\"" >&2
     exit 1
 fi
+
+"$ADB_BIN" start-server >/dev/null 2>&1 || true
 
 if [[ -z "$ARCHIVE_DIR" ]]; then
     ARCHIVE_DIR="$PROJECT_DIR/build-artifacts/apk"
@@ -127,7 +311,7 @@ if [[ -z "$PACKAGE_NAME" ]]; then
     fi
 fi
 
-ADB_CMD=(adb)
+ADB_CMD=("$ADB_BIN")
 if [[ -n "$SERIAL" ]]; then
     ADB_CMD+=( -s "$SERIAL" )
     if [[ "$("${ADB_CMD[@]}" get-state 2>/dev/null || true)" != "device" ]]; then
@@ -135,15 +319,20 @@ if [[ -n "$SERIAL" ]]; then
         exit 1
     fi
 else
-    mapfile -t connected < <(adb devices | awk 'NR>1 && $2=="device" {print $1}')
+    connected=()
+    while IFS= read -r dev_serial; do
+        [[ -n "$dev_serial" ]] && connected+=("$dev_serial")
+    done < <("$ADB_BIN" devices | awk 'NR>1 && $2=="device" {print $1}')
     if [[ ${#connected[@]} -eq 0 ]]; then
-        echo "No connected Android devices found." >&2
-        exit 1
+        if ! launch_emulator_fallback; then
+            exit 1
+        fi
+    else
+        if [[ ${#connected[@]} -gt 1 ]]; then
+            log "Multiple devices found; using the first one: ${connected[0]}"
+        fi
+        SERIAL="${connected[0]}"
     fi
-    if [[ ${#connected[@]} -gt 1 ]]; then
-        log "Multiple devices found; using the first one: ${connected[0]}"
-    fi
-    SERIAL="${connected[0]}"
     ADB_CMD+=( -s "$SERIAL" )
 fi
 
@@ -212,14 +401,25 @@ if [[ $SKIP_LAUNCH -eq 0 ]]; then
                 component="${PACKAGE_NAME}/.${component}"
             fi
         fi
-        "${ADB_CMD[@]}" shell am start -n "$component"
+        "${ADB_CMD[@]}" shell am start -W -n "$component"
         log "Launched component: $component"
     else
-        "${ADB_CMD[@]}" shell monkey -p "$PACKAGE_NAME" -c android.intent.category.LAUNCHER 1
-        log "Launched package via LAUNCHER intent: $PACKAGE_NAME"
+        set +e
+        launch_output="$("${ADB_CMD[@]}" shell monkey -p "$PACKAGE_NAME" -c android.intent.category.LAUNCHER 1 2>&1)"
+        launch_status=$?
+        set -e
+        printf '%s\n' "$launch_output"
+        if [[ $launch_status -ne 0 ]]; then
+            log "monkey returned $launch_status; proceeding without failure to keep emulator running."
+        fi
+        log "Launch intent sent for package: $PACKAGE_NAME"
     fi
 else
     log "Launch skipped (--skip-launch)."
+fi
+
+if [[ $EMULATOR_STARTED -eq 1 ]]; then
+    log "Emulator was auto-started and is intentionally left running for manual testing."
 fi
 
 log "Done."

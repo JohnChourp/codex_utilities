@@ -1,256 +1,1002 @@
-# Infra keyword scan
-
-- Root: `/Users/john/Downloads/lambdas/codeliver_all`
-- Limit: `250`
-
-## Matches
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-app-renew-device-token/README.md:59` `- **DynamoDB tables (hardcoded)**:`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-app-renew-device-token/README.md:102` `- Η lambda δεν κάνει publish σε SNS/SQS/EventBridge και δεν στέλνει push notifications από μόνη της.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-app-renew-device-token/dynamo_db_functions.js:5` `const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-app-renew-device-token/dynamo_db_functions.js:6` `const { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand, QueryCommand } = require("@aws-sdk/lib-dynamodb");`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-app-renew-device-token/dynamo_db_functions.js:8` `const client = new DynamoDBClient({ region: "eu-west-1" });`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-app-renew-device-token/dynamo_db_functions.js:9` `const docClient = DynamoDBDocumentClient.from(client, {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-app-renew-device-token/cloudformation/stack.json:9` `"S3Bucket": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-app-renew-device-token/cloudformation/stack.json:13` `"S3Key": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-app-renew-device-token/cloudformation/stack.json:27` `"S3Bucket": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-app-renew-device-token/cloudformation/stack.json:28` `"Ref": "S3Bucket"`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-app-renew-device-token/cloudformation/stack.json:30` `"S3Key": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-app-renew-device-token/cloudformation/stack.json:31` `"Ref": "S3Key"`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-app-login-mobile-pin/LOGIN_PIN_HANDLER_CASES.md:49` `## 3) Διασυνδέσεις/Εξαρτήσεις (DynamoDB)`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-app-login-mobile-pin/README.md:22` `## Sample event (API Gateway)`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-app-login-mobile-pin/README.md:81` `- DynamoDB tables:`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-app-login-mobile-pin/README.md:154` `- Το lambda δεν στέλνει notifications. Αν αποτυγχάνει το login, δεν εκδίδεται token και οι ροές push/SNS downstream δεν ενεργοποιούνται.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-app-login-mobile-pin/README.md:170` `- Δεν υπάρχουν άμεσες δημοσιεύσεις σε SNS/SQS/EventBridge από αυτό το lambda.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-app-login-mobile-pin/dynamo_db_functions.js:6` `const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-app-login-mobile-pin/dynamo_db_functions.js:7` `const { DynamoDBDocumentClient, GetCommand, QueryCommand, UpdateCommand } = require("@aws-sdk/lib-dynamodb");`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-app-login-mobile-pin/dynamo_db_functions.js:9` `const client = new DynamoDBClient({ region: "eu-west-1" });`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-app-login-mobile-pin/dynamo_db_functions.js:10` `const docClient = DynamoDBDocumentClient.from(client, {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-app-login-mobile-pin/cloudformation/stack.json:9` `"S3Bucket": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-app-login-mobile-pin/cloudformation/stack.json:13` `"S3Key": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-app-login-mobile-pin/cloudformation/stack.json:27` `"S3Bucket": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-app-login-mobile-pin/cloudformation/stack.json:28` `"Ref": "S3Bucket"`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-app-login-mobile-pin/cloudformation/stack.json:30` `"S3Key": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-app-login-mobile-pin/cloudformation/stack.json:31` `"Ref": "S3Key"`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-socket-emitter-sqs/index.js:26` `// Merge all SQS record bodies into a single array`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-socket-emitter-sqs/api_gateway_functions.js:3` `const { ApiGatewayManagementApiClient, PostToConnectionCommand } = require("@aws-sdk/client-apigatewaymanagementapi");`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-socket-emitter-sqs/api_gateway_functions.js:5` `const apiGatewayClient = new ApiGatewayManagementApiClient({`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-socket-emitter-sqs/README.md:4` `Lambda consumer που διαβάζει batches από SQS και προωθεί τα μηνύματα σε WebSocket connections μέσω API Gateway Management API.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-socket-emitter-sqs/README.md:7` `1) Η Lambda ενεργοποιείται από SQS event (`event.Records[]`).`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-socket-emitter-sqs/README.md:15` `**SQS event (sample)**`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-socket-emitter-sqs/README.md:41` `- Parameters: `LambdaFunctionName`, `S3Bucket`, `S3Key`, `Role`.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-socket-emitter-sqs/README.md:68` `- **`JSON.parse` αποτυγχάνει στο `record.body`**: το SQS message δεν είναι JSON array → η Lambda επιστρέφει `success: false` και γίνεται log το `event` (με redaction) + το error.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-socket-emitter-sqs/README.md:77` `- ότι τα SQS messages παράγονται σωστά (upstream producer),`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-socket-emitter-sqs/README.md:89` `- Upstream components που γράφουν στο SQS και clients που είναι συνδεδεμένοι στο WebSocket API επηρεάζονται άμεσα από failures.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-socket-emitter-sqs/ROADMAP.md:4` `- Consumes SQS batches and merges message arrays from `record.body`.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-socket-emitter-sqs/cloudformation/stack.json:9` `"S3Bucket": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-socket-emitter-sqs/cloudformation/stack.json:13` `"S3Key": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-socket-emitter-sqs/cloudformation/stack.json:27` `"S3Bucket": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-socket-emitter-sqs/cloudformation/stack.json:28` `"Ref": "S3Bucket"`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-socket-emitter-sqs/cloudformation/stack.json:30` `"S3Key": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-socket-emitter-sqs/cloudformation/stack.json:31` `"Ref": "S3Key"`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/README.md:3` ``codeliver-delivery-request-actions` processes DynamoDB Streams updates for “delivery request actions” and forwards the latest action state to the CodeDeliver panel via the panel socket-emitter queue.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/README.md:7` `1. The Lambda is triggered by a DynamoDB Streams batch (`event.Records`).`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/README.md:10` `4. It enqueues messages to the panel socket-emitter SQS FIFO queue with event `request-actions-updated`.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/README.md:49` `- **DynamoDB**:`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/README.md:51` `- **SQS**:`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/README.md:64` `- A request action item is updated in DynamoDB (stream `MODIFY`).`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/README.md:81` `- DynamoDB stream record is missing required fields (e.g. `updated_timestamp`).`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/README.md:91` `## SQS payload guardrail`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/README.md:92` `- Οι αποστολές προς SQS γίνονται με byte-aware chunking (`262144` bytes ανά message body).`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/README.md:96` `## SQS Smart Grouping & Stable Dedup`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/README.md:111` `- Εδώ δεν στέλνονται push notifications/SNS. Στέλνονται μόνο panel socket messages μέσω SQS.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/README.md:113` `- SQS queue `codeliver-panel-socket-emitter.fifo` (backlog/DLQ στον consumer, αν υπάρχει).`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/README.md:119` `- Αν τα request actions γράφονται σωστά στο upstream DynamoDB table (απ’ όπου έρχεται το stream event).`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/README.md:128` `- Downstream: consumer του SQS `codeliver-panel-socket-emitter.fifo` (broadcast σε WebSocket connections).`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/README.md:129` `- Upstream: component που γράφει/ενημερώνει τα “request actions” στο DynamoDB table που τροφοδοτεί το stream.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/README.md:133` `- Σημαίνει ότι κάποιο μεμονωμένο payload item ξεπέρασε το όριο μεγέθους SQS και παραλείφθηκε.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/ROADMAP.md:4` `- Uses byte-aware SQS payload chunking (max `262144` bytes/message) and emits handled code `sqs_item_too_large` for oversize single items.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/ROADMAP.md:5` `- Consumes DynamoDB Streams `INSERT`/`MODIFY` records for request-actions updates and deduplicates them by `group_request_id` + `timestamp` (keeps the newest `updated_timestamp`).`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/ROADMAP.md:16` `- [ ] Make the SQS queue URL and DynamoDB table names configurable via env vars (keep current values as defaults).`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/ROADMAP.md:17` `- [ ] Add minimal contract examples/tests for the DynamoDB Stream event shape and deduplication logic.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/sqs_functions.js:3` `const { SQSClient, SendMessageCommand } = require("@aws-sdk/client-sqs");`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/sqs_functions.js:6` `const sqsClient = new SQSClient({ region: "eu-west-1" });`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/sqs_functions.js:7` `const CODELIVER_PANEL_SOCKET_EMITTER_SQS_QUEUE_URL = "https://sqs.eu-west-1.amazonaws.com/957873067375/codeliver-panel-socket-emitter.fifo";`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/sqs_functions.js:9` `const MAX_SQS_MESSAGE_BYTES = 262144;`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/sqs_functions.js:133` `if (nextBytes > MAX_SQS_MESSAGE_BYTES) {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/sqs_functions.js:160` `if (standaloneBytes > MAX_SQS_MESSAGE_BYTES) {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/sqs_functions.js:181` `if (entriesBytes(bucketEntries) <= MAX_SQS_MESSAGE_BYTES) {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/sqs_functions.js:205` `const canFitCurrent = current.entries.length === 0 || mergeBytes(current.entries, group.entries) <= MAX_SQS_MESSAGE_BYTES;`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/sqs_functions.js:268` `return send_partitioned_fifo_messages(messages, CODELIVER_PANEL_SOCKET_EMITTER_SQS_QUEUE_URL, "panel");`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/dynamo_db_functions.js:3` `const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/dynamo_db_functions.js:4` `const { DynamoDBDocumentClient, QueryCommand } = require("@aws-sdk/lib-dynamodb");`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/dynamo_db_functions.js:6` `const client = new DynamoDBClient({ region: "eu-west-1" });`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/dynamo_db_functions.js:7` `const docClient = DynamoDBDocumentClient.from(client, {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/cloudformation/stack.json:9` `"S3Bucket": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/cloudformation/stack.json:13` `"S3Key": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/cloudformation/stack.json:27` `"S3Bucket": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/cloudformation/stack.json:28` `"Ref": "S3Bucket"`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/cloudformation/stack.json:30` `"S3Key": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-request-actions/cloudformation/stack.json:31` `"Ref": "S3Key"`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-fetch-delivery-guy-raw-coordinates/README.md:9` `- DynamoDB is queried on `codeliver-delivery-guys-coordinates` by `group_delivery_guy_id` and `timestamp` between the requested bounds.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-fetch-delivery-guy-raw-coordinates/README.md:13` `**Sample event (API Gateway)**`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-fetch-delivery-guy-raw-coordinates/README.md:58` `- DynamoDB table: `codeliver-delivery-guys-coordinates` (PK: `group_delivery_guy_id`, SK: `timestamp`)`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-fetch-delivery-guy-raw-coordinates/README.md:97` `- Έλεγχος authorizer mapping στο API Gateway.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-fetch-delivery-guy-raw-coordinates/ROADMAP.md:5` `- Validates API Gateway authorizer context and request body inputs and returns stable `comment_id` codes on handled failures.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-fetch-delivery-guy-raw-coordinates/ROADMAP.md:7` `- Queries the delivery-guy coordinates DynamoDB table by `group_delivery_guy_id` and `timestamp` range.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-fetch-delivery-guy-raw-coordinates/cloudformation/stack.json:9` `"S3Bucket": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-fetch-delivery-guy-raw-coordinates/cloudformation/stack.json:13` `"S3Key": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-fetch-delivery-guy-raw-coordinates/cloudformation/stack.json:27` `"S3Bucket": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-fetch-delivery-guy-raw-coordinates/cloudformation/stack.json:28` `"Ref": "S3Bucket"`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-fetch-delivery-guy-raw-coordinates/cloudformation/stack.json:30` `"S3Key": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-fetch-delivery-guy-raw-coordinates/cloudformation/stack.json:31` `"Ref": "S3Key"`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delete-localserver-logs-stream/README.md:4` `Lambda που καθαρίζει (delete) entries από το DynamoDB table `codeliver-localserver-logs` όταν λαμβάνει DynamoDB Stream `REMOVE` event για localserver record.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delete-localserver-logs-stream/README.md:7` `1. Λαμβάνει DynamoDB Stream records.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delete-localserver-logs-stream/README.md:15` `**Input (DynamoDB Stream record example)**`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delete-localserver-logs-stream/README.md:39` `- DynamoDB table: `codeliver-localserver-logs``
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delete-localserver-logs-stream/README.md:62` `**Failure example (λάθος/ασύμβατο event shape ή σφάλμα σε DynamoDB/Slack)**`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delete-localserver-logs-stream/README.md:85` `- **DynamoDB errors (query/batch write):** permissions, λάθος region, throttling, ή table mismatch.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delete-localserver-logs-stream/README.md:110` `- Οποιοδήποτε component διαβάζει το DynamoDB table `codeliver-localserver-logs` (θα δει λιγότερο ιστορικό μετά από localserver delete).`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delete-localserver-logs-stream/ROADMAP.md:4` `- Processes DynamoDB Stream `REMOVE` records and extracts `server_id` from `dynamodb.OldImage`.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delete-localserver-logs-stream/ROADMAP.md:15` `- [ ] Make DynamoDB table name, region, Slack channel configurable via env vars.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delete-localserver-logs-stream/ROADMAP.md:16` `- [ ] Handle DynamoDB BatchWrite unprocessed items explicitly (retry/backoff) for more reliable cleanup.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delete-localserver-logs-stream/dynamo_db_functions.js:3` `const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delete-localserver-logs-stream/dynamo_db_functions.js:4` `const { DynamoDBDocumentClient, BatchWriteCommand } = require("@aws-sdk/lib-dynamodb");`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delete-localserver-logs-stream/dynamo_db_functions.js:6` `const client = new DynamoDBClient({ region: "eu-west-1" });`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delete-localserver-logs-stream/dynamo_db_functions.js:7` `const docClient = DynamoDBDocumentClient.from(client, {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delete-localserver-logs-stream/cloudformation/stack.json:9` `"S3Bucket": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delete-localserver-logs-stream/cloudformation/stack.json:13` `"S3Key": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delete-localserver-logs-stream/cloudformation/stack.json:27` `"S3Bucket": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delete-localserver-logs-stream/cloudformation/stack.json:28` `"Ref": "S3Bucket"`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delete-localserver-logs-stream/cloudformation/stack.json:30` `"S3Key": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delete-localserver-logs-stream/cloudformation/stack.json:31` `"Ref": "S3Key"`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-send-firebase-push-notification/README.md:64` `- DynamoDB table: `codeliver-notifications``
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-send-firebase-push-notification/README.md:65` `- DynamoDB table: `codeliver-devices``
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-send-firebase-push-notification/dynamo_db_functions.js:5` `const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-send-firebase-push-notification/dynamo_db_functions.js:6` `const { DynamoDBDocumentClient, PutCommand, UpdateCommand } = require("@aws-sdk/lib-dynamodb");`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-send-firebase-push-notification/dynamo_db_functions.js:8` `const client = new DynamoDBClient({ region: "eu-west-1" });`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-send-firebase-push-notification/dynamo_db_functions.js:9` `const docClient = DynamoDBDocumentClient.from(client, {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-send-firebase-push-notification/codeliver-app.json:5` `"private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCkvsBwx/hYwlZc\n9AvnMUjY8k/nep4dMJ/gQlRY9H6vjqPn4Wjp9ViIFhbf2wU71S8kSqP7Is08ojyQ\nTzPNe+WUjeJ+UC9+HZCz56Cslm3CdYq03RRRvray/sWhpofQ5hIj6/mvJsqx8CoH\nq1qrWTJE307vkNjYm42PweT9Ocok6t8bOhF8ceYU/+tU+m9zWTEtld60rh+uGfgO\nSLLerJYnTIzA1tsLdRj1EG+z6G6Uw0eiInhbLCe1qxLM1kk0W+H41RefZLqdDGG4\nS1HUjbtjp5gfjmd0ZcdppOdQCYSdVC/N3WjHbMMKL4ZcoZDjXFxgJsi/Ehe0eTcq\nMXBgbsqPAgMBAAECggEAAVhJS+JmBZt4hwO7ASUm2haITnRyy/w0oekItT0xt48r\niV4OtDI7icjcYPFxxn5EB0DQu+EZ2c/dPLRY0OmdAyxxV+Shrp7hKobOifokZTz+\nZ+GSI+Sxqx5nUJ2CaFMofMCVZjej2fYC8dMVR2bQAT3tcAk3q/UBH9ZOXz7Uhp6c\n2ae+QfzmMITX5bvFDUw/qjHrEPQrnHVZh/x7R6ifR/mdPI7Ov72LS3KssmS4kkQk\n2hjw8WGmkt24ScB3wHjbnQ2fwrslPY+EucQUmrrzDZQw99O/7gWg3gHHLnCZQ7l7\noLfM4ovgw3yKzOZZBe76MVEZ39qRrwmVKAPfF31EuQKBgQDmRIX7rGfoaBYO1ADW\nc820mPimToLzH1IJt40kfL8uN6QYWKNtzuD6F6TvIGRGBE6xbAwN5OEN1AMqqQoR\n6GSd431qdOqKbNhzLprlfsf18ygrPoFEMzAwf280JCCaPN5vOGp9HXppKigBFScK\nteY2SKNr5cKT40c0OOMr747XgwKBgQC3J8Pq4Durpq1e3AzXK+bmHiT9mrDikTE0\n/ykBopKE1tNrO63G7uurjJE8HhUphwWEZB98+Cmgko/oZIM+Bkp8HGgI3nChvAqk\ntkhpE3lQbneB7KujmmwxKvpGclrw69Ne32mKXIrYgSOdeLGWymkrNvQywxZQzjJl\ntQA4TkAHBQKBgQCC2D0qHXWN4ldmZaF0OqmRDbt9BO/0Jr//NYXGTfx0zrk3/GYh\nZ4T/l5/pIYbZIml09+iBnKUlrmt+Oj+2nU9PSI1jiLwdnGwCR2FNNxV49IrGx+W8\nUzn21PLjtgOwoRXkLTKVlcKRL5s7wkFFHMeL4Qq7rPs7/dHgItMzjBSm8QKBgDXH\n63OQnHTu4IG2Q976+TYhK+N8BOzCjZxuQHBGeJehLTuTrpd3mKQrBoqMmtIy35/c\ndpKPnEmWP8ORoCgaWMzQ2ougJZqYSNfM3r5cBYdkqJryEAReV96oLA17jtCnrs1w\n9OC4A91HLloTErKghPk3jcVKG8dmhM3wtDvUXmCxAoGBALVQhcY8mMk0zmGV4fh7\nADyDpR9uO473yo1cpcB5t5nzglGFRPaKwj/XUOmZnbP6v9ODytIa5Yq9f9W1NIdC\n0soyo6Zxzeskbob/T4IBd7Op6c/RbOUg8fSBBLj4m35/Y+o6J+DOABps9g0HGSwB\nfK0Gkpjcj4Bmhq/OXFFPmwBK\n-----END PRIVATE KEY-----\n",`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-send-firebase-push-notification/cloudformation/stack.json:9` `"S3Bucket": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-send-firebase-push-notification/cloudformation/stack.json:13` `"S3Key": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-send-firebase-push-notification/cloudformation/stack.json:27` `"S3Bucket": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-send-firebase-push-notification/cloudformation/stack.json:28` `"Ref": "S3Bucket"`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-send-firebase-push-notification/cloudformation/stack.json:30` `"S3Key": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-send-firebase-push-notification/cloudformation/stack.json:31` `"Ref": "S3Key"`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-pos-search-delivery-requests/README.md:25` `- Για date range types, κανονικοποιεί `date_from`/`date_to` σε όρια ημέρας (00:00:00 → 23:59:59) με βάση το `timezone` του caller (IANA string, fallback `Europe/Athens`) και εκτελεί recursive query στο DynamoDB ώστε να επιστραφούν όλα τα αποτελέσματα σε ένα response.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-pos-search-delivery-requests/README.md:62` `- DynamoDB `codeliver-pos-users` (PK: `store_id`, SK: `user_id`).`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-pos-search-delivery-requests/README.md:63` `- DynamoDB `codeliver-requests` (PK: `group`, SK: `request_id`).`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-pos-search-delivery-requests/README.md:99` `- API Gateway authorizer logs και payload του JWT.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-pos-search-delivery-requests/README.md:103` `- Η lambda αυτή δεν δημοσιεύει notifications. Έλεγξε τα αντίστοιχα SNS/Push lambdas για notifications.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-pos-search-delivery-requests/ROADMAP.md:5` `- Query requests by store id, phone, delivery guy, route id, and nextShortCfRequestId using DynamoDB GSIs.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-pos-search-delivery-requests/ROADMAP.md:6` `- Non-date-range list queries now use fill-to-limit pagination: repeated DynamoDB Query calls continue until the response page reaches 20 items or the dataset is exhausted.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-pos-search-delivery-requests/dynamo_db_functions.js:5` `const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-pos-search-delivery-requests/dynamo_db_functions.js:6` `const { DynamoDBDocumentClient, GetCommand, QueryCommand } = require("@aws-sdk/lib-dynamodb");`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-pos-search-delivery-requests/dynamo_db_functions.js:8` `const client = new DynamoDBClient({ region: "eu-west-1" });`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-pos-search-delivery-requests/dynamo_db_functions.js:9` `const docClient = DynamoDBDocumentClient.from(client, {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-pos-search-delivery-requests/cloudformation/stack.json:9` `"S3Bucket": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-pos-search-delivery-requests/cloudformation/stack.json:13` `"S3Key": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-pos-search-delivery-requests/cloudformation/stack.json:27` `"S3Bucket": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-pos-search-delivery-requests/cloudformation/stack.json:28` `"Ref": "S3Bucket"`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-pos-search-delivery-requests/cloudformation/stack.json:30` `"S3Key": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-pos-search-delivery-requests/cloudformation/stack.json:31` `"Ref": "S3Key"`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/README.md:2` ``codeliver-delivery-requests-stream-ws` consumes DynamoDB Stream changes for delivery requests and fan-outs request updates/removals to active WebSocket connections (panel, POS, and device/app) via SQS.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/README.md:5` `1. DynamoDB Stream emits `INSERT` / `MODIFY` / `REMOVE` records for a delivery request.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/README.md:11` `4. It publishes messages to SQS FIFO queues for downstream WebSocket “emitter” lambdas.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/README.md:14` `**Input (DynamoDB Streams event)**`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/README.md:42` `- DynamoDB tables (queried):`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/README.md:46` `- SQS queues (publish):`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/README.md:55` `- `sqs:SendMessage` on the above SQS queues.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/README.md:69` `## SQS payload guardrail`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/README.md:70` `- Οι αποστολές προς SQS γίνονται με byte-aware chunking (`262144` bytes ανά message body).`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/README.md:74` `## SQS Smart Grouping & Stable Dedup`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/README.md:92` `- Αιτία: το DynamoDB Stream record δεν περιέχει `group`, `store_id`, `request_id`, `updated_timestamp`.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/README.md:93` `- Έλεγχοι: δείτε το `event` log (είναι redacted), και το DynamoDB Stream mapping / source item shape.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/README.md:95` `- Αιτία: αποτυχία query στα socket tables ή αποτυχία `SendMessage` προς SQS.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/README.md:96` `- Έλεγχοι: CloudWatch logs για `ACTION:SLACK_HANDLED_ERROR_HE1=...`, DynamoDB permissions, SQS permissions.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/README.md:102` `- Τα WebSocket updates εδώ γίνονται μέσω SQS → emitter lambdas. Ελέγξτε:`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/README.md:103` `- αν τα SQS queues γεμίζουν / έχουν DLQ alarms,`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/README.md:105` `- αν υπάρχουν “ορφανά” socket connections σε DynamoDB (expired items / λάθος `expire`).`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/README.md:116` `- Downstream επηρεάζονται οι WebSocket emitter lambdas/consumers που διαβάζουν τα SQS queues (panel/POS/app). Αν πέσει αυτό το lambda, δεν θα υπάρχουν real-time updates παρότι τα requests αλλάζουν στο DB.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/README.md:120` `- Σημαίνει ότι κάποιο μεμονωμένο payload item ξεπέρασε το όριο μεγέθους SQS και παραλείφθηκε.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/ROADMAP.md:7` `- Uses byte-aware SQS payload chunking (max `262144` bytes/message) and emits handled code `sqs_item_too_large` for oversize single items.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/ROADMAP.md:8` `- Consumes DynamoDB Stream events for delivery requests and deduplicates per `(store_id, request_id)` using `updated_timestamp`.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/ROADMAP.md:10` `- Publishes per-connection messages to channel-specific SQS FIFO queues for downstream WebSocket emitters.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/ROADMAP.md:21` `- [ ] Add idempotency/size safeguards for large DynamoDB batches (e.g., chunking SQS payloads, per-connection caps).`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/sqs_functions.js:3` `const { SQSClient, SendMessageCommand } = require("@aws-sdk/client-sqs");`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/sqs_functions.js:6` `const sqsClient = new SQSClient({ region: "eu-west-1" });`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/sqs_functions.js:7` `const CODELIVER_PANEL_SOCKET_EMITTER_SQS_QUEUE_URL = "https://sqs.eu-west-1.amazonaws.com/957873067375/codeliver-panel-socket-emitter.fifo";`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/sqs_functions.js:8` `const CODELIVER_POS_SOCKET_EMITTER_SQS_QUEUE_URL = "https://sqs.eu-west-1.amazonaws.com/957873067375/codeliver-pos-socket-emitter.fifo";`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/sqs_functions.js:9` `const CODELIVER_APP_SOCKET_EMITTER_SQS_QUEUE_URL = "https://sqs.eu-west-1.amazonaws.com/957873067375/codeliver-app-socket-emitter-sqs.fifo";`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/sqs_functions.js:11` `const MAX_SQS_MESSAGE_BYTES = 262144;`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/sqs_functions.js:135` `if (nextBytes > MAX_SQS_MESSAGE_BYTES) {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/sqs_functions.js:162` `if (standaloneBytes > MAX_SQS_MESSAGE_BYTES) {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/sqs_functions.js:183` `if (entriesBytes(bucketEntries) <= MAX_SQS_MESSAGE_BYTES) {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/sqs_functions.js:207` `const canFitCurrent = current.entries.length === 0 || mergeBytes(current.entries, group.entries) <= MAX_SQS_MESSAGE_BYTES;`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/sqs_functions.js:270` `return send_partitioned_fifo_messages(messages, CODELIVER_PANEL_SOCKET_EMITTER_SQS_QUEUE_URL, "panel");`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/sqs_functions.js:274` `return send_partitioned_fifo_messages(messages, CODELIVER_POS_SOCKET_EMITTER_SQS_QUEUE_URL, "pos");`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/sqs_functions.js:278` `return send_partitioned_fifo_messages(messages, CODELIVER_APP_SOCKET_EMITTER_SQS_QUEUE_URL, "app");`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/dynamo_db_functions.js:3` `const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/dynamo_db_functions.js:4` `const { DynamoDBDocumentClient, QueryCommand } = require("@aws-sdk/lib-dynamodb");`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/dynamo_db_functions.js:6` `const client = new DynamoDBClient({ region: "eu-west-1" });`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/dynamo_db_functions.js:7` `const docClient = DynamoDBDocumentClient.from(client, {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/cloudformation/stack.json:9` `"S3Bucket": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/cloudformation/stack.json:13` `"S3Key": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/cloudformation/stack.json:27` `"S3Bucket": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/cloudformation/stack.json:28` `"Ref": "S3Bucket"`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/cloudformation/stack.json:30` `"S3Key": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-delivery-requests-stream-ws/cloudformation/stack.json:31` `"Ref": "S3Key"`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-panel-renew-token/README.md:4` `Lambda που ανανεώνει το JWT ενός panel user (CodeDeliver Panel) χρησιμοποιώντας το authorizer context του API Gateway (`user_id`, `group`) και επιστρέφει νέο token μαζί με `user` και `groupApp`.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-panel-renew-token/README.md:9` `3. Φορτώνει τον panel user από DynamoDB (`codeliver-panel-users`).`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-panel-renew-token/README.md:13` `7. Φορτώνει το `groupApp` από DynamoDB (`codeliver-groups`).`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-panel-renew-token/README.md:59` `- DynamoDB tables:`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-panel-renew-token/README.md:103` `- DynamoDB: ύπαρξη/σωστό key για panel user στο `codeliver-panel-users`.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-panel-renew-token/README.md:117` `- Άλλα panel lambdas που βασίζονται στο ίδιο auth/authorizer (και στα ίδια tables) θα επηρεαστούν έμμεσα αν υπάρχει λάθος σε `JWT_SECRET` ή στα DynamoDB records.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-panel-renew-token/ROADMAP.md:5` `- Renews panel JWT tokens using API Gateway authorizer context (`user_id`, `group`).`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-panel-renew-token/ROADMAP.md:6` `- Validates the caller by loading the panel user from DynamoDB and omitting sensitive fields in responses.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-panel-renew-token/ROADMAP.md:8` `- Loads and returns group configuration (`groupApp`) from DynamoDB for downstream panel flows.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-panel-renew-token/dynamo_db_functions.js:5` `const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-panel-renew-token/dynamo_db_functions.js:6` `const { DynamoDBDocumentClient, GetCommand, UpdateCommand } = require("@aws-sdk/lib-dynamodb");`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-panel-renew-token/dynamo_db_functions.js:8` `const client = new DynamoDBClient({ region: "eu-west-1" });`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-panel-renew-token/dynamo_db_functions.js:9` `const docClient = DynamoDBDocumentClient.from(client, {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-panel-renew-token/cloudformation/stack.json:9` `"S3Bucket": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-panel-renew-token/cloudformation/stack.json:13` `"S3Key": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-panel-renew-token/cloudformation/stack.json:27` `"S3Bucket": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-panel-renew-token/cloudformation/stack.json:28` `"Ref": "S3Bucket"`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-panel-renew-token/cloudformation/stack.json:30` `"S3Key": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-panel-renew-token/cloudformation/stack.json:31` `"Ref": "S3Key"`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-sap-send-user-credentials/README.md:8` `2. Διαβάζει τον χρήστη από DynamoDB table `codeliver-sap-users` με key `superadmin_id`.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-sap-send-user-credentials/README.md:10` `4. Δημιουργεί 4-ψήφιο κωδικό, αποθηκεύει bcrypt hash στο DynamoDB και ενημερώνει `updated_timestamp` στο `codeliver-sap-users`, και μετά καλεί τη `codeliver-send-sms-gateway` για να σταλεί SMS με username/password και το URL του SAP.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-sap-send-user-credentials/README.md:57` `- DynamoDB:`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-sap-send-user-credentials/README.md:63` `- DynamoDB client is initialized with `eu-west-1` in code.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-sap-send-user-credentials/ROADMAP.md:4` `- Persists the newly generated credentials hash in DynamoDB (`codeliver-sap-users`).`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-sap-send-user-credentials/dynamo_db_functions.js:5` `const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-sap-send-user-credentials/dynamo_db_functions.js:6` `const { DynamoDBDocumentClient, GetCommand, UpdateCommand } = require("@aws-sdk/lib-dynamodb");`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-sap-send-user-credentials/dynamo_db_functions.js:8` `const client = new DynamoDBClient({ region: "eu-west-1" });`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-sap-send-user-credentials/dynamo_db_functions.js:9` `const docClient = DynamoDBDocumentClient.from(client, {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-sap-send-user-credentials/cloudformation/stack.json:9` `"S3Bucket": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-sap-send-user-credentials/cloudformation/stack.json:13` `"S3Key": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-sap-send-user-credentials/cloudformation/stack.json:27` `"S3Bucket": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-sap-send-user-credentials/cloudformation/stack.json:28` `"Ref": "S3Bucket"`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-sap-send-user-credentials/cloudformation/stack.json:30` `"S3Key": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-sap-send-user-credentials/cloudformation/stack.json:31` `"Ref": "S3Key"`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-panel-fetch-localserver-logs/README.md:4` `Fetches paginated log entries for a given `server_id` from DynamoDB and returns them to the CodeDeliver panel.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-panel-fetch-localserver-logs/README.md:7` `1. API Gateway authorizer injects `group` and `user_id` into `event.requestContext.authorizer`.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-panel-fetch-localserver-logs/README.md:45` `- DynamoDB tables:`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-panel-fetch-localserver-logs/README.md:75` `- Ρύθμιση authorizer στο API Gateway (claims → `group`, `user_id`).`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-panel-fetch-localserver-logs/ROADMAP.md:12` `- [ ] Make DynamoDB table names configurable (env vars) to avoid hardcoding prod resources.`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-panel-fetch-localserver-logs/dynamo_db_functions.js:5` `const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-panel-fetch-localserver-logs/dynamo_db_functions.js:6` `const { DynamoDBDocumentClient, GetCommand, QueryCommand } = require("@aws-sdk/lib-dynamodb");`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-panel-fetch-localserver-logs/dynamo_db_functions.js:8` `const client = new DynamoDBClient({ region: "eu-west-1" });`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-panel-fetch-localserver-logs/dynamo_db_functions.js:9` `const docClient = DynamoDBDocumentClient.from(client, {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-panel-fetch-localserver-logs/cloudformation/stack.json:9` `"S3Bucket": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-panel-fetch-localserver-logs/cloudformation/stack.json:13` `"S3Key": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-panel-fetch-localserver-logs/cloudformation/stack.json:27` `"S3Bucket": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-panel-fetch-localserver-logs/cloudformation/stack.json:28` `"Ref": "S3Bucket"`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-panel-fetch-localserver-logs/cloudformation/stack.json:30` `"S3Key": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-panel-fetch-localserver-logs/cloudformation/stack.json:31` `"Ref": "S3Key"`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-external-request-cancel/index.js:7` `const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-external-request-cancel/index.js:8` `const { DynamoDBDocumentClient, GetCommand } = require("@aws-sdk/lib-dynamodb");`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-external-request-cancel/index.js:21` `const ddb = DynamoDBDocumentClient.from(`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-external-request-cancel/index.js:22` `new DynamoDBClient({ region: process.env.AWS_REGION || "eu-west-1" })`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-external-request-cancel/cloudformation/stack.json:9` `"S3Bucket": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-external-request-cancel/cloudformation/stack.json:13` `"S3Key": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-external-request-cancel/cloudformation/stack.json:27` `"S3Bucket": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-external-request-cancel/cloudformation/stack.json:28` `"Ref": "S3Bucket"`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-external-request-cancel/cloudformation/stack.json:30` `"S3Key": {`
-- `/Users/john/Downloads/lambdas/codeliver_all/codeliver-external-request-cancel/cloudformation/stack.json:31` `"Ref": "S3Key"`
+[
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-app-delivery-guys-actions-handler/index.js",
+    "line": 131,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-app-delivery-guys-actions-handler/index.js",
+    "line": 133,
+    "text": "DynamoDBDocumentClient,"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-app-delivery-guys-actions-handler/index.js",
+    "line": 146,
+    "text": "const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: REGION }), {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-fetch-routes/index.js",
+    "line": 133,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-fetch-routes/index.js",
+    "line": 135,
+    "text": "DynamoDBDocumentClient,"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-fetch-routes/index.js",
+    "line": 148,
+    "text": "const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: REGION }), {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-fetch-devices-sockets/index.js",
+    "line": 128,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-fetch-devices-sockets/index.js",
+    "line": 130,
+    "text": "DynamoDBDocumentClient,"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-fetch-devices-sockets/index.js",
+    "line": 143,
+    "text": "const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: REGION }), {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-delivery-guys-stream-ws/index.js",
+    "line": 128,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-delivery-guys-stream-ws/index.js",
+    "line": 130,
+    "text": "DynamoDBDocumentClient,"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-delivery-guys-stream-ws/index.js",
+    "line": 143,
+    "text": "const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: REGION }), {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-delivery-guys-stream-ws/index.js",
+    "line": 163,
+    "text": "const { SQSClient, SendMessageCommand } = require(\"@aws-sdk/client-sqs\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-delivery-guys-stream-ws/index.js",
+    "line": 164,
+    "text": "const sqsClient = new SQSClient({ region: REGION });"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-delivery-guys-stream-ws/index.js",
+    "line": 175,
+    "text": "const putInSQS = async (messages) => {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-delivery-guys-stream-ws/index.js",
+    "line": 308,
+    "text": "await putInSQS(messages);"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-panel-devices-stream-ws/index.js",
+    "line": 3,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-panel-devices-stream-ws/index.js",
+    "line": 4,
+    "text": "const { DynamoDBDocumentClient } = require(\"@aws-sdk/lib-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-panel-devices-stream-ws/index.js",
+    "line": 6,
+    "text": "const { SQSClient, SendMessageCommand } = require(\"@aws-sdk/client-sqs\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-panel-devices-stream-ws/index.js",
+    "line": 31,
+    "text": "const dynamoClient = new DynamoDBClient({ region: REGION });"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-panel-devices-stream-ws/index.js",
+    "line": 32,
+    "text": "const documentClient = DynamoDBDocumentClient.from(dynamoClient);"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-panel-devices-stream-ws/index.js",
+    "line": 33,
+    "text": "const sqsClient = new SQSClient({ region: REGION });"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-panel-devices-stream-ws/index.js",
+    "line": 157,
+    "text": "const putInSQS = async (messages) => {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-panel-devices-stream-ws/index.js",
+    "line": 245,
+    "text": "await putInSQS(messages);"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-calculate-delivery-guy-route/google-directions-keys.json",
+    "line": 133,
+    "text": "\"key\": \"AIzaSyAiJi938hgdy2XE0LS3n6JJLDazseG8E8Q\""
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-calculate-delivery-guy-route/index.js",
+    "line": 2,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-calculate-delivery-guy-route/index.js",
+    "line": 26,
+    "text": "DynamoDBDocumentClient,"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-calculate-delivery-guy-route/index.js",
+    "line": 32,
+    "text": "const ddbClient = new DynamoDBClient({ region: \"eu-west-1\" });"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-calculate-delivery-guy-route/index.js",
+    "line": 33,
+    "text": "const docClient = DynamoDBDocumentClient.from(ddbClient);"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-app-sync-actions/index.js",
+    "line": 2,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-app-sync-actions/index.js",
+    "line": 4,
+    "text": "DynamoDBDocumentClient,"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-app-sync-actions/index.js",
+    "line": 44,
+    "text": "const dynamo = DynamoDBDocumentClient.from("
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-app-sync-actions/index.js",
+    "line": 45,
+    "text": "new DynamoDBClient({ region: \"eu-west-1\" }),"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-app-sync-actions/index.js",
+    "line": 149,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-app-sync-actions/index.js",
+    "line": 151,
+    "text": "DynamoDBDocumentClient,"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-app-sync-actions/index.js",
+    "line": 164,
+    "text": "const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: REGION }), {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-get-delivery-guy-path/index.js",
+    "line": 2,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-get-delivery-guy-path/index.js",
+    "line": 3,
+    "text": "const { DynamoDBDocumentClient } = require(\"@aws-sdk/lib-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-get-delivery-guy-path/index.js",
+    "line": 26,
+    "text": "const dynamoDbClient = new DynamoDBClient({ region: \"eu-west-1\" });"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-get-delivery-guy-path/index.js",
+    "line": 27,
+    "text": "const client = DynamoDBDocumentClient.from(dynamoDbClient);"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-send-firebase-push-notification/index.js",
+    "line": 3,
+    "text": "DynamoDBClient"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-send-firebase-push-notification/index.js",
+    "line": 6,
+    "text": "DynamoDBDocumentClient"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-send-firebase-push-notification/index.js",
+    "line": 30,
+    "text": "const docClient = DynamoDBDocumentClient.from(new DynamoDBClient({"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-fetch-delivery-guys-positions/index.js",
+    "line": 128,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-fetch-delivery-guys-positions/index.js",
+    "line": 130,
+    "text": "DynamoDBDocumentClient,"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-fetch-delivery-guys-positions/index.js",
+    "line": 143,
+    "text": "const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: REGION }), {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-delivery-request-calculations/index.js",
+    "line": 128,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-delivery-request-calculations/index.js",
+    "line": 130,
+    "text": "DynamoDBDocumentClient,"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-delivery-request-calculations/index.js",
+    "line": 143,
+    "text": "const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: REGION }), {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-handle-delivery-guy/index.js",
+    "line": 130,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-handle-delivery-guy/index.js",
+    "line": 132,
+    "text": "DynamoDBDocumentClient,"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-handle-delivery-guy/index.js",
+    "line": 145,
+    "text": "const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: REGION }), {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-ongoing-route-check-times/index.js",
+    "line": 132,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-ongoing-route-check-times/index.js",
+    "line": 134,
+    "text": "DynamoDBDocumentClient,"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-ongoing-route-check-times/index.js",
+    "line": 147,
+    "text": "const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: REGION }), {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-fetch-road-path/google-directions-keys.json",
+    "line": 133,
+    "text": "\"key\": \"AIzaSyAiJi938hgdy2XE0LS3n6JJLDazseG8E8Q\""
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-fetch-road-path/index.js",
+    "line": 2,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-fetch-road-path/index.js",
+    "line": 3,
+    "text": "const { DynamoDBDocumentClient } = require(\"@aws-sdk/lib-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-fetch-road-path/index.js",
+    "line": 29,
+    "text": "const dynamoDocClient = DynamoDBDocumentClient.from("
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-fetch-road-path/index.js",
+    "line": 30,
+    "text": "new DynamoDBClient({ region: \"eu-west-1\" })"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-app-renew-device-token/index.js",
+    "line": 3,
+    "text": "const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-app-renew-device-token/index.js",
+    "line": 5,
+    "text": "DynamoDBDocumentClient,"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-app-renew-device-token/index.js",
+    "line": 35,
+    "text": "const client = DynamoDBDocumentClient.from("
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-app-renew-device-token/index.js",
+    "line": 36,
+    "text": "new DynamoDBClient({ region: 'eu-west-1' })"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-send-delivery-guy-credentials/index.js",
+    "line": 151,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-send-delivery-guy-credentials/index.js",
+    "line": 153,
+    "text": "DynamoDBDocumentClient,"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-send-delivery-guy-credentials/index.js",
+    "line": 166,
+    "text": "const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: REGION }), {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-app-fetch-delivery-guy-path/index.js",
+    "line": 149,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-app-fetch-delivery-guy-path/index.js",
+    "line": 151,
+    "text": "DynamoDBDocumentClient,"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-app-fetch-delivery-guy-path/index.js",
+    "line": 164,
+    "text": "const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: REGION }), {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-handle-customer/index.js",
+    "line": 134,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-handle-customer/index.js",
+    "line": 136,
+    "text": "DynamoDBDocumentClient,"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-handle-customer/index.js",
+    "line": 149,
+    "text": "const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: REGION }), {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-app-fetch-delivery-guy-data/index.js",
+    "line": 128,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-app-fetch-delivery-guy-data/index.js",
+    "line": 130,
+    "text": "DynamoDBDocumentClient,"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-app-fetch-delivery-guy-data/index.js",
+    "line": 143,
+    "text": "const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: REGION }), {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-fetch-delivery-guys-actions/index.js",
+    "line": 128,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-fetch-delivery-guys-actions/index.js",
+    "line": 130,
+    "text": "DynamoDBDocumentClient,"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-fetch-delivery-guys-actions/index.js",
+    "line": 143,
+    "text": "const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: REGION }), {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-search-delivery-guys/index.js",
+    "line": 130,
+    "text": "// const { S3Client, PutObjectCommand } = require(\"@aws-sdk/client-s3\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-search-delivery-guys/index.js",
+    "line": 131,
+    "text": "const { DynamoDBClient, UpdateItemCommand, PutItemCommand } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-search-delivery-guys/index.js",
+    "line": 132,
+    "text": "const { DynamoDBDocumentClient, GetCommand, QueryCommand, UpdateCommand } = require(\"@aws-sdk/lib-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-search-delivery-guys/index.js",
+    "line": 133,
+    "text": "const dynamoClient = new DynamoDBClient({});"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-search-delivery-guys/index.js",
+    "line": 134,
+    "text": "const docClient = DynamoDBDocumentClient.from(dynamoClient);"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-search-delivery-guys/index.js",
+    "line": 136,
+    "text": "// const s3Client = new S3Client({ region: \"eu-west-1\" });"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-delivery-guy-coordinates-stream-ws/index.js",
+    "line": 25,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-delivery-guy-coordinates-stream-ws/index.js",
+    "line": 26,
+    "text": "const { DynamoDBDocumentClient } = require(\"@aws-sdk/lib-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-delivery-guy-coordinates-stream-ws/index.js",
+    "line": 27,
+    "text": "const { SQSClient, SendMessageCommand } = require(\"@aws-sdk/client-sqs\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-delivery-guy-coordinates-stream-ws/index.js",
+    "line": 30,
+    "text": "const dynamoClient = new DynamoDBClient({ region: \"eu-west-1\" });"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-delivery-guy-coordinates-stream-ws/index.js",
+    "line": 31,
+    "text": "const documentClient = DynamoDBDocumentClient.from(dynamoClient);"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-delivery-guy-coordinates-stream-ws/index.js",
+    "line": 32,
+    "text": "const sqsClient = new SQSClient({ region: \"eu-west-1\" });"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-delivery-guy-coordinates-stream-ws/index.js",
+    "line": 53,
+    "text": "// DynamoDB's previous attr.unwrap returned Number; this keeps the same contract (may round > Number.MAX_SAFE_INTEGER)."
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-delivery-guy-coordinates-stream-ws/index.js",
+    "line": 106,
+    "text": "const putInSQS = async (messages) => {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-delivery-guy-coordinates-stream-ws/index.js",
+    "line": 184,
+    "text": "await putInSQS(messages);"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-manually-dispatch-delivery-guy/index.js",
+    "line": 147,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-manually-dispatch-delivery-guy/index.js",
+    "line": 149,
+    "text": "DynamoDBDocumentClient,"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-manually-dispatch-delivery-guy/index.js",
+    "line": 162,
+    "text": "const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: REGION }), {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-make-delivery-request-calculations/index.js",
+    "line": 147,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-make-delivery-request-calculations/index.js",
+    "line": 149,
+    "text": "DynamoDBDocumentClient,"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-make-delivery-request-calculations/index.js",
+    "line": 162,
+    "text": "const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: REGION }), {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-make-delivery-request-calculations/index.js",
+    "line": 181,
+    "text": "const { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } = require(\"@aws-sdk/client-s3\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-make-delivery-request-calculations/index.js",
+    "line": 182,
+    "text": "const s3Client = new S3Client({ region: REGION });"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-app-delivery-guys-actions-handler/index.js",
+    "line": 2,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-app-delivery-guys-actions-handler/index.js",
+    "line": 3,
+    "text": "const { DynamoDBDocumentClient } = require(\"@aws-sdk/lib-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-app-delivery-guys-actions-handler/index.js",
+    "line": 28,
+    "text": "const client = DynamoDBDocumentClient.from("
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-app-delivery-guys-actions-handler/index.js",
+    "line": 29,
+    "text": "new DynamoDBClient({ region: \"eu-west-1\" })"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-dispatch-delivery-guy/index.js",
+    "line": 2,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-dispatch-delivery-guy/index.js",
+    "line": 4,
+    "text": "DynamoDBDocumentClient,"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-dispatch-delivery-guy/index.js",
+    "line": 44,
+    "text": "const dynamo = DynamoDBDocumentClient.from("
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-dispatch-delivery-guy/index.js",
+    "line": 45,
+    "text": "new DynamoDBClient({ region: \"eu-west-1\" }),"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-fetch-matrix-calculations/index.js",
+    "line": 132,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-fetch-matrix-calculations/index.js",
+    "line": 134,
+    "text": "DynamoDBDocumentClient,"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-fetch-matrix-calculations/index.js",
+    "line": 147,
+    "text": "const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: REGION }), {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-delivery-request-recalculate-estimation/index.js",
+    "line": 147,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-delivery-request-recalculate-estimation/index.js",
+    "line": 149,
+    "text": "DynamoDBDocumentClient,"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-delivery-request-recalculate-estimation/index.js",
+    "line": 162,
+    "text": "const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: REGION }), {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-delivery-request-recalculate-estimation/index.js",
+    "line": 181,
+    "text": "const { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } = require(\"@aws-sdk/client-s3\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-delivery-request-recalculate-estimation/index.js",
+    "line": 182,
+    "text": "const s3Client = new S3Client({ region: REGION });"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-check-delivery-guy-store-schedules/index.js",
+    "line": 30,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-check-delivery-guy-store-schedules/index.js",
+    "line": 31,
+    "text": "const { DynamoDBDocumentClient } = require(\"@aws-sdk/lib-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-check-delivery-guy-store-schedules/index.js",
+    "line": 33,
+    "text": "const client = DynamoDBDocumentClient.from("
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-check-delivery-guy-store-schedules/index.js",
+    "line": 34,
+    "text": "new DynamoDBClient({ region: \"eu-west-1\" })"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-check-delivery-guy-store-schedules/index.js",
+    "line": 222,
+    "text": "const checkStoreSchedule = (calculation) => {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-check-delivery-guy-store-schedules/index.js",
+    "line": 230,
+    "text": "calculation.storeOffSchedule = !timestamp_is_in_schedule;"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-check-delivery-guy-store-schedules/index.js",
+    "line": 235,
+    "text": "const checkDeliveryGuySchedule = (calculation) => {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-check-delivery-guy-store-schedules/index.js",
+    "line": 243,
+    "text": "calculation.devGuyOffSchedule = !timestamp_is_in_schedule;"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-check-delivery-guy-store-schedules/index.js",
+    "line": 252,
+    "text": "calculation = checkStoreSchedule(calculation);"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-check-delivery-guy-store-schedules/index.js",
+    "line": 253,
+    "text": "calculation = checkDeliveryGuySchedule(calculation);"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-check-delivery-guy-store-schedules/index.js",
+    "line": 254,
+    "text": "if (calculation.devGuyOffSchedule || calculation.storeOffSchedule) {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-check-delivery-guy-store-schedules/index.js",
+    "line": 265,
+    "text": "request.devGuyOffSchedule = calculation.devGuyOffSchedule;"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-check-delivery-guy-store-schedules/index.js",
+    "line": 266,
+    "text": "request.storeOffSchedule = calculation.storeOffSchedule;"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-fetch-delivery-guys-sockets/index.js",
+    "line": 128,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-fetch-delivery-guys-sockets/index.js",
+    "line": 130,
+    "text": "DynamoDBDocumentClient,"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-fetch-delivery-guys-sockets/index.js",
+    "line": 143,
+    "text": "const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: REGION }), {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-search-group-delivery-customers/index.js",
+    "line": 128,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-search-group-delivery-customers/index.js",
+    "line": 130,
+    "text": "DynamoDBDocumentClient,"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-search-group-delivery-customers/index.js",
+    "line": 143,
+    "text": "const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: REGION }), {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-delivery-guy-assign-order/index.js",
+    "line": 128,
+    "text": "const { S3Client, GetObjectCommand, PutObjectCommand } = require(\"@aws-sdk/client-s3\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-delivery-guy-assign-order/index.js",
+    "line": 129,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-delivery-guy-assign-order/index.js",
+    "line": 130,
+    "text": "const { DynamoDBDocumentClient, GetCommand, QueryCommand, UpdateCommand } = require(\"@aws-sdk/lib-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-delivery-guy-assign-order/index.js",
+    "line": 131,
+    "text": "const dynamoClient = new DynamoDBClient({});"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-delivery-guy-assign-order/index.js",
+    "line": 132,
+    "text": "const docClient = DynamoDBDocumentClient.from(dynamoClient);"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-delivery-guy-assign-order/index.js",
+    "line": 135,
+    "text": "const client = new DynamoDBClient({ region: \"eu-west-1\" });"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-delivery-guy-assign-order/index.js",
+    "line": 136,
+    "text": "const s3Client = new S3Client({ region: \"eu-west-1\" });"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-handle-device/index.js",
+    "line": 130,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-handle-device/index.js",
+    "line": 132,
+    "text": "DynamoDBDocumentClient,"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-handle-device/index.js",
+    "line": 145,
+    "text": "const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: REGION }), {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-app-fetch-notifications/index.js",
+    "line": 128,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-app-fetch-notifications/index.js",
+    "line": 130,
+    "text": "DynamoDBDocumentClient,"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-app-fetch-notifications/index.js",
+    "line": 143,
+    "text": "const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: REGION }), {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-backend-calculate-delivery-distances/index.js",
+    "line": 2,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-backend-calculate-delivery-distances/index.js",
+    "line": 4,
+    "text": "DynamoDBDocumentClient,"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-backend-calculate-delivery-distances/index.js",
+    "line": 8,
+    "text": "const { PutObjectCommand, S3Client } = require(\"@aws-sdk/client-s3\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-backend-calculate-delivery-distances/index.js",
+    "line": 35,
+    "text": "const dynamo = new DynamoDBClient({ region: \"eu-west-1\" });"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-backend-calculate-delivery-distances/index.js",
+    "line": 36,
+    "text": "const client = DynamoDBDocumentClient.from(dynamo);"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-backend-calculate-delivery-distances/index.js",
+    "line": 37,
+    "text": "const s3 = new S3Client({ region: \"eu-west-1\" });"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-app-async-actions/index.js",
+    "line": 130,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-app-async-actions/index.js",
+    "line": 132,
+    "text": "DynamoDBDocumentClient,"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-app-async-actions/index.js",
+    "line": 145,
+    "text": "const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: REGION }), {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-app-ws-disconnect/index.js",
+    "line": 1,
+    "text": "const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-app-ws-disconnect/index.js",
+    "line": 25,
+    "text": "DynamoDBDocumentClient,"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-app-ws-disconnect/index.js",
+    "line": 40,
+    "text": "const dynamo = DynamoDBDocumentClient.from("
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-app-ws-disconnect/index.js",
+    "line": 41,
+    "text": "new DynamoDBClient({ region: 'eu-west-1' }),"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-app-fetch-delivery-requests/index.js",
+    "line": 3,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-app-fetch-delivery-requests/index.js",
+    "line": 4,
+    "text": "const { DynamoDBDocumentClient } = require(\"@aws-sdk/lib-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-app-fetch-delivery-requests/index.js",
+    "line": 28,
+    "text": "const client = DynamoDBDocumentClient.from("
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-app-fetch-delivery-requests/index.js",
+    "line": 29,
+    "text": "new DynamoDBClient({"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-dispatch-delivery-guy/index.js",
+    "line": 130,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-dispatch-delivery-guy/index.js",
+    "line": 132,
+    "text": "DynamoDBDocumentClient,"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-dispatch-delivery-guy/index.js",
+    "line": 145,
+    "text": "const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: REGION }), {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-search-store-customer/index.js",
+    "line": 128,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-search-store-customer/index.js",
+    "line": 130,
+    "text": "DynamoDBDocumentClient,"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-search-store-customer/index.js",
+    "line": 143,
+    "text": "const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: REGION }), {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-app-async-actions/index.js",
+    "line": 2,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-app-async-actions/index.js",
+    "line": 3,
+    "text": "const { DynamoDBDocumentClient } = require(\"@aws-sdk/lib-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-app-async-actions/index.js",
+    "line": 28,
+    "text": "const docClient = DynamoDBDocumentClient.from("
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-app-async-actions/index.js",
+    "line": 29,
+    "text": "new DynamoDBClient({"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-test-push-notification/index.js",
+    "line": 3,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-test-push-notification/index.js",
+    "line": 4,
+    "text": "const { DynamoDBDocumentClient } = require(\"@aws-sdk/lib-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-test-push-notification/index.js",
+    "line": 38,
+    "text": "const dynamoDocumentClient = DynamoDBDocumentClient.from("
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-test-push-notification/index.js",
+    "line": 39,
+    "text": "new DynamoDBClient({ region: \"eu-west-1\" })"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/dm-cf-delivery-request-directions/google-directions-keys.json",
+    "line": 133,
+    "text": "\"key\": \"AIzaSyAiJi938hgdy2XE0LS3n6JJLDazseG8E8Q\""
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-app-handle-delivery-guy/index.js",
+    "line": 130,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-app-handle-delivery-guy/index.js",
+    "line": 132,
+    "text": "DynamoDBDocumentClient,"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-app-handle-delivery-guy/index.js",
+    "line": 145,
+    "text": "const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: REGION }), {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-delivery-request-dispatch-calculations/index.js",
+    "line": 128,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-delivery-request-dispatch-calculations/index.js",
+    "line": 130,
+    "text": "DynamoDBDocumentClient,"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-delivery-request-dispatch-calculations/index.js",
+    "line": 143,
+    "text": "const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: REGION }), {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-check-autocomplete-address/checkStoreScheduleStatus.js",
+    "line": 7,
+    "text": "module.exports = (delivery_days_exceptions, areaSchedule, now, languageCode, timezone) => {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-check-autocomplete-address/checkStoreScheduleStatus.js",
+    "line": 9,
+    "text": "if (_.isEmpty(areaSchedule)) {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-check-autocomplete-address/checkStoreScheduleStatus.js",
+    "line": 32,
+    "text": "delivery_schedule_info = is_store_online(format_schedule(areaSchedule, timezone), now, null, timezone);"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-check-autocomplete-address/checkStoreScheduleStatus.js",
+    "line": 41,
+    "text": "formatted_day_schedule = format_schedule(areaSchedule, timezone)[day];"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-check-autocomplete-address/index.js",
+    "line": 151,
+    "text": "const checkStoreScheduleStatus = require('./checkStoreScheduleStatus');"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-check-autocomplete-address/index.js",
+    "line": 155,
+    "text": "const { DynamoDBClient } = require(\"@aws-sdk/client-dynamodb\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-check-autocomplete-address/index.js",
+    "line": 157,
+    "text": "DynamoDBDocumentClient,"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-check-autocomplete-address/index.js",
+    "line": 170,
+    "text": "const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: REGION }), {"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-check-autocomplete-address/index.js",
+    "line": 185,
+    "text": "const { v4: uuidv4 } = require(\"uuid\");const { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } = require(\"@aws-sdk/client-s3\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-check-autocomplete-address/index.js",
+    "line": 186,
+    "text": "const s3Client = new S3Client({ region: REGION });"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-check-autocomplete-address/index.js",
+    "line": 610,
+    "text": "const calculated_schedule = checkStoreScheduleStatus(area.delivery_days_exceptions || [], area.schedule, moment().format(\"x\"), event.languageCode, store.timezone || \"Europe/Athens\");"
+  },
+  {
+    "path": "/home/dm-soft-1/Downloads/lambdas/cf_all/paneldelivery-cf-panel-check-autocomplete-address/index.js",
+    "line": 612,
+    "text": "let showSchedule = false;"
+  }
+]

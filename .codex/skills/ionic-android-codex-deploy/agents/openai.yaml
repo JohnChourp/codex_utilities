@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ionic Android Codex Deploy"
+  short_description: "Build, sync, install debug APK, and launch on Codex Android emulator"
+  default_prompt: "Build this Ionic Capacitor project, sync Android, install debug, and launch it on the Codex Android emulator."

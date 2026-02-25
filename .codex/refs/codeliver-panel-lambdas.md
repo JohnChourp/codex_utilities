@@ -167,7 +167,13 @@ Observed payloads (body)
 
 Source: `/home/dm-soft-1/Downloads/projects/codeliver/codeliver-panel/src/app/shared/data.storage.service.ts:1217`
 ```ts
-{ delivery_guy_id }
+{
+  delivery_guy_id,
+  date_from?,   // epoch ms
+  date_to?,     // epoch ms
+  action_type?, // string
+  group?,       // optional fallback
+}
 ```
 
 ## codeliver-panel-fetch-delivery-guys-positions
