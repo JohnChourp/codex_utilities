@@ -250,10 +250,40 @@ Rules:
 - **Build persistence rule (mandatory):** when the user asks to run a build/install, keep iterating (`run -> inspect error -> apply fix -> rerun`) until it succeeds or a hard external blocker appears. For Android `installDebug`, if `INSTALL_FAILED_UPDATE_INCOMPATIBLE` appears, uninstall the existing app package from the device and retry install.
   - Do not run AWS API calls using user credentials (DynamoDB, S3, SQS, SNS, Lambda, CloudWatch, STS, etc.) unless the user explicitly requests it in the current prompt.
 - **Plan Mode question UX (mandatory):** when in Plan Mode, ask clarifying questions through the interactive options UI (`request_user_input`) and avoid posting free-form question lists in plain chat. Keep asking through the interactive UI until required decisions are collected, then present the final plan so the user can choose “Implement Plan”.
+### MCP Smart Routing (Playwright / Figma / Notion / Linear)
+
+- **Auto-first policy (mandatory):** in non-Plan mode, automatically select and use the most relevant MCP server among `playwright`, `figma`, `notion`, `linear` when the user intent clearly matches one of them; do not ask permission first.
+- **Trigger matrix (mandatory):**
+  - `playwright`: browser automation, UI bug reproduction, screenshots/snapshots, form flows, regressions, real-page interaction debugging.
+  - `figma`: Figma links/node IDs, design-to-code, visual parity checks, extracting design context/assets/variables.
+  - `notion`: knowledge capture, documentation, FAQ/how-to pages, decision logs, research synthesis into Notion.
+  - `linear`: issue/project/cycle/label/status workflows in Linear.
+- **PM conflict policy (mandatory):** `ClickUp` remains primary baseline for CodeDeliver task workflow. Use `linear` as secondary only when the user explicitly asks for Linear, or when the context is clearly a Linear workspace workflow.
+- **Fallback policy (mandatory):** if an MCP server is unavailable or auth fails, continue with the best non-blocking fallback flow and provide exact setup/login commands only when needed.
+  - `notion`: `codex mcp add notion --url https://mcp.notion.com/mcp` then `codex mcp login notion`
+  - `linear`: `codex mcp add linear --url https://mcp.linear.app/mcp` then `codex mcp login linear`
+  - `figma`: add in `~/.codex/config.toml`:
+    - `[mcp_servers.figma]`
+    - `url = "https://mcp.figma.com/mcp"`
+    - `bearer_token_env_var = "FIGMA_OAUTH_TOKEN"`
+    - `http_headers = { "X-Figma-Region" = "us-east-1" }`
+  - verify MCP availability with `codex mcp list` (and restart Codex after auth/config changes).
+- **Guardrails (mandatory):**
+  - Do not force MCP usage when it does not materially improve the task.
+  - Do not invent data from `notion`/`linear`/`figma` when access is missing; state the limitation explicitly.
+  - Keep tool usage minimal and justify MCP choice briefly in progress updates.
+- **CodeDeliver examples (reference):**
+  - Prompt like `βρες γιατί δεν ανοίγει modal στο sap` -> prefer `playwright` first for reproduction and UI-state evidence.
+  - Prompt with Figma URL for SAP/Panel modal parity -> prefer `figma` first, then implement with existing project conventions.
+  - Prompt like `γράψε doc/faq για τη ροή` -> prefer `notion` for structured capture (unless user asks local markdown only).
+  - Prompt like `φτιάξε/update issue` -> keep `ClickUp` baseline; use `linear` only when explicitly requested or clearly required by workspace context.
 - Before changing any lambda, review `.codex/AGENTS.md` and the relevant `.codex/refs/codeliver-*-lambdas.md` reference files to confirm required inputs/examples so the flow does not break.
 - Always end replies with links to the files you touched so they can be opened directly in VS Code.
 - Always run `ionic build` after each change batch only when you changed files under `projects/`; fix any build errors until it succeeds. If no project files changed (docs/lambdas/.codex), do not run it.
 - Translation rule (UI text in templates): never hardcode user-visible labels/messages/statuses (including Greek text such as `ενεργο` / `ανενεργο`) directly in templates. Always use the translate pipe with a key (e.g., `{{ "store-status-active" | translate }}`) and add/update that key in **every** `src/assets/i18n/*.json` language file.
+- Translation completion gate (mandatory): for every change that adds/updates translation key usage (`| translate`, `translate.instant`, `translate.get`, `translate.stream`), run a key-coverage check against all `src/assets/i18n/*.json` files of the impacted frontend project before completing the task.
+  - If any used key is missing from at least one locale file, the task is **not complete**.
+  - Final reply must include: (a) the checked key set, and (b) the locale files where keys were added/updated.
 - Translation key safety: do not introduce dotted translation keys that collide with existing **string** keys (e.g. avoid `statistics.week-grouping-hint` if `statistics` is already a string). Prefer flat keys like `statistics-week-grouping-hint`, or ensure the parent key is an object in all locales.
 - UI affordance rule (chips): do **not** render `ion-chip` elements that look clickable but perform no action on tap/click. If the content is informational only, use `ion-badge`, `ion-text`, `ion-label`, or plain text containers instead.
 - CustomError translation coverage (frontend-facing): when adding/changing any `CustomError` code in a lambda that is frontend-reachable (directly called by frontend, or one-hop downstream from a frontend-called lambda and its result is returned to frontend), you MUST ensure translation coverage in impacted frontend project(s) for **all** `src/assets/i18n/*.json` files.
