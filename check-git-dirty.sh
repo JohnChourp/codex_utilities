@@ -1,33 +1,97 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="${1:-.}"
-REPORT_FILE="${2:-./dirty-repos.txt}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPORT_FILE_DEFAULT="$SCRIPT_DIR/dirty-repos.txt"
+REPORT_FILE="$REPORT_FILE_DEFAULT"
 
-if [[ ! -d "$ROOT" ]]; then
-  echo "Invalid path: $ROOT" >&2
+resolve_downloads_root() {
+  local dir="$SCRIPT_DIR"
+  while [[ "$dir" != "/" ]]; do
+    if [[ "$(basename "$dir")" == "Downloads" ]]; then
+      echo "$dir"
+      return 0
+    fi
+    dir="$(dirname "$dir")"
+  done
+  return 1
+}
+
+DOWNLOADS_ROOT="$(resolve_downloads_root || true)"
+if [[ -z "$DOWNLOADS_ROOT" ]]; then
+  echo "Could not resolve Downloads root from: $SCRIPT_DIR" >&2
   exit 2
 fi
 
-# Find directories that contain a .git directory OR a .git file (worktrees/submodules).
-mapfile -t REPOS < <(
-  find "$ROOT" \
-    -type d \( -name node_modules -o -name dist -o -name build -o -name out -o -name .next -o -name .cache -o -name .venv -o -name venv \) -prune -o \
-    \( -type d -name .git -print -o -type f -name .git -print \) \
-  | sed 's|/\.git$||' \
-  | sort -u
+TARGET_ROOTS_DEFAULT=(
+  "$DOWNLOADS_ROOT/projects"
+  "$DOWNLOADS_ROOT/projects/codeliver"
+  "$DOWNLOADS_ROOT/lambdas/codeliver_all"
+  "$DOWNLOADS_ROOT/lambdas/crp_all"
+)
+TARGET_ROOTS=("${TARGET_ROOTS_DEFAULT[@]}")
+
+# Backward-compatible args:
+# - check-git-dirty.sh                       -> scan default roots, default report
+# - check-git-dirty.sh /path/report.txt      -> scan default roots, custom report
+# - check-git-dirty.sh /path/root            -> scan only that root, default report
+# - check-git-dirty.sh /path/root report.txt -> scan only that root, custom report
+if [[ $# -ge 1 ]]; then
+  if [[ -d "${1:-}" ]]; then
+    TARGET_ROOTS=("${1}")
+    if [[ $# -ge 2 ]]; then
+      REPORT_FILE="${2}"
+    fi
+  else
+    REPORT_FILE="${1}"
+  fi
+fi
+
+if [[ "$REPORT_FILE" != /* ]]; then
+  REPORT_FILE="$PWD/$REPORT_FILE"
+fi
+mkdir -p "$(dirname "$REPORT_FILE")"
+
+REPOS=()
+SCAN_ROOTS=()
+
+for root in "${TARGET_ROOTS[@]}"; do
+  if [[ -d "$root" ]]; then
+    SCAN_ROOTS+=("$(cd "$root" && pwd)")
+  fi
+done
+
+if [[ ${#SCAN_ROOTS[@]} -eq 0 ]]; then
+  echo "None of the scan roots exist under: $DOWNLOADS_ROOT" >&2
+  exit 2
+fi
+
+while IFS= read -r repo; do
+  REPOS+=("$repo")
+done < <(
+  for root in "${SCAN_ROOTS[@]}"; do
+    find "$root" \
+      -type d \( -name node_modules -o -name dist -o -name build -o -name out -o -name .next -o -name .cache -o -name .venv -o -name venv \) -prune -o \
+      \( -type d -name .git -print -o -type f -name .git -print \) \
+      2>/dev/null \
+      | sed 's|/\.git$||'
+  done | sort -u
 )
 
 {
   echo "Git dirty repo scan report"
-  echo "Root: $(cd "$ROOT" && pwd)"
+  echo "Downloads root: $DOWNLOADS_ROOT"
+  echo "Scan roots:"
+  for root in "${SCAN_ROOTS[@]}"; do
+    echo "- $root"
+  done
   echo "Generated: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
   echo "Repos detected: ${#REPOS[@]}"
   echo
 } > "$REPORT_FILE"
 
 if [[ ${#REPOS[@]} -eq 0 ]]; then
-  echo "No Git repositories found under: $ROOT" | tee -a "$REPORT_FILE"
+  echo "No Git repositories found under scan roots." | tee -a "$REPORT_FILE"
   exit 0
 fi
 
@@ -57,4 +121,3 @@ fi
 
 echo "Found $DIRTY_COUNT dirty repo(s). Report: $REPORT_FILE"
 exit 1
-
