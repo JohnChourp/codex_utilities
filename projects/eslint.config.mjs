@@ -88,7 +88,6 @@ export default [
       "@angular-eslint/prefer-standalone": "off",
       "unicorn/no-nested-ternary": "off",
       "unicorn/prefer-top-level-await":"off",
-      "unicorn/consistent-function-scoping": "off",
 
       "unicorn/prevent-abbreviations": [
         "error",
