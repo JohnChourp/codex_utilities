@@ -1,12 +1,50 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="/Users/john/Downloads/lambdas/codeliver_all"
+ROOT_DIR="${ROOT_DIR:-/Users/john/Downloads/lambdas/codeliver_all}"
 ROOT_LABEL="codeliver_all"
+PROJECTS_DIR="${PROJECTS_DIR:-/Users/john/Downloads/projects}"
+PROJECTS_CODELIVER_DIR="${PROJECTS_CODELIVER_DIR:-${PROJECTS_DIR}/codeliver}"
+DEFAULT_TARGET_REPOS_FILE="/Users/john/Downloads/lambdas/codeliver_all/current-codeliver-target-repos.txt"
+SPECIAL_REPOS_CSV="codeliver-sap,codeliver-panel,codeliver-pos,codeliver-app,codeliver-cost-wizard-react,codeliver-website,codeliver-integration-partners,codeliver-partners-panel,codeliver-io"
 
 CONCURRENCY="${CONCURRENCY:-20}"
 REPORT_DIR="${REPORT_DIR:-/Users/john/Downloads/lambdas/_sync_reports}"
 RUN_TS="$(date +%Y%m%d_%H%M%S)"
+TARGET_REPOS_FILE="$DEFAULT_TARGET_REPOS_FILE"
+
+usage() {
+  cat <<'USAGE'
+Usage:
+  sync_codeliver_all.sh [--repos-file <path>]
+
+Options:
+  --repos-file <path>   Text file with target repos (one repo_id per line).
+                        Default: /Users/john/Downloads/lambdas/codeliver_all/current-codeliver-target-repos.txt
+USAGE
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --repos-file)
+      if [[ $# -lt 2 ]]; then
+        echo "ERROR: --repos-file requires a value." >&2
+        exit 2
+      fi
+      TARGET_REPOS_FILE="$2"
+      shift 2
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "ERROR: Unknown argument: $1" >&2
+      usage
+      exit 2
+      ;;
+  esac
+done
 
 REPORT_FILE="${REPORT_DIR}/${ROOT_LABEL}_sync_report_${RUN_TS}.txt"
 FAILURES_FILE="${REPORT_DIR}/${ROOT_LABEL}_sync_failures_${RUN_TS}.txt"
@@ -45,6 +83,49 @@ append_failure() {
   append_line_locked "$FAILURES_FILE" "$FAILURES_LOCK_FILE" "$1"
 }
 
+is_special_repo() {
+  local repo_name="$1"
+  local s
+  IFS=',' read -r -a __special_arr <<< "$SPECIAL_REPOS_CSV"
+  for s in "${__special_arr[@]}"; do
+    if [[ "$repo_name" == "$s" ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+resolve_special_repo_target() {
+  local repo_name="$1"
+  local primary_dir="${PROJECTS_DIR}/${repo_name}"
+  local codeliver_dir="${PROJECTS_CODELIVER_DIR}/${repo_name}"
+
+  if [[ -d "$codeliver_dir" ]]; then
+    printf "%s\n" "$codeliver_dir"
+    return 0
+  fi
+
+  if [[ -d "$primary_dir" ]]; then
+    printf "%s\n" "$primary_dir"
+    return 0
+  fi
+
+  if [[ -d "$PROJECTS_CODELIVER_DIR" ]]; then
+    printf "%s\n" "$codeliver_dir"
+    return 0
+  fi
+
+  printf "%s\n" "$primary_dir"
+}
+
+resolve_special_repo_target_parent() {
+  if [[ -d "$PROJECTS_CODELIVER_DIR" ]]; then
+    printf "%s\n" "$PROJECTS_CODELIVER_DIR"
+    return 0
+  fi
+  printf "%s\n" "$PROJECTS_DIR"
+}
+
 log_repo_status() {
   local timestamp="$1"
   local repo_name="$2"
@@ -56,7 +137,7 @@ log_repo_status() {
   append_report "$line"
 
   case "$status" in
-    FETCH_FAILED|PULL_FAILED|RECLONE_FAILED|SKIPPED_PULL_DIRTY|SKIPPED_PULL_NO_UPSTREAM)
+    FETCH_FAILED|PULL_FAILED|RECLONE_FAILED|MOVE_TO_PROJECTS_FAILED|SKIPPED_PULL_DIRTY|SKIPPED_PULL_NO_UPSTREAM|MISSING_TARGET_REPO)
       append_failure "$line"
       ;;
   esac
@@ -96,9 +177,9 @@ sync_repo() {
     fi
 
     case "$repo_dir" in
-      "$ROOT_DIR"/*) ;;
+      "$ROOT_DIR"/*|"${PROJECTS_DIR}"/*) ;;
       *)
-        log_repo_status "$timestamp" "$repo_name" "RECLONE_FAILED" "$repo_dir" "Safety guard blocked rm -rf outside root"
+        log_repo_status "$timestamp" "$repo_name" "RECLONE_FAILED" "$repo_dir" "Safety guard blocked rm -rf outside allowed roots"
         rm -f "$fetch_err_file" "$pull_err_file"
         return 1
         ;;
@@ -163,17 +244,62 @@ sync_repo() {
   return 0
 }
 
+sync_target_repo() {
+  local repo_name="$1"
+  local repo_dir source_dir timestamp move_err_file move_err target_parent
+
+  if is_special_repo "$repo_name"; then
+    source_dir="${ROOT_DIR}/${repo_name}"
+    repo_dir="$(resolve_special_repo_target "$repo_name")"
+
+    if [[ -d "$source_dir" && ! -e "$repo_dir" ]]; then
+      timestamp="$(date -Iseconds)"
+      move_err_file="$(mktemp)"
+      target_parent="$(resolve_special_repo_target_parent)"
+      if ! mkdir -p "$target_parent"; then
+        log_repo_status "$timestamp" "$repo_name" "MOVE_TO_PROJECTS_FAILED" "$source_dir" "Failed to create target parent: $target_parent"
+        rm -f "$move_err_file"
+        return 1
+      fi
+      if ! mv "$source_dir" "$repo_dir" 2>"$move_err_file"; then
+        move_err="$(tail -n 20 "$move_err_file" 2>/dev/null | tr "\n" " " | sed -E "s/[[:space:]]+/ /g; s/^ +//; s/ +$//" || true)"
+        log_repo_status "$timestamp" "$repo_name" "MOVE_TO_PROJECTS_FAILED" "$source_dir" "${move_err:-Failed to move repo to projects directory}"
+        rm -f "$move_err_file"
+        return 1
+      fi
+      rm -f "$move_err_file"
+      log_repo_status "$timestamp" "$repo_name" "MOVED_TO_PROJECTS" "$repo_dir" "Moved from $source_dir to $repo_dir"
+    fi
+  else
+    repo_dir="${ROOT_DIR}/${repo_name}"
+  fi
+
+  if [[ ! -e "$repo_dir" ]]; then
+    timestamp="$(date -Iseconds)"
+    log_repo_status "$timestamp" "$repo_name" "MISSING_TARGET_REPO" "$repo_dir" "Target repo is missing locally"
+    return 1
+  fi
+
+  sync_repo "$repo_dir"
+}
+
 export -f append_line_locked
 export -f append_report
 export -f append_failure
+export -f is_special_repo
+export -f resolve_special_repo_target
+export -f resolve_special_repo_target_parent
 export -f log_repo_status
 export -f sync_repo
-export ROOT_DIR ROOT_LABEL REPORT_FILE FAILURES_FILE REPORT_LOCK_FILE FAILURES_LOCK_FILE
+export -f sync_target_repo
+export ROOT_DIR ROOT_LABEL PROJECTS_DIR PROJECTS_CODELIVER_DIR REPORT_FILE FAILURES_FILE REPORT_LOCK_FILE FAILURES_LOCK_FILE
+export SPECIAL_REPOS_CSV
 
 {
   echo "Git sync report"
   echo "Generated: $(date -Iseconds)"
   echo "Root: $ROOT_DIR"
+  echo "Targets file: $TARGET_REPOS_FILE"
   echo "Concurrency: $CONCURRENCY"
   echo "Format: timestamp<TAB>repo<TAB>status<TAB>path<TAB>detail"
   echo "------------------------------------------------------------------"
@@ -183,19 +309,31 @@ export ROOT_DIR ROOT_LABEL REPORT_FILE FAILURES_FILE REPORT_LOCK_FILE FAILURES_L
   echo "Git sync failures/skipped-pull report"
   echo "Generated: $(date -Iseconds)"
   echo "Root: $ROOT_DIR"
+  echo "Targets file: $TARGET_REPOS_FILE"
   echo "Format: timestamp<TAB>repo<TAB>status<TAB>path<TAB>detail"
   echo "------------------------------------------------------------------"
 } > "$FAILURES_FILE"
-
-overall_exit=0
 
 if [[ ! -d "$ROOT_DIR" ]]; then
   echo "Root directory not found: $ROOT_DIR" >&2
   exit 1
 fi
 
-if ! find "$ROOT_DIR" -mindepth 1 -maxdepth 1 -type d -print0 \
-  | xargs -0 -P "$CONCURRENCY" -I {} bash -c 'set -euo pipefail; sync_repo "$1"' _ {}; then
+if [[ ! -f "$TARGET_REPOS_FILE" ]]; then
+  echo "Target repos file not found: $TARGET_REPOS_FILE" >&2
+  exit 2
+fi
+
+mapfile -t TARGET_REPOS < <(sed -e 's/#.*$//' -e 's/^ *//' -e 's/ *$//' "$TARGET_REPOS_FILE" | awk 'NF>0' | sort -u)
+
+if [[ ${#TARGET_REPOS[@]} -eq 0 ]]; then
+  echo "Target repos file is empty: $TARGET_REPOS_FILE" >&2
+  exit 2
+fi
+
+overall_exit=0
+
+if ! printf "%s\0" "${TARGET_REPOS[@]}" | xargs -0 -P "$CONCURRENCY" -I {} bash -c 'set -euo pipefail; sync_target_repo "$1"' _ {}; then
   overall_exit=1
 fi
 

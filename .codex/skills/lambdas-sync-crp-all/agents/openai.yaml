@@ -1,5 +1,0 @@
-interface:
-  display_name: "Lambdas Sync crp_all"
-  short_description: "Bulk fetch/pull + empty repo reclone for crp_all"
-  default_prompt: "Sync all repositories inside crp_all with fetch/pull, auto-reclone empty repos, and generate txt reports with failures and skipped pulls."
-

@@ -1,60 +1,136 @@
 ---
-name: codeliver-link-missing-cloud-repos
-description: Find `codeliver-*` repos from Cloud Repos Panel S3 inventory (`ORG-repos.json`) that are missing from the CRP project `codeliver`, then auto-link them to the best existing feature (or fallback feature). Use when the user asks to sync missing cloud repos into the project automatically.
+name: "Codeliver Link Repos"
+description: Sync Codeliver cloud repos for GitHub `codeliver-*` repos (project `codeliver`), auto-link missing cloud repos, then keep local repos updated under `Downloads/lambdas/codeliver_all` with special project placement for `codeliver-sap`  and `codeliver-panel` and `codeliver-pos` and `codeliver-app` and `codeliver-cost-wizard-react` and `codeliver-website` and `codeliver-integration-partners` and `codeliver-partners-panel` and `codeliver-io`.
 ---
 
-# Codeliver Link Missing Cloud Repos
+# Codeliver Link Repos
 
 ## Overview
-Run one command to sync missing `codeliver-*` repos from S3 to CRP project links with deterministic rules and a JSON report.
 
-## Workflow
-1. Verify prerequisites.
-- `crp` is logged in (`~/.crp/config.json` has token).
-- AWS CLI credentials can read `s3://cloud-repos-panel-data/<org>-repos.json`.
+Sync workflow for Codeliver repositories based on:
+- GitHub org repos where name contains `codeliver-` (archived excluded by default), and
+- cloud repos already linked in codeliver project `codeliver`.
 
-2. Run the sync script.
-- Dry run first:
+Default behavior:
+1. Discover GitHub repos that match `codeliver-`.
+2. Build target set:
+   - matched GitHub repos
+   - plus special repos: `codeliver-sap`, `codeliver-panel`, `codeliver-pos`, `codeliver-app`, `codeliver-cost-wizard-react`, `codeliver-website`, `codeliver-integration-partners`, `codeliver-partners-panel`, `codeliver-io`
+3. Auto-create missing cloud repo links in codeliver project `codeliver`:
+   - in subproject `cloud-repos-auto-linking` (created if missing)
+   - in feature `auto-linked-codeliver-repos` (created if missing)
+4. Local sync/clone:
+   - `codeliver-sap`, `codeliver-panel`, `codeliver-pos`, `codeliver-app`, `codeliver-cost-wizard-react`, `codeliver-website`, `codeliver-integration-partners`, `codeliver-partners-panel`, `codeliver-io` -> `/Users/john/Downloads/projects/<repo>`
+   - all other target repos -> `/Users/john/Downloads/lambdas/codeliver_all/<repo>`
+   - existing repos: `fetch --all --prune` + `pull --ff-only`
+   - missing repos: clone with preferred protocol; auto-fallback from SSH to HTTPS on publickey failures
+5. Refresh project repo artifacts:
+  - `/Users/john/Downloads/lambdas/codeliver_all/current-codeliver-project-repos-full-list.json`
+  - single-file artifact with all cloud repos found by scanning all features of the selected project (`search_mode: all-features`; fallback to project-level list only if feature-level API is unavailable)
+  - cleanup of legacy text/json sync artifacts so only the JSON list remains persisted
+
+## Auth + non-blocking behavior
+
+- Cloud-link stage requires auth token at `~/.codeliver/config.json` (`api.auth.token`).
+- If `~/.codeliver/config.json` is missing/empty but env var `CODELIVER_AUTH_TOKEN` exists, the orchestrator auto-bootstraps/updates `~/.codeliver/config.json` before cloud stage.
+- If auth is still missing:
+  - default run (`codeliver_all.sh`) does **not** block; it skips cloud-link and falls back to local-only sync using discovered local `codeliver-*` repos.
+  - explicit cloud-only run (`--only-cloud-link-clone`) fails fast with a clear auth error.
+- Special project repos are resolved in both layouts:
+  - `/Users/john/Downloads/projects/<repo>`
+  - `/Users/john/Downloads/projects/codeliver/<repo>` (auto-detected/preferred when present)
+
+## Run
+
 ```bash
-python3 scripts/sync_missing_cloud_repos.py --dry-run
+~/.codex/skills/codeliver-link-missing-cloud-repos/scripts/codeliver_all.sh
 ```
-- Apply links:
+
+Only local git sync (from target repos file):
+
 ```bash
-python3 scripts/sync_missing_cloud_repos.py
+~/.codex/skills/codeliver-link-missing-cloud-repos/scripts/codeliver_all.sh --only-sync
 ```
 
-3. Review the generated report.
-- Default output: `./missing-cloud-repos-sync-report.json`
-- Report includes:
-- missing repos found
-- target feature selected per repo
-- created fallback subproject/feature (if any)
-- link success/failure per repo
+Only cloud-link + local clone/sync stage:
 
-## Placement Rules
-1. Compute missing repos as:
-- repos in S3 `<org>-repos.json` matching prefix (`codeliver-` by default)
-- minus repos already linked to the target project.
+```bash
+~/.codex/skills/codeliver-link-missing-cloud-repos/scripts/codeliver_all.sh --only-cloud-link-clone
+```
 
-2. Pick target feature per missing repo:
-- Score repo name tokens against all project feature name tokens.
-- If score is above threshold (`--min-match-score`, default `2`), link to best-scored feature.
-- Otherwise link to fallback feature (`uncategorized-repos` by default).
+Dry run:
 
-3. Fallback bootstrap:
-- If fallback feature is missing and auto-create is enabled, create:
-- subproject: `cloud-repos-auto-linking` (or `--auto-subproject-name`)
-- feature: fallback feature name (or `--auto-feature-name` if fallback is an id)
+```bash
+~/.codex/skills/codeliver-link-missing-cloud-repos/scripts/codeliver_all.sh --dry-run
+```
 
-## Script
-`scripts/sync_missing_cloud_repos.py`
+Force HTTPS clone preference:
 
-Useful flags:
+```bash
+~/.codex/skills/codeliver-link-missing-cloud-repos/scripts/codeliver_all.sh --clone-prefer https
+```
+
+Bootstrap config on the fly (single run) with env token:
+
+```bash
+CODELIVER_AUTH_TOKEN="<your-token>" ~/.codex/skills/codeliver-link-missing-cloud-repos/scripts/codeliver_all.sh
+```
+
+## Main Arguments (cloud stage)
+
+- `--project-name` (default: `codeliver`)
+- `--api-route-prefix` (default: `crp`)
+- `--project-id` (optional override)
+- `--name-contains` (default: `codeliver-`)
+- `--include-special-repos` (default: `codeliver-sap,codeliver-panel,codeliver-pos,codeliver-app,codeliver-cost-wizard-react,codeliver-website,codeliver-integration-partners,codeliver-partners-panel,codeliver-io`)
+- `--exclude-archived` (default enabled)
+- `--include-archived` (override)
+- `--auto-subproject-name` (default: `cloud-repos-auto-linking`)
+- `--auto-feature-name` (default: `auto-linked-codeliver-repos`)
+- `--clone-prefer` (`ssh` or `https`, default: `ssh`)
+- `--github-org` (optional override)
+- `--repos-list-out` (default: `/Users/john/Downloads/lambdas/codeliver_all/current-codeliver-target-repos.txt`)
+- `--out` (default: `/Users/john/Downloads/lambdas/codeliver_all/codeliver-cloud-repos-sync-report.json`)
+- `--all-cloud-repos-out` (default: `/Users/john/Downloads/lambdas/codeliver_all/current-codeliver-project-repos-full-list.json`)
 - `--dry-run`
-- `--project-name codeliver`
-- `--project-id <id>`
-- `--fallback-feature uncategorized-repos`
-- `--min-match-score 2`
-- `--bucket cloud-repos-panel-data`
-- `--crp-org admin`
-- `--out /tmp/report.json`
+- `--no-local-sync`
+
+## Optional env vars
+
+- `CONCURRENCY` (default: `20`) for sync stage
+- `REPORT_DIR` (default: `/Users/john/Downloads/lambdas/_sync_reports`) for sync stage text reports
+- `CODELIVER_AUTH_TOKEN` (optional) auto-bootstrap token for `~/.codeliver/config.json` when missing
+
+## Output files
+
+- Persisted output:
+  - `/Users/john/Downloads/lambdas/codeliver_all/current-codeliver-project-repos-full-list.json` (single file with all cloud repos found from all-features search for the selected project)
+- Non-persisted (temporary during run):
+  - cloud stage report
+  - target repos list
+  - sync text reports
+
+## CRP project mode
+
+For project `crp`, run with:
+
+```bash
+~/.codex/skills/codeliver-link-missing-cloud-repos/scripts/codeliver_all.sh --project-name crp --api-route-prefix crp
+```
+
+## JSON report fields (cloud stage)
+
+- `github_repo_count`
+- `github_filtered_repo_count`
+- `missing_cloud_repo_count`
+- `created_cloud_repo_count`
+- `local_sync_summary`
+- `repos[]` entries with:
+  - `cloud_status` (`already_linked`, `cloud_linked`, `cloud_link_planned`, `cloud_link_failed`)
+  - `local_status` (`synced`, `cloned`, `exists`, `skipped_dirty`, `clone_failed`, etc.)
+
+## Scripts
+
+- Orchestrator: `scripts/codeliver_all.sh`
+- Sync-only stage: `scripts/sync_codeliver_all.sh`
+- Cloud-link + local sync stage: `scripts/sync_codeliver_cloud_repos.py`
