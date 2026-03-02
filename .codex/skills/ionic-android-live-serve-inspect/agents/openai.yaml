@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ionic Android Live Serve Inspect"
+  short_description: "Run ionic serve + USB device launch + chrome inspect for live mobile debugging"
+  default_prompt: "Start Ionic live serve on port 8206, connect my USB Android device with adb reverse, install/launch the app, and open chrome://inspect/#devices."
