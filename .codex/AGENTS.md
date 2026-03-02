@@ -782,6 +782,17 @@ Note (team convention): on the CLIENTS “Client tasks list”, use the list sta
 
 Language convention (team): unless the user explicitly asks otherwise, write ClickUp task descriptions, implementation plans, and comments in Greek.
 
+### ClickUp hard gate (STRICT - do not skip)
+
+- Do **not** send a final user reply unless all ClickUp updates below are completed for the active request:
+  - task exists (new or explicitly provided by user),
+  - task status is in the list-equivalent of `in-progress` while working,
+  - at completion: add a summary comment (what changed + key files + tests/build status),
+  - at completion: add a manual time entry for the actual elapsed work time,
+  - at completion: move task to the list-equivalent of `completed` (for CLIENTS list this may be `complete`).
+- If implementation finished before ClickUp was updated, you must **backfill immediately** in the same session (comment + time entry + completion status) before closing the conversation.
+- Missing ClickUp update is treated as an incomplete task, even if code changes are already done.
+
 ## 3) Before implementing: scout architecture and code paths
 
 - Read the closest architecture/reference docs first (`ARCHITECTURE.md`, `README.md`, `docs/`, ADRs).
