@@ -1,9 +1,9 @@
 ---
-name: crp-audit-frontend-lambda-errors-i18n
+name: CRP Audit Frontend Lambda Errors i18n
 description: Audit and autofix frontend-visible CRP lambda error translation coverage for cloud-repos-panel using one-hop lambda expansion and OpenAI auto-translation.
 ---
 
-# crp-audit-frontend-lambda-errors-i18n
+# CRP Audit Frontend Lambda Errors i18n
 
 ## Overview
 Use this skill to enforce translation coverage for frontend-visible CRP lambda error codes (`comment_id` / `comments`) in `cloud-repos-panel`.
