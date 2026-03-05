@@ -1,0 +1,21 @@
+{
+  "modal_utilities_allowlist": [
+    ".custom-height",
+    ".custom-height3",
+    ".custom-height4",
+    ".custom-height43",
+    ".custom-height5",
+    ".customselectStoreModal"
+  ],
+  "allow_insertions": false,
+  "targets": {
+    "sap": {
+      "deny_selectors": [],
+      "deny_contexts": []
+    },
+    "pos": {
+      "deny_selectors": [],
+      "deny_contexts": []
+    }
+  }
+}
