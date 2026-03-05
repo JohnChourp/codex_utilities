@@ -87,7 +87,7 @@ Source: `/home/dm-soft-1/Downloads/projects/codeliver/codeliver-pos/src/app/shar
         from_timestamp,
         to_timestamp,
         delivery_guy_id,
-      }
+}
 ```
 
 ## codeliver-pos-fetch-zones
@@ -112,6 +112,17 @@ Source: `/home/dm-soft-1/Downloads/projects/codeliver/codeliver-pos/src/app/shar
 { type, customer }
 ```
 
+## codeliver-pos-handle-delivery-guy
+
+- Normalized: `codeliver-pos/prod/codeliver-pos-handle-delivery-guy`
+
+Observed payloads (body)
+
+Source: `/home/dm-soft-1/Downloads/projects/codeliver/codeliver-pos/src/app/shared/data.storage.service.ts`
+```ts
+payload
+```
+
 ## codeliver-pos-handle-delivery-request
 
 - Normalized: `codeliver-pos/prod/codeliver-pos-handle-delivery-request`
@@ -133,6 +144,8 @@ Source: `/home/dm-soft-1/Downloads/projects/codeliver/codeliver-pos/src/app/shar
 ```ts
 {
         type,
+        route,
+        route_id,
         delivery_guy_id,
         requests,
       }
@@ -212,10 +225,12 @@ Source: `/home/dm-soft-1/Downloads/projects/codeliver/codeliver-pos/src/app/shar
 {
         type,
         phone,
+        store_id,
         delivery_guy_id,
         status,
         exclusiveStartKey,
         route_id,
+        request_id,
         nextShortCfRequestId,
       }
 ```

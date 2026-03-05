@@ -1,0 +1,4 @@
+interface:
+  display_name: "CRP Lambda Log Error Agent"
+  short_description: "Run CRP Lambda error triage as full agent workflow"
+  default_prompt: "Investigate a CloudWatch logEventViewer URL using CRP CLI as an agent-native workflow (no lambda-log-error-url wrapper, no lambda-ai-tools). Run deterministic preflight gates (CRP auth, AWS auth, GitHub org, Lambda runtime/arch), use check-lambda-log-url/check-lambda-log with analysis none, enrich repo context (feature + master repo + brain repos + runtime cwd brain repo when applicable), collect code and log evidence, and produce a filtered health verdict that separates production failures from smoke/test failures with critical-signature checks, plus concrete fix, verification, and rollback commands."

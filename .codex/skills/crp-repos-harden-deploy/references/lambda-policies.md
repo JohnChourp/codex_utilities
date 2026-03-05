@@ -23,6 +23,16 @@ Treat this repo as **source of truth** for:
 
 If anything here conflicts with other docs/prompts, prefer `dmngr/lambda-policies`.
 
+Canonical ownership map (quick):
+- General Lambda logging baseline: `printed-logs/printed-logs-policy.md`
+- Handled-errors contract (`ACTION:...` + `RequestId SUCCESS` suppression): `handled-errors/handled-error-policy.md`
+- Handled-errors automation behavior: `handled-errors/handled-errors-policy-tooling.md`
+- Hardening flow/phases/checkpoints: `harden/README.md` + `harden/harden-policy.md`
+
+Scope note:
+- For policy/docs-only edits in `dmngr/lambda-policies`, do not run harden flows.
+- For Lambda repo runtime/arch hardening, default to PR-first (`crp repos harden-pr`) and use deploy flow (`crp repos harden-deploy`) only with explicit deploy intent.
+
 ## Key docs to read (only when needed)
 
 - Handled errors contract:
