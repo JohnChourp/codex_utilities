@@ -19,9 +19,11 @@ REFS_DIR_DEFAULT = "/home/dm-soft-1/.codex/refs"
 INDEX_FILENAME_DEFAULT = "refs-frontend-index.generated.md"
 
 EXECUTE_API_RE = re.compile(
-    r"https?://([a-z0-9]+)\\.execute-api\\.[^/]+/([^/\\s\"'`]+)(/[^\\s\"'`]+)?",
+    r"https?://([a-z0-9]+)\.execute-api\.[^/]+/([^/\s\"'`]+)(/[^\s\"'`]+)?",
     re.IGNORECASE,
 )
+THIS_URL_RE = re.compile(r"""this\.(\w+)\s*\+\s*['"]([^'"]+)['"]""")
+ASSIGN_URL_RE = re.compile(r"""(\w+)\s*=\s*['"](https?://[^'"]+)['"]""")
 
 
 def iter_service_files(root: Path):
@@ -140,7 +142,7 @@ def load_api_map(path: Path):
     for line in path.read_text(encoding="utf-8", errors="ignore").splitlines():
         if not line.startswith("### "):
             continue
-        match = re.match(r"###\\s+(.+?)\\s+\\(([^)]+)\\)", line)
+        match = re.match(r"###\s+(.+?)\s+\(([^)]+)\)", line)
         if match:
             name = match.group(1).strip()
             api_id = match.group(2).strip()
@@ -190,6 +192,28 @@ def parse_url(expr: str, api_map: dict):
     if api_id:
         api_name = api_map.get(api_id)
     return api_id, api_name, stage, route
+
+
+def extract_base_url_assignments(text: str):
+    base_urls = {}
+    for name, value in ASSIGN_URL_RE.findall(text):
+        if "execute-api" in value:
+            base_urls[name] = value
+    return base_urls
+
+
+def resolve_url_expression(expr: str, base_urls: dict):
+    if "execute-api" in expr:
+        return expr
+    match = THIS_URL_RE.search(expr)
+    if not match:
+        return expr
+    var_name, suffix = match.groups()
+    base_url = base_urls.get(var_name)
+    if not base_url:
+        return expr
+    separator = "" if base_url.endswith("/") else "/"
+    return f'"{base_url}{separator}{suffix}"'
 
 
 def normalized_path(api_name: str, stage: str, route: str):
@@ -313,10 +337,12 @@ def main():
     rows = []
     for path in iter_service_files(root):
         text = path.read_text(encoding="utf-8", errors="ignore")
+        base_urls = extract_base_url_assignments(text)
         project = detect_project(path)
         for method, idx, args_str in find_calls(text):
             parts = split_top_level(args_str)
-            url = parts[0] if parts else ""
+            raw_url = parts[0] if parts else ""
+            url = resolve_url_expression(raw_url, base_urls)
             body = parts[1] if len(parts) > 1 else ""
             api_id, api_name, stage, route = parse_url(url, api_map)
             rows.append(

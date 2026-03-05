@@ -31,6 +31,280 @@ CALL_INVOKE_RE = re.compile(r"\b(?:lambda_invoke|lambdaInvoke|invokeLambda)\s*\(
 FUNCTION_NAME_RE = re.compile(r"FunctionName\s*:\s*([^\s,}\n]+)")
 STRING_LITERAL_RE = re.compile(r'^["\']([a-z0-9-]+)["\']$')
 IDENTIFIER_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+TODO_PLACEHOLDER_RE = re.compile(r"^\s*TODO\([^)]+\)\s*$", re.IGNORECASE)
+GREEK_CHAR_RE = re.compile(r"[Α-Ωα-ω]")
+SUPPORTED_LOCALE_FILES = {"el.json", "en.json"}
+
+ERROR_CODE_TRANSLATIONS = {
+    "all_delivery_guys_rejected": {
+        "en": "All delivery drivers rejected the request.",
+        "el": "Όλοι οι διανομείς απέρριψαν το αίτημα.",
+    },
+    "already_active_route": {
+        "en": "This route is already active.",
+        "el": "Αυτή η διαδρομή είναι ήδη ενεργή.",
+    },
+    "db_error": {
+        "en": "Database error.",
+        "el": "Σφάλμα βάσης δεδομένων.",
+    },
+    "db_failed_create_request_calculation": {
+        "en": "Failed to create request calculation in the database.",
+        "el": "Αποτυχία δημιουργίας υπολογισμού αιτήματος στη βάση δεδομένων.",
+    },
+    "db_failed_querying_devices_sockets": {
+        "en": "Failed to query device sockets from the database.",
+        "el": "Αποτυχία ανάκτησης sockets συσκευών από τη βάση δεδομένων.",
+    },
+    "db_failed_to_create_route_path_calculation": {
+        "en": "Failed to create route path calculation in the database.",
+        "el": "Αποτυχία δημιουργίας υπολογισμού διαδρομής στη βάση δεδομένων.",
+    },
+    "db_failed_to_delete_route": {
+        "en": "Failed to delete route from the database.",
+        "el": "Αποτυχία διαγραφής διαδρομής από τη βάση δεδομένων.",
+    },
+    "db_failed_to_get_delivery_guy": {
+        "en": "Failed to fetch delivery driver from the database.",
+        "el": "Αποτυχία ανάκτησης διανομέα από τη βάση δεδομένων.",
+    },
+    "db_failed_to_get_delivery_guy_coordinates": {
+        "en": "Failed to fetch delivery driver coordinates from the database.",
+        "el": "Αποτυχία ανάκτησης συντεταγμένων διανομέα από τη βάση δεδομένων.",
+    },
+    "db_failed_to_get_delivery_guys": {
+        "en": "Failed to fetch delivery drivers from the database.",
+        "el": "Αποτυχία ανάκτησης διανομέων από τη βάση δεδομένων.",
+    },
+    "db_failed_to_get_group": {
+        "en": "Failed to fetch group from the database.",
+        "el": "Αποτυχία ανάκτησης group από τη βάση δεδομένων.",
+    },
+    "db_failed_to_get_panel_user": {
+        "en": "Failed to fetch panel user from the database.",
+        "el": "Αποτυχία ανάκτησης χρήστη panel από τη βάση δεδομένων.",
+    },
+    "db_failed_to_get_request": {
+        "en": "Failed to fetch request from the database.",
+        "el": "Αποτυχία ανάκτησης αιτήματος από τη βάση δεδομένων.",
+    },
+    "db_failed_to_get_requests": {
+        "en": "Failed to fetch requests from the database.",
+        "el": "Αποτυχία ανάκτησης αιτημάτων από τη βάση δεδομένων.",
+    },
+    "db_failed_to_get_route": {
+        "en": "Failed to fetch route from the database.",
+        "el": "Αποτυχία ανάκτησης διαδρομής από τη βάση δεδομένων.",
+    },
+    "db_failed_to_get_route_paths": {
+        "en": "Failed to fetch route paths from the database.",
+        "el": "Αποτυχία ανάκτησης route paths από τη βάση δεδομένων.",
+    },
+    "db_failed_to_get_user": {
+        "en": "Failed to fetch user from the database.",
+        "el": "Αποτυχία ανάκτησης χρήστη από τη βάση δεδομένων.",
+    },
+    "db_failed_to_query_delivery_guys": {
+        "en": "Failed to query delivery drivers from the database.",
+        "el": "Αποτυχία αναζήτησης διανομέων στη βάση δεδομένων.",
+    },
+    "db_failed_to_query_delivery_guys_actions": {
+        "en": "Failed to query delivery driver actions from the database.",
+        "el": "Αποτυχία αναζήτησης ενεργειών διανομέων στη βάση δεδομένων.",
+    },
+    "db_failed_to_query_group_zones": {
+        "en": "Failed to query group zones from the database.",
+        "el": "Αποτυχία αναζήτησης ζωνών group στη βάση δεδομένων.",
+    },
+    "db_failed_to_query_request_calculations": {
+        "en": "Failed to query request calculations from the database.",
+        "el": "Αποτυχία αναζήτησης υπολογισμών αιτημάτων στη βάση δεδομένων.",
+    },
+    "db_failed_to_query_requests": {
+        "en": "Failed to query requests from the database.",
+        "el": "Αποτυχία αναζήτησης αιτημάτων στη βάση δεδομένων.",
+    },
+    "db_failed_to_query_requests_actions": {
+        "en": "Failed to query request actions from the database.",
+        "el": "Αποτυχία αναζήτησης ενεργειών αιτημάτων στη βάση δεδομένων.",
+    },
+    "db_failed_to_query_route_paths": {
+        "en": "Failed to query route paths from the database.",
+        "el": "Αποτυχία αναζήτησης route paths στη βάση δεδομένων.",
+    },
+    "db_failed_to_query_routes": {
+        "en": "Failed to query routes from the database.",
+        "el": "Αποτυχία αναζήτησης διαδρομών στη βάση δεδομένων.",
+    },
+    "db_failed_to_query_routes_paths_calculations": {
+        "en": "Failed to query route path calculations from the database.",
+        "el": "Αποτυχία αναζήτησης υπολογισμών διαδρομών στη βάση δεδομένων.",
+    },
+    "db_failed_to_update_delivery_guy": {
+        "en": "Failed to update delivery driver in the database.",
+        "el": "Αποτυχία ενημέρωσης διανομέα στη βάση δεδομένων.",
+    },
+    "db_failed_to_update_delivery_guy_current_route_id": {
+        "en": "Failed to update delivery driver current route in the database.",
+        "el": "Αποτυχία ενημέρωσης της τρέχουσας διαδρομής διανομέα στη βάση δεδομένων.",
+    },
+    "db_failed_to_update_route_status_canceled": {
+        "en": "Failed to set route status to canceled in the database.",
+        "el": "Αποτυχία ενημέρωσης κατάστασης διαδρομής σε ακυρωμένη στη βάση δεδομένων.",
+    },
+    "db_failed_to_update_route_status_merged_and_delivery_guy_status_to_accepted": {
+        "en": "Failed to update merged route and delivery driver accepted status.",
+        "el": "Αποτυχία ενημέρωσης συγχωνευμένης διαδρομής και κατάστασης αποδοχής διανομέα.",
+    },
+    "db_query_failed_to_query_delivery_guys_coordinates": {
+        "en": "Failed to query delivery driver coordinates from the database.",
+        "el": "Αποτυχία αναζήτησης συντεταγμένων διανομέων στη βάση δεδομένων.",
+    },
+    "delivery_guy_not_in_route": {
+        "en": "Delivery driver is not part of this route.",
+        "el": "Ο διανομέας δεν ανήκει σε αυτή τη διαδρομή.",
+    },
+    "dynamo_db_error": {
+        "en": "DynamoDB error.",
+        "el": "Σφάλμα DynamoDB.",
+    },
+    "dynamo_error": {
+        "en": "DynamoDB error.",
+        "el": "Σφάλμα DynamoDB.",
+    },
+    "get_current_route_error": {
+        "en": "Failed to fetch current route.",
+        "el": "Αποτυχία ανάκτησης τρέχουσας διαδρομής.",
+    },
+    "get_route_to_accept_error": {
+        "en": "Failed to fetch route to accept.",
+        "el": "Αποτυχία ανάκτησης διαδρομής προς αποδοχή.",
+    },
+    "group_does_not_exists": {
+        "en": "Group does not exist.",
+        "el": "Το group δεν υπάρχει.",
+    },
+    "invalid_body": {
+        "en": "Invalid request body.",
+        "el": "Μη έγκυρο σώμα αιτήματος.",
+    },
+    "invalid_group_or_delivery_guy": {
+        "en": "Invalid group or delivery driver.",
+        "el": "Μη έγκυρο group ή διανομέας.",
+    },
+    "invalid_params": {
+        "en": "Invalid parameters.",
+        "el": "Μη έγκυρες παράμετροι.",
+    },
+    "invalid_remove_request_payload": {
+        "en": "Invalid remove-request payload.",
+        "el": "Μη έγκυρο payload αφαίρεσης αιτήματος.",
+    },
+    "invalid_reorder_payload": {
+        "en": "Invalid reorder payload.",
+        "el": "Μη έγκυρο payload αναδιάταξης.",
+    },
+    "invoke_codeliver_routes_merge_error": {
+        "en": "Failed to invoke codeliver-routes-merge.",
+        "el": "Αποτυχία κλήσης του codeliver-routes-merge.",
+    },
+    "lambda_invoke_codeliver_routes_merge_error": {
+        "en": "Lambda invoke failed for codeliver-routes-merge.",
+        "el": "Αποτυχία invoke lambda για το codeliver-routes-merge.",
+    },
+    "missing_active_route": {
+        "en": "Active route is missing.",
+        "el": "Λείπει ενεργή διαδρομή.",
+    },
+    "missing_customer_leg_for_merge": {
+        "en": "Missing customer leg required for merge.",
+        "el": "Λείπει το customer leg που απαιτείται για συγχώνευση.",
+    },
+    "missing_date_from": {
+        "en": "Missing date_from parameter.",
+        "el": "Λείπει η παράμετρος date_from.",
+    },
+    "missing_delivery_guy_id": {
+        "en": "Missing delivery_guy_id parameter.",
+        "el": "Λείπει η παράμετρος delivery_guy_id.",
+    },
+    "missing_request_paths_to_merge": {
+        "en": "Missing request paths required for merge.",
+        "el": "Λείπουν route paths αιτημάτων που απαιτούνται για συγχώνευση.",
+    },
+    "missing_route_id": {
+        "en": "Missing route_id parameter.",
+        "el": "Λείπει η παράμετρος route_id.",
+    },
+    "missing_store_leg_for_merge": {
+        "en": "Missing store leg required for merge.",
+        "el": "Λείπει το store leg που απαιτείται για συγχώνευση.",
+    },
+    "not_found_delviery_guy": {
+        "en": "Delivery driver was not found.",
+        "el": "Ο διανομέας δεν βρέθηκε.",
+    },
+    "not_found_either_new_requests_or_route_or_route_paths_or_delivery_guy_to_merge": {
+        "en": "Missing required data (new requests, route, route paths, or delivery driver) for merge.",
+        "el": "Δεν βρέθηκαν απαιτούμενα δεδομένα (νέα αιτήματα, διαδρομή, route paths ή διανομέας) για συγχώνευση.",
+    },
+    "not_found_either_route_paths_or_requests_that_exist_or_requests_or_route_or_route_paths_or_delivery_guy_or_current_route_id_to_merge": {
+        "en": "Missing required route/request data needed for merge.",
+        "el": "Δεν βρέθηκαν απαιτούμενα δεδομένα διαδρομής/αιτημάτων για συγχώνευση.",
+    },
+    "not_found_route_or_requests_after_removal": {
+        "en": "Route or requests were not found after removal.",
+        "el": "Δεν βρέθηκε διαδρομή ή αιτήματα μετά την αφαίρεση.",
+    },
+    "not_found_route_or_requests_to_reorder": {
+        "en": "Route or requests to reorder were not found.",
+        "el": "Δεν βρέθηκε διαδρομή ή αιτήματα για αναδιάταξη.",
+    },
+    "request_not_found": {
+        "en": "Request was not found.",
+        "el": "Το αίτημα δεν βρέθηκε.",
+    },
+    "request_not_found_in_route": {
+        "en": "Request was not found in route.",
+        "el": "Το αίτημα δεν βρέθηκε στη διαδρομή.",
+    },
+    "route_not_found": {
+        "en": "Route was not found.",
+        "el": "Η διαδρομή δεν βρέθηκε.",
+    },
+    "route_paths_calculations_error": {
+        "en": "Route path calculations failed.",
+        "el": "Αποτυχία υπολογισμών route paths.",
+    },
+    "someone_else_accepted": {
+        "en": "This route was accepted by another user.",
+        "el": "Η διαδρομή έγινε αποδεκτή από άλλον χρήστη.",
+    },
+    "total_paths_sum_after_merge_bigger_than_group_max_requests_in_route": {
+        "en": "Merged route exceeds group maximum requests per route.",
+        "el": "Η συγχωνευμένη διαδρομή ξεπερνά το μέγιστο αιτημάτων ανά διαδρομή του group.",
+    },
+    "unauthorized_access": {
+        "en": "Unauthorized access.",
+        "el": "Μη εξουσιοδοτημένη πρόσβαση.",
+    },
+    "update_delivery_guy_error": {
+        "en": "Failed to update delivery driver.",
+        "el": "Αποτυχία ενημέρωσης διανομέα.",
+    },
+    "update_requests_error": {
+        "en": "Failed to update requests.",
+        "el": "Αποτυχία ενημέρωσης αιτημάτων.",
+    },
+    "update_route_to_accept_error": {
+        "en": "Failed to update route for acceptance.",
+        "el": "Αποτυχία ενημέρωσης διαδρομής προς αποδοχή.",
+    },
+    "user_does_not_exist": {
+        "en": "User does not exist.",
+        "el": "Ο χρήστης δεν υπάρχει.",
+    },
+}
 
 
 def parse_ref_file(path: Path):
@@ -156,17 +430,108 @@ def save_i18n_file(path: Path, data):
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
-def check_translation_exists(i18n_data: dict, translation_kind: str, entry_lambda: str, error_code: str):
+def is_placeholder_translation(value: str):
+    return bool(TODO_PLACEHOLDER_RE.match(value.strip()))
+
+
+def locale_language_code_from_file_name(file_name: str):
+    locale = Path(file_name).stem.lower()
+    if locale in {"el", "gr", "greek"}:
+        return "el"
+    return "en"
+
+
+def is_unusable_translation(value: str, target_locale_file: str):
+    stripped = value.strip()
+    if is_placeholder_translation(stripped):
+        return True
+    locale_code = locale_language_code_from_file_name(target_locale_file)
+    if locale_code == "en" and GREEK_CHAR_RE.search(stripped):
+        return True
+    return False
+
+
+def generate_translation_from_error_code(error_code: str, target_locale_file: str):
+    locale_code = locale_language_code_from_file_name(target_locale_file)
+    exact = ERROR_CODE_TRANSLATIONS.get(error_code, {})
+    if locale_code in exact:
+        return exact[locale_code]
+    if "en" in exact:
+        return exact["en"]
+    text = re.sub(r"[_\-.]+", " ", error_code).strip()
+    if locale_code == "el":
+        return f"Σφάλμα: {text}."
+    return f"{text.capitalize()}."
+
+
+def check_translation_exists(
+    i18n_data: dict,
+    translation_kind: str,
+    entry_lambda: str,
+    error_code: str,
+    target_locale_file: str,
+):
+    return (
+        get_translation_value(
+            i18n_data, translation_kind, entry_lambda, error_code, target_locale_file
+        )
+        is not None
+    )
+
+
+def get_translation_value(
+    i18n_data: dict,
+    translation_kind: str,
+    entry_lambda: str,
+    error_code: str,
+    target_locale_file: str,
+):
     if translation_kind == "root":
-        return error_code in i18n_data
+        value = i18n_data.get(error_code)
+        if not isinstance(value, str) or not value.strip():
+            return None
+        return None if is_unusable_translation(value, target_locale_file) else value
 
     lambdas_responses = i18n_data.get("lambdas_responses")
     if not isinstance(lambdas_responses, dict):
-        return False
+        return None
     lambda_map = lambdas_responses.get(entry_lambda)
     if not isinstance(lambda_map, dict):
-        return False
-    return error_code in lambda_map
+        return None
+    value = lambda_map.get(error_code)
+    if not isinstance(value, str) or not value.strip():
+        return None
+    return None if is_unusable_translation(value, target_locale_file) else value
+
+
+def select_fallback_translation(
+    i18n_cache: dict,
+    current_i18n_key: str,
+    translation_kind: str,
+    entry_lambda: str,
+    error_code: str,
+    target_locale_file: str,
+):
+    target_locale_code = locale_language_code_from_file_name(target_locale_file)
+    for i18n_key, i18n_data in i18n_cache.items():
+        if i18n_key == current_i18n_key:
+            continue
+        candidate_file_name = Path(i18n_key).name
+        if locale_language_code_from_file_name(candidate_file_name) != target_locale_code:
+            continue
+        value = get_translation_value(
+            i18n_data,
+            translation_kind,
+            entry_lambda,
+            error_code,
+            candidate_file_name,
+        )
+        if value:
+            return value, "copied_from_other_locale"
+    return (
+        generate_translation_from_error_code(error_code, target_locale_file),
+        "generated_from_error_code",
+    )
 
 
 def ensure_translation(
@@ -175,10 +540,16 @@ def ensure_translation(
     entry_lambda: str,
     error_code: str,
     placeholder: str,
+    target_locale_file: str,
     apply_changes: bool = True,
 ):
     if translation_kind == "root":
-        if error_code in i18n_data:
+        existing_value = i18n_data.get(error_code)
+        if (
+            isinstance(existing_value, str)
+            and existing_value.strip()
+            and not is_unusable_translation(existing_value, target_locale_file)
+        ):
             return False, None
         if apply_changes:
             i18n_data[error_code] = placeholder
@@ -206,7 +577,12 @@ def ensure_translation(
     if not isinstance(lambda_map, dict):
         return False, "invalid_lambda_translation_container"
 
-    if error_code in lambda_map:
+    existing_value = lambda_map.get(error_code)
+    if (
+        isinstance(existing_value, str)
+        and existing_value.strip()
+        and not is_unusable_translation(existing_value, target_locale_file)
+    ):
         return False, None
 
     if apply_changes:
@@ -289,9 +665,13 @@ def write_markdown_report(path: Path, report: dict):
 
 def parse_languages_spec(languages: str):
     if languages.strip().lower() == "all":
-        return None
+        return set(SUPPORTED_LOCALE_FILES)
     values = [item.strip() for item in languages.split(",") if item.strip()]
-    return {f"{value}.json" if not value.endswith(".json") else value for value in values}
+    selected = {f"{value}.json" if not value.endswith(".json") else value for value in values}
+    unsupported = sorted(selected - SUPPORTED_LOCALE_FILES)
+    if unsupported:
+        raise SystemExit(f"unsupported locales requested: {unsupported}. Only el,en are allowed.")
+    return selected
 
 
 def analyze_lambda_folder(lambda_dir: Path):
@@ -319,7 +699,7 @@ def main():
         description="Audit/autofix frontend-visible lambda error translation coverage."
     )
     parser.add_argument("--mode", choices=["audit", "autofix"], default="autofix")
-    parser.add_argument("--languages", default="all", help="all or comma-separated list, e.g. el,en")
+    parser.add_argument("--languages", default="el,en", help="comma-separated list, supported only: el,en")
     parser.add_argument("--depth", type=int, default=1)
     parser.add_argument("--projects-root", default="/home/dm-soft-1/Downloads/projects")
     parser.add_argument("--lambdas-root", default="/home/dm-soft-1/Downloads/lambdas")
@@ -479,6 +859,11 @@ def main():
                 else "root"
             )
 
+            for preload_i18n_file in i18n_files:
+                preload_key = str(preload_i18n_file.resolve())
+                if preload_key not in i18n_cache:
+                    i18n_cache[preload_key] = load_i18n_file(preload_i18n_file)
+
             for i18n_file in i18n_files:
                 i18n_key = str(i18n_file.resolve())
                 if i18n_key not in i18n_cache:
@@ -491,18 +876,28 @@ def main():
                         translation_kind=translation_kind,
                         entry_lambda=entry_lambda,
                         error_code=error_code,
+                        target_locale_file=i18n_file.name,
                     )
 
                     status = "found" if exists else "missing"
                     reason = ""
 
                     if not exists and args.mode == "autofix":
+                        fallback_text, fallback_source = select_fallback_translation(
+                            i18n_cache=i18n_cache,
+                            current_i18n_key=i18n_key,
+                            translation_kind=translation_kind,
+                            entry_lambda=entry_lambda,
+                            error_code=error_code,
+                            target_locale_file=i18n_file.name,
+                        )
                         created, collision_reason = ensure_translation(
                             i18n_data=i18n_data,
                             translation_kind=translation_kind,
                             entry_lambda=entry_lambda,
                             error_code=error_code,
-                            placeholder=f"TODO({error_code})",
+                            placeholder=fallback_text,
+                            target_locale_file=i18n_file.name,
                             apply_changes=not args.dry_run,
                         )
                         if collision_reason:
@@ -514,6 +909,7 @@ def main():
                                 reason = "dry_run"
                             else:
                                 status = "created"
+                                reason = fallback_source
                                 changed_i18n_files.add(i18n_key)
 
                     downstream_lambda = ""

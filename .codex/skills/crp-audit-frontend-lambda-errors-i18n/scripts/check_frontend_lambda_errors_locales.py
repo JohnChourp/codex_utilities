@@ -7,11 +7,11 @@ from pathlib import Path
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Fast el/en validation from frontend lambda error translation report."
+        description="Fast locale validation from CRP frontend lambda error translation report."
     )
     parser.add_argument(
         "--report-json",
-        default="/home/dm-soft-1/.codex/tmp/frontend-lambda-errors-i18n-report.json",
+        default="/Users/john/.codex/tmp/crp-frontend-lambda-errors-i18n-report.json",
     )
     parser.add_argument("--fail-on-missing", action="store_true", default=True)
     parser.add_argument("--no-fail-on-missing", action="store_false", dest="fail_on_missing")
@@ -23,6 +23,7 @@ def main():
 
     report = json.loads(report_path.read_text(encoding="utf-8"))
     rows = report.get("rows", [])
+    unresolved = report.get("unresolved", [])
     el_en_rows = [
         row
         for row in rows
@@ -40,6 +41,8 @@ def main():
     ]
 
     status_counts = Counter(row.get("status", "") for row in el_en_rows)
+    translation_counts = Counter(row.get("translation_status", "") for row in el_en_rows)
+
     missing_rows = [row for row in el_en_rows if row.get("status") == "missing"]
 
     output = {
@@ -50,11 +53,17 @@ def main():
         "created": status_counts.get("created", 0),
         "missing": status_counts.get("missing", 0),
         "skipped": status_counts.get("skipped", 0),
+        "translation_found": translation_counts.get("found", 0),
+        "translation_created": translation_counts.get("created", 0),
+        "translation_fallback_copied": translation_counts.get("fallback_copied", 0),
+        "translation_missing": translation_counts.get("missing", 0),
+        "translation_skipped": translation_counts.get("skipped", 0),
+        "unresolved_mappings": len(unresolved),
     }
     print(json.dumps(output, ensure_ascii=False))
 
     if missing_rows:
-        print("missing_el_en_examples")
+        print("missing_examples")
         for row in missing_rows[:50]:
             print(
                 json.dumps(
@@ -69,7 +78,7 @@ def main():
                 )
             )
 
-    if args.fail_on_missing and (missing_rows or other_locale_rows):
+    if args.fail_on_missing and (missing_rows or unresolved or other_locale_rows):
         raise SystemExit(2)
 
 

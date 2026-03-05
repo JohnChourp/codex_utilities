@@ -3,21 +3,21 @@
 Purpose: Document HTTP lambdas called from the frontend (from *.service.ts) with normalized paths and observed payloads/responses.
 
 ## API Ids -> API Names
-- (no API ids resolved)
+- `y3hl4t4f22` -> `codeliver-sap`
 
 ## Sources
-- `/home/dm-soft-1/Downloads/projects/codeliver/codeliver-sap/src/app/shared/data.storage.service.ts`
+- `/Users/john/Downloads/projects/codeliver/codeliver-sap/src/app/shared/data.storage.service.ts`
 
 ## test-connection
 
-- Normalized: `(unresolved)`
+- Normalized: `codeliver-sap/prod/test-connection`
 - Method: `POST`
 - Route: `/test-connection`
-- URL: `this.url + "test-connection"`
+- URL: `"https://y3hl4t4f22.execute-api.eu-west-1.amazonaws.com/prod/test-connection"`
 
 Observed request payload/options
 
-Source: `/home/dm-soft-1/Downloads/projects/codeliver/codeliver-sap/src/app/shared/data.storage.service.ts:187`
+Source: `/Users/john/Downloads/projects/codeliver/codeliver-sap/src/app/shared/data.storage.service.ts:246`
 ```ts
 {}
 ```

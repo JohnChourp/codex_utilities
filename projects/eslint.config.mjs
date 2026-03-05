@@ -38,8 +38,8 @@ export default [
       "plugin:import/typescript",
       "plugin:eslint-comments/recommended",
       "plugin:security/recommended-legacy",
-      "plugin:unicorn/recommended"
-    )
+      "plugin:unicorn/recommended",
+    ),
   ),
   {
     plugins: {
@@ -63,10 +63,8 @@ export default [
       "no-debugger": "error",
 
       "no-unused-vars": "off",
-      "@typescript-eslint/no-unused-vars": [
-        "off",
-      ],
-      
+      "@typescript-eslint/no-unused-vars": ["off"],
+
       "no-undef": "error",
       semi: ["error", "always"],
       quotes: ["error", "double"],
@@ -87,7 +85,7 @@ export default [
       "unicorn/numeric-separators-style": "off",
       "@angular-eslint/prefer-standalone": "off",
       "unicorn/no-nested-ternary": "off",
-      "unicorn/prefer-top-level-await":"off",
+      "unicorn/prefer-top-level-await": "off",
 
       "unicorn/prevent-abbreviations": [
         "error",
