@@ -1,0 +1,4 @@
+interface:
+  display_name: "CodeDeliver Lambda Log Error Agent"
+  short_description: "Triage CodeDeliver Lambda errors (single + batch codeliver_all)"
+  default_prompt: "Investigate CodeDeliver Lambda failures as an agent-native workflow, with support for single incident triage and batch triage across all local repos in /home/dm-soft-1/Downloads/lambdas/codeliver_all. Run deterministic preflight (AWS auth, local repo roots, runtime/arch when function is known), collect log evidence by request id, correlate across lambdas and /home/dm-soft-1/Downloads/projects/codeliver, separate production failures from smoke/test noise, and provide concrete fix plus verification steps."
