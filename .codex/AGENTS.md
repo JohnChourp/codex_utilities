@@ -249,6 +249,10 @@ Rules:
 - Ask clarifying questions only in Plan Mode (via interactive options UI) or when execution is blocked by a truly mandatory user decision that cannot be inferred from code/context.
 - **Build persistence rule (mandatory):** when the user asks to run a build/install, keep iterating (`run -> inspect error -> apply fix -> rerun`) until it succeeds or a hard external blocker appears. For Android `installDebug`, if `INSTALL_FAILED_UPDATE_INCOMPATIBLE` appears, uninstall the existing app package from the device and retry install.
   - Do not run AWS API calls using user credentials (DynamoDB, S3, SQS, SNS, Lambda, CloudWatch, STS, etc.) unless the user explicitly requests it in the current prompt.
+- **Re-entrant pending-selection safety (mandatory):** when implementing any pending UI selection flow that opens map markers/info windows (or any handler that can trigger state refresh), always apply `clear-before-open` and `restore-on-miss`.
+  - Required pattern: copy pending id locally -> set pending state to `null` -> attempt selection/open -> if selection target is missing, restore pending id.
+  - Forbidden pattern: clearing pending id only after `open...()`/selection handler returns, because those handlers may synchronously trigger refresh cycles and re-enter the pending-flush method, causing recursion and stack overflows.
+  - Quick self-check: verify no cycle of the form `flushPending* -> open/select* -> refresh* -> flushPending*` can run with the same pending id still set.
 - **Plan Mode question UX (mandatory):** when in Plan Mode, ask clarifying questions through the interactive options UI (`request_user_input`) and avoid posting free-form question lists in plain chat. Keep asking through the interactive UI until required decisions are collected, then present the final plan so the user can choose “Implement Plan”.
 ### MCP Smart Routing (Playwright / Figma / Notion / Linear)
 
