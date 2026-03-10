@@ -1,0 +1,206 @@
+# CRP infra keyword scan
+
+- Root: `/Users/john/Downloads/lambdas/crp_all`
+- Limit: `200`
+
+## Matches
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/s3_functions.js:5` `const { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand, S3ServiceException, NoSuchKey } = require("@aws-sdk/client-s3");`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/s3_functions.js:6` `const s3Client = new S3Client({ region: "eu-west-1" });`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/s3_functions.js:26` `if (error instanceof S3ServiceException && error.name === "EntityTooLarge") {`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/s3_functions.js:29` `} else if (error instanceof S3ServiceException) {`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/s3_functions.js:50` `if (error instanceof S3ServiceException && error.name === "NoSuchBucket") {`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/s3_functions.js:53` `} else if (error instanceof S3ServiceException) {`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/s3_functions.js:78` `} else if (error instanceof S3ServiceException) {`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/aws-lambda-resources.json:468` `"res_type": "S3",`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/aws-lambda-resources.json:477` `"res_type_res_name": "S3_cloud-repos-panel-data",`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/aws-lambda-resources.json:487` `"type": "S3",`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/aws-lambda-resources.json:499` `"res_type": "S3",`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/aws-lambda-resources.json:508` `"res_type_res_name": "S3_cloud-repos-panel-data",`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/aws-lambda-resources.json:518` `"type": "S3",`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/aws-lambda-resources.json:530` `"res_type": "S3",`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/aws-lambda-resources.json:539` `"res_type_res_name": "S3_cloud-repos-panel-data",`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/aws-lambda-resources.json:549` `"type": "S3",`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/index.js:53` `(foundLambdaAwsResource.res_type === "SQS" && foundLambdaAwsResource.queue_url === lambdaAwsResource.queue_url) ||`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/index.js:69` `let resDynamoDBText = "";`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/index.js:72` `resDynamoDBText += resource.index_name !== "null" ? `IndexName: ${resource.index_name}\n` : "";`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/index.js:73` `resDynamoDBText += resource.method ? `Method: ${resource.method}\n` : "";`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/index.js:76` `resDynamoDBText += resource.method ? `Method: ${resource.method}\n` : "";`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/index.js:79` `return `${resource.res_type}:${resource.res_name}\n${resDynamoDBText}Line:${resource.res_line}\nDeleted:${resource.deleted}`;`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/README.md:11` `- Ανεβάζει, διαβάζει και διαγράφει technical data JSON αρχεία στο S3 bucket `cloud-repos-panel-data`.`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/README.md:177` `- DynamoDB tables used through helper functions:`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/README.md:182` `- S3 bucket:`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/README.md:191` `- DynamoDB read/write access στα παραπάνω CRP tables.`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/README.md:192` `- S3 `GetObject` / `PutObject` / `DeleteObject` στο `cloud-repos-panel-data`.`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/README.md:245` `- Το final not-found flow πλέον καθαρίζει shared AWS resource state, soft-deleteάρει linked `crp-lambda-aws-resources` / `crp-cloud-repos` και διαγράφει το technical-data object από S3.`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/ROADMAP.md:5` `- Stores repository technical analysis data in S3 and keeps resource, feature, and project `last_checked` timestamps aligned after technical-data updates.`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/aws-lambda-resources-report.md:190` `## S3: cloud-repos-panel-data`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/aws-lambda-resources-report.md:203` `## S3: cloud-repos-panel-data`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/aws-lambda-resources-report.md:216` `## S3: cloud-repos-panel-data`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/dynamo_db_functions.js:5` `const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/dynamo_db_functions.js:6` `const { DynamoDBDocumentClient, GetCommand, UpdateCommand, QueryCommand, PutCommand, DeleteCommand, ScanCommand } = require("@aws-sdk/lib-dynamodb");`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/dynamo_db_functions.js:8` `const client = new DynamoDBClient({ region: "eu-west-1" });`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-cloud-resource/dynamo_db_functions.js:9` `const docClient = DynamoDBDocumentClient.from(client, {`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-fine-tuning-model/README.md:13` `Hey team! This function manages fine-tuning operations by interacting with DynamoDB and OpenAI.`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-fine-tuning-model/README.md:19` `- **DynamoDB Tables**: `crp-users`, `crp-fine-tuning-models``
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-fine-tuning-model/README.md:68` `- Introduced DynamoDB CRUD operations (Get, Put, Update, Delete) for fine‑tuning model metadata`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-fine-tuning-model/dynamo_db_functions.js:5` `const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-fine-tuning-model/dynamo_db_functions.js:6` `const { DynamoDBDocumentClient, GetCommand, UpdateCommand, DeleteCommand, PutCommand } = require("@aws-sdk/lib-dynamodb");`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-fine-tuning-model/dynamo_db_functions.js:8` `const client = new DynamoDBClient({ region: "eu-west-1" });`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-fine-tuning-model/dynamo_db_functions.js:9` `const docClient = DynamoDBDocumentClient.from(client);`
+- `/Users/john/Downloads/lambdas/crp_all/crp-init-sqs-aws-data/index.js:7` `recursive_query_aws_resources_by_org_res_type_SQS,`
+- `/Users/john/Downloads/lambdas/crp_all/crp-init-sqs-aws-data/index.js:91` `await recursive_query_aws_resources_by_org_res_type_SQS(`
+- `/Users/john/Downloads/lambdas/crp_all/crp-init-sqs-aws-data/index.js:125` `console.error("Error fetching all SQS queues:", err);`
+- `/Users/john/Downloads/lambdas/crp_all/crp-init-sqs-aws-data/index.js:129` `console.log("Total SQS queues:", sqsData.length);`
+- `/Users/john/Downloads/lambdas/crp_all/crp-init-sqs-aws-data/index.js:162` `// Get AWS data & connections concurrently for this SQS queue`
+- `/Users/john/Downloads/lambdas/crp_all/crp-init-sqs-aws-data/index.js:184` `org_res_type: `${organization.org}_SQS`,`
+- `/Users/john/Downloads/lambdas/crp_all/crp-init-sqs-aws-data/index.js:188` `org_res_type_res_name: `${organization.org}_SQS_${ev.QueueName}`,`
+- `/Users/john/Downloads/lambdas/crp_all/crp-init-sqs-aws-data/index.js:216` `console.log(`Retrying ${failedQueues.length} failed SQS Queues...`);`
+- `/Users/john/Downloads/lambdas/crp_all/crp-init-sqs-aws-data/index.js:240` `org_res_type: `${organization.org}_SQS`,`
+- `/Users/john/Downloads/lambdas/crp_all/crp-init-sqs-aws-data/index.js:244` `org_res_type_res_name: `${organization.org}_SQS_${ev.QueueName}`,`
+- `/Users/john/Downloads/lambdas/crp_all/crp-init-sqs-aws-data/dynamo_db_functions.js:5` `const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");`
+- `/Users/john/Downloads/lambdas/crp_all/crp-init-sqs-aws-data/dynamo_db_functions.js:6` `const { DynamoDBDocumentClient, PutCommand } = require("@aws-sdk/lib-dynamodb");`
+- `/Users/john/Downloads/lambdas/crp_all/crp-init-sqs-aws-data/dynamo_db_functions.js:8` `const client = new DynamoDBClient({ region: "eu-west-1" });`
+- `/Users/john/Downloads/lambdas/crp_all/crp-init-sqs-aws-data/dynamo_db_functions.js:9` `const docClient = DynamoDBDocumentClient.from(client, {`
+- `/Users/john/Downloads/lambdas/crp_all/crp-init-sqs-aws-data/dynamo_db_functions.js:32` `const recursive_query_aws_resources_by_org_res_type_SQS = async org => {`
+- `/Users/john/Downloads/lambdas/crp_all/crp-init-sqs-aws-data/dynamo_db_functions.js:40` `":org_res_type": `${org}_SQS``
+- `/Users/john/Downloads/lambdas/crp_all/crp-init-sqs-aws-data/dynamo_db_functions.js:71` `recursive_query_aws_resources_by_org_res_type_SQS,`
+- `/Users/john/Downloads/lambdas/crp_all/crp-check-repo-technical-data-ai/s3_functions.js:3` `const { S3Client, S3ServiceException, NoSuchKey, GetObjectCommand, PutObjectCommand } = require("@aws-sdk/client-s3");`
+- `/Users/john/Downloads/lambdas/crp_all/crp-check-repo-technical-data-ai/s3_functions.js:5` `const s3Client = new S3Client({ region: "eu-west-1" });`
+- `/Users/john/Downloads/lambdas/crp_all/crp-check-repo-technical-data-ai/s3_functions.js:24` `} else if (error instanceof S3ServiceException) {`
+- `/Users/john/Downloads/lambdas/crp_all/crp-check-repo-technical-data-ai/s3_functions.js:52` `if (error instanceof S3ServiceException && error.name === "EntityTooLarge") {`
+- `/Users/john/Downloads/lambdas/crp_all/crp-check-repo-technical-data-ai/s3_functions.js:55` `} else if (error instanceof S3ServiceException) {`
+- `/Users/john/Downloads/lambdas/crp_all/crp-check-repo-technical-data-ai/s3_functions.js:81` `} else if (error instanceof S3ServiceException) {`
+- `/Users/john/Downloads/lambdas/crp_all/crp-check-repo-technical-data-ai/aws-lambda-resources.json:405` `"res_type": "S3",`
+- `/Users/john/Downloads/lambdas/crp_all/crp-check-repo-technical-data-ai/aws-lambda-resources.json:416` `"res_type_res_name": "S3_cloud-repos-panel-data",`
+- `/Users/john/Downloads/lambdas/crp_all/crp-check-repo-technical-data-ai/aws-lambda-resources.json:426` `"type": "S3",`
+- `/Users/john/Downloads/lambdas/crp_all/crp-check-repo-technical-data-ai/aws-lambda-resources.json:438` `"res_type": "S3",`
+- `/Users/john/Downloads/lambdas/crp_all/crp-check-repo-technical-data-ai/aws-lambda-resources.json:447` `"res_type_res_name": "S3_cloud-repos-panel-data",`
+- `/Users/john/Downloads/lambdas/crp_all/crp-check-repo-technical-data-ai/aws-lambda-resources.json:457` `"type": "S3",`
+- `/Users/john/Downloads/lambdas/crp_all/crp-check-repo-technical-data-ai/README.md:15` `This Lambda function coordinates fetching repo code from GitHub, prepping it (line numbers, file splitting), checking token limits, invoking OpenAI for technical insights, and then storing or updating metadata in DynamoDB and S3. It also handles errors via a CustomError class and fires off other Lambdas for Slack notifications or README processing when needed.`
+- `/Users/john/Downloads/lambdas/crp_all/crp-check-repo-technical-data-ai/README.md:23` `- Fetch existing technical data and prompts from S3, and upload new tech data when ready`
+- `/Users/john/Downloads/lambdas/crp_all/crp-check-repo-technical-data-ai/README.md:25` `- Create and update AI job entries in DynamoDB for tracking analysis progress`
+- `/Users/john/Downloads/lambdas/crp_all/crp-check-repo-technical-data-ai/README.md:27` `- Update cloud resource records (filename, analyzable flag, AWS metadata) in DynamoDB`
+- `/Users/john/Downloads/lambdas/crp_all/crp-check-repo-technical-data-ai/README.md:36` `- **backend_technical_data_cloud_repo:** Backend precheck and batch analysis flow, including S3 and Lambda invocations`
+- `/Users/john/Downloads/lambdas/crp_all/crp-check-repo-technical-data-ai/README.md:37` `- **DynamoDB helpers:** `get_current_user`, `update_aws_resource_filename`, `create_ai_job`, `update_ai_job`, `get_aws_resource_by_res_type_and_res_name``
+- `/Users/john/Downloads/lambdas/crp_all/crp-check-repo-technical-data-ai/README.md:41` `- **S3 helpers:** `get_repo_technical_data_from_s3`, `upload_repo_technical_data_to_s3`, `get_prompts_from_s3``
+- `/Users/john/Downloads/lambdas/crp_all/crp-check-repo-technical-data-ai/README.md:64` `- **get_current_user:** Fetches a user record from DynamoDB and prunes null values`
+- `/Users/john/Downloads/lambdas/crp_all/crp-check-repo-technical-data-ai/README.md:66` `- **create_ai_job:** Records a new AI job entry in DynamoDB`
+- `/Users/john/Downloads/lambdas/crp_all/crp-check-repo-technical-data-ai/README.md:67` `- **update_ai_job:** Updates AI job status and token usage in DynamoDB`
+- `/Users/john/Downloads/lambdas/crp_all/crp-check-repo-technical-data-ai/README.md:77` `- **get_repo_technical_data_from_s3:** Retrieves stored technical data from S3`
+- `/Users/john/Downloads/lambdas/crp_all/crp-check-repo-technical-data-ai/README.md:78` `- **upload_repo_technical_data_to_s3:** Uploads technical data JSON to S3`
+- `/Users/john/Downloads/lambdas/crp_all/crp-check-repo-technical-data-ai/README.md:79` `- **get_prompts_from_s3:** Fetches prompt configurations from S3`
+- `/Users/john/Downloads/lambdas/crp_all/crp-check-repo-technical-data-ai/README.md:94` `- Modularized AWS interactions with DynamoDB, S3, and Lambda using AWS SDK v3 and new helper/dynamo_db_functions`
+- `/Users/john/Downloads/lambdas/crp_all/crp-check-repo-technical-data-ai/README.md:95` `- Implemented S3 persistence for technical data and prompts (get_repo_technical_data_from_s3, upload_repo_technical_data_to_s3, get_prompts_from_s3)`
+- `/Users/john/Downloads/lambdas/crp_all/crp-check-repo-technical-data-ai/aws-lambda-resources-report.md:173` `## S3: cloud-repos-panel-data`
+- `/Users/john/Downloads/lambdas/crp_all/crp-check-repo-technical-data-ai/aws-lambda-resources-report.md:186` `## S3: cloud-repos-panel-data`
+- `/Users/john/Downloads/lambdas/crp_all/crp-check-repo-technical-data-ai/dynamo_db_functions.js:5` `const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");`
+- `/Users/john/Downloads/lambdas/crp_all/crp-check-repo-technical-data-ai/dynamo_db_functions.js:6` `const { DynamoDBDocumentClient, GetCommand, UpdateCommand, QueryCommand, PutCommand, ScanCommand } = require("@aws-sdk/lib-dynamodb");`
+- `/Users/john/Downloads/lambdas/crp_all/crp-check-repo-technical-data-ai/dynamo_db_functions.js:8` `const client = new DynamoDBClient({ region: "eu-west-1" });`
+- `/Users/john/Downloads/lambdas/crp_all/crp-check-repo-technical-data-ai/dynamo_db_functions.js:9` `const docClient = DynamoDBDocumentClient.from(client);`
+- `/Users/john/Downloads/lambdas/crp_all/crp-fetch-assistants/README.md:16` `- The AWS SDK is used to interact with DynamoDB through `@aws-sdk/client-dynamodb` and `@aws-sdk/lib-dynamodb` libraries.`
+- `/Users/john/Downloads/lambdas/crp_all/crp-fetch-assistants/README.md:21` `- The lambda uses Lodash for utility operations (i.e., intersection check for permissions) and a custom prune function from `@deliverymanager/prune_fns_v3` to remove null values from DynamoDB responses.`
+- `/Users/john/Downloads/lambdas/crp_all/crp-fetch-assistants/README.md:32` `| get_current_user       | An internal async function to fetch the current user from the DynamoDB table "crp-users".                         |`
+- `/Users/john/Downloads/lambdas/crp_all/crp-fetch-assistants/README.md:60` `Introduced the main Lambda function implementation in index.js. Implemented functions to retrieve the current user and fetch assistants from DynamoDB, with proper error handling via a CustomError class. Enhanced security by extracting user_id and org from the event authorizer, and added permissions checks. Also updated package.json by adding dependencies for prune_fns and lodash.`
+- `/Users/john/Downloads/lambdas/crp_all/crp-fetch-assistants/dynamo_db_functions.js:3` `const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");`
+- `/Users/john/Downloads/lambdas/crp_all/crp-fetch-assistants/dynamo_db_functions.js:4` `const { DynamoDBDocumentClient, GetCommand, QueryCommand } = require("@aws-sdk/lib-dynamodb");`
+- `/Users/john/Downloads/lambdas/crp_all/crp-fetch-assistants/dynamo_db_functions.js:6` `const client = new DynamoDBClient({ region: "eu-west-1" });`
+- `/Users/john/Downloads/lambdas/crp_all/crp-fetch-assistants/dynamo_db_functions.js:7` `const docClient = DynamoDBDocumentClient.from(client);`
+- `/Users/john/Downloads/lambdas/crp_all/crp-search-cloud-repos/dynamo_db_functions.js:5` `const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");`
+- `/Users/john/Downloads/lambdas/crp_all/crp-search-cloud-repos/dynamo_db_functions.js:6` `const { DynamoDBDocumentClient, GetCommand, QueryCommand } = require("@aws-sdk/lib-dynamodb");`
+- `/Users/john/Downloads/lambdas/crp_all/crp-search-cloud-repos/dynamo_db_functions.js:8` `const client = new DynamoDBClient({ region: "eu-west-1" });`
+- `/Users/john/Downloads/lambdas/crp_all/crp-search-cloud-repos/dynamo_db_functions.js:9` `const docClient = DynamoDBDocumentClient.from(client);`
+- `/Users/john/Downloads/lambdas/crp_all/crp-search-subprojects/dynamo_db_functions.js:5` `const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");`
+- `/Users/john/Downloads/lambdas/crp_all/crp-search-subprojects/dynamo_db_functions.js:6` `const { DynamoDBDocumentClient, GetCommand, QueryCommand } = require("@aws-sdk/lib-dynamodb");`
+- `/Users/john/Downloads/lambdas/crp_all/crp-search-subprojects/dynamo_db_functions.js:8` `const client = new DynamoDBClient({ region: "eu-west-1" });`
+- `/Users/john/Downloads/lambdas/crp_all/crp-search-subprojects/dynamo_db_functions.js:9` `const docClient = DynamoDBDocumentClient.from(client, {`
+- `/Users/john/Downloads/lambdas/crp_all/crp-subprojects-stream-ws/sqs_functions.js:5` `const { SQSClient, SendMessageCommand } = require("@aws-sdk/client-sqs");`
+- `/Users/john/Downloads/lambdas/crp_all/crp-subprojects-stream-ws/sqs_functions.js:7` `const sqsClient = new SQSClient({ region: "eu-west-1" });`
+- `/Users/john/Downloads/lambdas/crp_all/crp-subprojects-stream-ws/sqs_functions.js:8` `const SQS_SOCKET_EMITTER_QUEUE_URL = "https://sqs.eu-west-1.amazonaws.com/787324535455/crp-socket-emitter.fifo";`
+- `/Users/john/Downloads/lambdas/crp_all/crp-subprojects-stream-ws/sqs_functions.js:12` `QueueUrl: SQS_SOCKET_EMITTER_QUEUE_URL,`
+- `/Users/john/Downloads/lambdas/crp_all/crp-subprojects-stream-ws/dynamo_db_functions.js:3` `const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");`
+- `/Users/john/Downloads/lambdas/crp_all/crp-subprojects-stream-ws/dynamo_db_functions.js:4` `const { DynamoDBDocumentClient, QueryCommand } = require("@aws-sdk/lib-dynamodb");`
+- `/Users/john/Downloads/lambdas/crp_all/crp-subprojects-stream-ws/dynamo_db_functions.js:6` `const client = new DynamoDBClient({ region: "eu-west-1" });`
+- `/Users/john/Downloads/lambdas/crp_all/crp-subprojects-stream-ws/dynamo_db_functions.js:7` `const docClient = DynamoDBDocumentClient.from(client);`
+- `/Users/john/Downloads/lambdas/crp_all/crp-fetch-aws-resources-connections/dynamo_db_functions.js:5` `const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");`
+- `/Users/john/Downloads/lambdas/crp_all/crp-fetch-aws-resources-connections/dynamo_db_functions.js:6` `const { DynamoDBDocumentClient, GetCommand, QueryCommand } = require("@aws-sdk/lib-dynamodb");`
+- `/Users/john/Downloads/lambdas/crp_all/crp-fetch-aws-resources-connections/dynamo_db_functions.js:8` `const client = new DynamoDBClient({ region: "eu-west-1" });`
+- `/Users/john/Downloads/lambdas/crp_all/crp-fetch-aws-resources-connections/dynamo_db_functions.js:9` `const docClient = DynamoDBDocumentClient.from(client, {`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-assistant/README.md:15` `This Lambda function manages assistant entities by interacting with DynamoDB and the OpenAI API. It supports create, update, and delete operations for both local records and remote OpenAI assistants, implementing custom error handling and input validation.`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-assistant/README.md:22` `- **DynamoDB Tables**:`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-assistant/README.md:39` `| `get_current_user`            | Fetches current user data from DynamoDB                           |`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-assistant/README.md:40` `| `create_assistant`            | Inserts a new assistant record into DynamoDB                      |`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-assistant/README.md:41` `| `update_assistant`            | Updates an existing assistant record in DynamoDB                  |`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-assistant/README.md:42` `| `delete_assistant`            | Removes an assistant record from DynamoDB                         |`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-assistant/README.md:62` `- Refactored DynamoDB CRUD operations for assistants (create/update/delete) with consolidated imports and prune_empty/prune_null utilities`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-assistant/dynamo_db_functions.js:3` `const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-assistant/dynamo_db_functions.js:4` `const { DynamoDBDocumentClient, GetCommand, UpdateCommand, PutCommand, DeleteCommand } = require("@aws-sdk/lib-dynamodb");`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-assistant/dynamo_db_functions.js:6` `const client = new DynamoDBClient({ region: "eu-west-1" });`
+- `/Users/john/Downloads/lambdas/crp_all/crp-handle-assistant/dynamo_db_functions.js:7` `const docClient = DynamoDBDocumentClient.from(client);`
+- `/Users/john/Downloads/lambdas/crp_all/crp-fetch-admin-sockets/README.md:15` `This AWS Lambda function is designed to process an event that contains authorization details, fetch connections from a DynamoDB table via the AWS SDK, and then group and analyze admin socket data. The following functions are utilized within the code:`
+- `/Users/john/Downloads/lambdas/crp_all/crp-fetch-admin-sockets/README.md:18` `- **get_connections**: An asynchronous function that queries the DynamoDB table for connections based on organization and expiry criteria.`
+- `/Users/john/Downloads/lambdas/crp_all/crp-fetch-admin-sockets/README.md:65` `- Changed DynamoDB client initialization by switching from DynamoDBDocument and DynamoDB to DynamoDBClient and DynamoDBDocumentClient`
+- `/Users/john/Downloads/lambdas/crp_all/crp-fetch-admin-sockets/README.md:66` `- Updated query logic to use QueryCommand and the new client to fetch data from DynamoDB`
+- `/Users/john/Downloads/lambdas/crp_all/crp-fetch-admin-sockets/dynamo_db_functions.js:5` `const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");`
+- `/Users/john/Downloads/lambdas/crp_all/crp-fetch-admin-sockets/dynamo_db_functions.js:6` `const { DynamoDBDocumentClient, QueryCommand } = require("@aws-sdk/lib-dynamodb");`
+- `/Users/john/Downloads/lambdas/crp_all/crp-fetch-admin-sockets/dynamo_db_functions.js:8` `const client = new DynamoDBClient({ region: "eu-west-1" });`
+- `/Users/john/Downloads/lambdas/crp_all/crp-fetch-admin-sockets/dynamo_db_functions.js:9` `const docClient = DynamoDBDocumentClient.from(client);`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/s3_functions.js:3` `const { S3Client, S3ServiceException, NoSuchKey, GetObjectCommand, PutObjectCommand } = require("@aws-sdk/client-s3");`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/s3_functions.js:5` `const s3Client = new S3Client({ region: "eu-west-1" });`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/s3_functions.js:24` `} else if (error instanceof S3ServiceException) {`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/s3_functions.js:55` `if (error instanceof S3ServiceException && error.name === "EntityTooLarge") {`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/s3_functions.js:58` `} else if (error instanceof S3ServiceException) {`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/aws-lambda-resources.json:188` `"res_type": "S3",`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/aws-lambda-resources.json:197` `"res_type_res_name": "S3_openai-platform-store",`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/aws-lambda-resources.json:207` `"type": "S3",`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/aws-lambda-resources.json:219` `"res_type": "S3",`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/aws-lambda-resources.json:228` `"res_type_res_name": "S3_openai-platform-store",`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/aws-lambda-resources.json:238` `"type": "S3",`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/aws-lambda-resources.json:250` `"res_type": "SQS",`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/aws-lambda-resources.json:259` `"res_type_res_name": "SQS_crp-socket-emitter.fifo",`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/aws-lambda-resources.json:270` `"type": "SQS",`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/index.js:161` `const hasErrorS3 = await upload_project_combine_technical_analysis_to_s3(filename, filename_uuid, promptResponse.html);`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/index.js:162` `if (hasErrorS3) customError = true;`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/README.md:15` `This Lambda function listens for S3 ObjectCreated events targeting PDF files in the `openai-platform-store` bucket. It streams each PDF into a buffer, writes it temporarily to `/tmp`, then uploads it to OpenAI’s file service. It tracks and updates DynamoDB tables for AI jobs and file metadata, manages vector stores to compare files, invokes OpenAI’s responses API to generate a JSON-based technical analysis, stores that analysis back to S3 if it’s under the 1MB limit, and finally emits real-time notifications via an SQS socket emitter queue.`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/README.md:19` `- Process S3 event records and filter for PDF uploads.`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/README.md:20` `- Convert S3 object streams into Buffers and handle temporary file I/O.`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/README.md:22` `- Interact with DynamoDB: insert and update `crp-ai-jobs`, `crp-openai-platform-store-files`, `crp-projects`, and query active sockets from `crp-sockets`.`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/README.md:26` `- Upload analysis JSON back to S3 if it’s under the 1MB threshold and update DynamoDB.`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/README.md:27` `- Emit real-time update messages to the socket emitter SQS queue for front-end clients.`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/README.md:31` `- **handler** – main Lambda entry point orchestrating env var checks, S3 loops, DB operations, OpenAI calls, and notifications.`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/README.md:33` `- **DynamoDBClient** & **DynamoDBDocumentClient** – used with `UpdateCommand`, `PutCommand`, `QueryCommand`, `GetCommand` for all DynamoDB ops.`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/README.md:34` `- **S3Client** – `GetObjectCommand` and `PutObjectCommand` for PDF retrieval and JSON upload.`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/README.md:35` `- **SQSClient** – `SendMessageCommand` for publishing socket emitter messages.`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/README.md:60` `- **update_ai_job** – updates AI job status and token metrics in DynamoDB.`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/README.md:63` `- **get_connections** – retrieves active socket connections from DynamoDB.`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/README.md:67` `- **get_technical_data_from_s3** – downloads a PDF from S3 into a Buffer.`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/README.md:68` `- **upload_project_combine_technical_analysis_to_s3** – uploads the JSON analysis to S3.`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/README.md:69` `- **put_in_socket_emitter_sqs** – sends SQS messages for real-time client updates.`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/README.md:94` `- Upgraded OpenAI SDK dependency to v4.97.0 and standardized error handling with CustomError across DB, S3, SQS, and OpenAI operations`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/README.md:95` `- Enhanced DynamoDB functions: default response_id to "null", unified attribute names/values in update expressions, and prune empty/null fields on writes`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/README.md:96` `- Added S3 utilities to fetch PDF buffers and upload analysis JSON with granular error cases (NoSuchKey, EntityTooLarge, etc.)`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/README.md:97` `- Introduced SQS helper for socket-emitter messages to broadcast file updates`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/sqs_functions.js:3` `const { SQSClient, SendMessageCommand } = require("@aws-sdk/client-sqs");`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/sqs_functions.js:5` `const sqsClient = new SQSClient({ region: "eu-west-1" });`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/sqs_functions.js:6` `const SQS_SOCKET_EMITTER_QUEUE_URL = "https://sqs.eu-west-1.amazonaws.com/787324535455/crp-socket-emitter.fifo";`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/sqs_functions.js:10` `QueueUrl: SQS_SOCKET_EMITTER_QUEUE_URL,`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/aws-lambda-resources-report.md:64` `## S3: openai-platform-store`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/aws-lambda-resources-report.md:77` `## S3: openai-platform-store`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/aws-lambda-resources-report.md:90` `## SQS: crp-socket-emitter.fifo`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/dynamo_db_functions.js:3` `const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/dynamo_db_functions.js:4` `const { DynamoDBDocumentClient, UpdateCommand, PutCommand, QueryCommand, GetCommand } = require("@aws-sdk/lib-dynamodb");`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/dynamo_db_functions.js:6` `const client = new DynamoDBClient({ region: "eu-west-1" });`
+- `/Users/john/Downloads/lambdas/crp_all/crp-openai-platform-store-stream/dynamo_db_functions.js:7` `const docClient = DynamoDBDocumentClient.from(client);`
+- `/Users/john/Downloads/lambdas/crp_all/crp-upgrade-repo-code-ai/s3_functions.js:5` `const { S3Client, S3ServiceException, NoSuchKey, GetObjectCommand } = require("@aws-sdk/client-s3");`
+- `/Users/john/Downloads/lambdas/crp_all/crp-upgrade-repo-code-ai/s3_functions.js:7` `const s3Client = new S3Client({ region: "eu-west-1" });`
+- `/Users/john/Downloads/lambdas/crp_all/crp-upgrade-repo-code-ai/s3_functions.js:25` `} else if (error instanceof S3ServiceException) {`
+- `/Users/john/Downloads/lambdas/crp_all/crp-upgrade-repo-code-ai/s3_functions.js:51` `} else if (error instanceof S3ServiceException) {`
+- `/Users/john/Downloads/lambdas/crp_all/crp-upgrade-repo-code-ai/aws-lambda-resources.json:272` `"res_type": "S3",`
+- `/Users/john/Downloads/lambdas/crp_all/crp-upgrade-repo-code-ai/aws-lambda-resources.json:283` `"res_type_res_name": "S3_cloud-repos-panel-data",`
+- `/Users/john/Downloads/lambdas/crp_all/crp-upgrade-repo-code-ai/aws-lambda-resources.json:293` `"type": "S3",`
+- `/Users/john/Downloads/lambdas/crp_all/crp-upgrade-repo-code-ai/README.md:89` `- DynamoDB: `crp-users`, `crp-aws-resources`, `crp-ai-jobs``
+- `/Users/john/Downloads/lambdas/crp_all/crp-upgrade-repo-code-ai/README.md:90` `- S3: `cloud-repos-panel-data``
+- `/Users/john/Downloads/lambdas/crp_all/crp-upgrade-repo-code-ai/README.md:97` `- DynamoDB read/write (users/resources/ai-jobs)`
+- `/Users/john/Downloads/lambdas/crp_all/crp-upgrade-repo-code-ai/README.md:98` `- S3 read (prompts/repos metadata)`
+- `/Users/john/Downloads/lambdas/crp_all/crp-upgrade-repo-code-ai/aws-lambda-resources-report.md:94` `## S3: cloud-repos-panel-data`
+- `/Users/john/Downloads/lambdas/crp_all/crp-upgrade-repo-code-ai/dynamo_db_functions.js:3` `const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");`
+- `/Users/john/Downloads/lambdas/crp_all/crp-upgrade-repo-code-ai/dynamo_db_functions.js:4` `const { DynamoDBDocumentClient, GetCommand, UpdateCommand, PutCommand, ScanCommand, QueryCommand } = require("@aws-sdk/lib-dynamodb");`
