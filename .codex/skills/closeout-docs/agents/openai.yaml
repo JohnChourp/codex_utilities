@@ -1,0 +1,4 @@
+interface:
+  display_name: "Closeout Docs"
+  short_description: "Standardize final status, comments, and summaries."
+  default_prompt: "Use this skill to complete task closeout artifacts in ClickUp and provide concise final reporting."

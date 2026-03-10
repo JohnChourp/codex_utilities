@@ -1,0 +1,4 @@
+interface:
+  display_name: "ClickUp Repo Linking"
+  short_description: "Link main tasks to repo registry tasks safely."
+  default_prompt: "Use this skill to find/create repo tasks and link them to implementation tasks in ClickUp."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Front End Code Style"
+  short_description: "Apply Angular Ionic frontend style for mobileorder/dmpanel."
+  default_prompt: "Use this skill to enforce frontend declaration order, camelCase naming, state subscription patterns, and template performance rules."

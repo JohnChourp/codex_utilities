@@ -719,185 +719,133 @@ After ROADMAP.md exists for a given lambda/project:
 - Avoid long narrative paragraphs.
 - Do NOT add “How to verify” steps in ROADMAP.md (verification belongs in the assistant reply).
 
-# Codex Workflow Guide (General)
+# Codex Workflow Guide (Policy + Skill Routing)
 
-This file describes a repeatable, task-agnostic workflow for handling engineering work using Codex CLI: ClickUp coordination, architecture scouting, minimal implementation, and optional push/deploy steps.
+This file is the optimized operating policy for Codex sessions.
+
+- Keep this file short and enforceable.
+- Use skills for detailed execution playbooks.
+- Full historical detail is preserved in `docs/AGENTS_FULL_REFERENCE.md`.
 
 ## 1) Start: confirm context
 
-- Confirm which repository/folder you are working in.
-- Confirm whether the change is:
-  - **frontend only**
-  - **backend only**
-  - **end-to-end** (backend + frontend)
-- Confirm environments involved (dev/stage/prod) if that matters for the task.
+Always confirm:
 
-## 2) ClickUp: create and manage a task for every request
+- current repository/folder
+- scope: `frontend`, `backend`, or `end-to-end`
+- environments involved (`dev`/`stage`/`prod`) when relevant
 
-Use ClickUp MCP tools (no manual browser required):
+## 2) Non-negotiable rules
 
-- For every new user request (plan, implementation, bugfix, refactor, analysis with actionable output), create a new ClickUp task before implementation work starts.
-- Rewrite the user request into clean, readable Greek for the task title/description:
-  - fix spelling errors, missing characters, and unclear phrasing,
-  - keep meaning unchanged,
-  - make the final text concise and professional.
-- Include in the task description:
-  - short objective,
-  - scope (frontend/backend/both),
-  - expected deliverable.
-- Set the task status to `in-progress` immediately after task creation.
-- If the user explicitly provides an existing task ID/link and asks to use it, continue with that task instead of creating a new one.
+### ClickUp task and write safety
 
-### How Codex connects to ClickUp (MCP)
+- Ask for existing ClickUp task link/ID before ClickUp write operations.
+- If no task exists, create one only after user confirms target List.
+- Write only on tasks assigned to the requesting user.
+- Treat tasks assigned to others as read-only.
+- Do not change due date, priority, assignees, or move to done/closed unless explicitly requested.
 
-- Codex uses the configured ClickUp MCP server (tools prefixed with `clickup_*`), authenticated via your local environment/session.
-- If a ClickUp call fails due to auth/permissions:
-  - verify you are logged in / authorized in the MCP server configuration,
-  - retry with a smaller scope (e.g. search within a specific list if you know it).
+### Mentions and language
 
-### ClickUp MCP setup + login (do this once per machine/account)
+- In ClickUp comments/descriptions/docs, use `@Display Name` mentions when notification intent exists.
+- Chat with user in English by default.
+- Mirror existing task language for ClickUp comments/descriptions.
+- Write repo markdown docs in English.
 
-1. Confirm the ClickUp MCP server is configured:
-   - `codex mcp list`
-   - If missing, add it:
-     - `codex mcp add clickup --url https://mcp.clickup.com/mcp`
-     - or edit `~/.codex/config.toml`:
-       - `[mcp_servers.clickup]`
-       - `url = "https://mcp.clickup.com/mcp"`
+### Approval and release controls
 
-2. Authenticate (OAuth):
-   - `codex mcp login clickup`
-   - Follow the browser flow (make sure you’re logged into the correct ClickUp account).
+- Do not implement before explicit user go-ahead.
+- Before any code changes, ask delivery mode and branch:
+- `local changes only` or `PR-ready changes`
+- target branch name (create/switch branch only after user confirms)
+- Do not push or deploy without explicit user confirmation.
+- Ask user: `push only` vs `deploy` before release actions.
 
-3. Verify it’s enabled/authenticated:
-   - `codex mcp list --json` (should show `clickup` as `enabled` with an OAuth auth status)
-   - If tools still don’t appear in a running Codex session, restart the session after logging in.
+### Time tracking and closure safety
 
-Troubleshooting:
+- Manual tracking policy applies (record discussion start/end in Europe/Athens, add elapsed entry when work completes).
+- When discussion on an existing task starts, move it to the list-specific `in progress` status (if available) at that time.
+- Do not move task to done/complete/closed without a corresponding time entry.
+- Move completed implementation tasks to testing-equivalent status (often `ΕΛΕΓΧΟΣ` / `ελεγχος`, list-dependent).
+- Before any status change, explicitly discover statuses for the task's List (do not assume from other Lists).
+- If the List has `in progress` and testing-equivalent statuses, use them (do not jump directly to `complete`).
+- If a List truly has only terminal flow (for example `to do` + `complete`), ask explicit user confirmation before setting `complete`, and note this limitation in a task comment.
 
-- Reset auth: `codex mcp logout clickup` then `codex mcp login clickup`
-- If your MCP server expects a bearer token instead of OAuth, configure it with `codex mcp add ... --bearer-token-env-var <ENV_VAR>` and export that env var before launching Codex.
+## 3) Skill routing (primary execution path)
 
-### Status naming gotcha
+Use these skills as the default source of detailed instructions.
 
-Statuses are list-specific and may not use English names like `in-progress` or `completed`. If updating to a desired status fails, inspect what statuses exist in that list and pick the closest equivalent.
+1. `clickup-task-lifecycle`
+- Task discovery, ownership checks, safe updates, status and time-entry rules.
 
-Note (team convention): on the CLIENTS “Client tasks list”, use the list status that matches `in-progress` while working and the status that matches `completed` when work is fully finished.
+2. `clickup-repo-linking`
+- Repo-registry lookup/create and task-to-repo linking.
+- Repo registry list: `901502503337`.
+- Registry URL: `https://app.clickup.com/9015329079/v/l/6-901502503337-1?pr=90151074892`.
 
-Language convention (team): unless the user explicitly asks otherwise, write ClickUp task descriptions, implementation plans, and comments in Greek.
+3. `implementation-gate`
+- Architecture scouting, plan writing, ambiguity cleanup, approval gate, release gating.
 
-### ClickUp hard gate (STRICT - do not skip)
+4. `front-end-code-style`
+- Angular Ionic frontend style for `mobileorder`/`dmpanel`:
+- declaration order (`@Input/@Output` -> `public` -> `private`)
+- camelCase naming
+- NgRx subscription lifecycle patterns
+- avoid non-trivial function calls in template bindings (precompute in `.ts`)
 
-- Do **not** send a final user reply unless all ClickUp updates below are completed for the active request:
-  - task exists (new or explicitly provided by user),
-  - task status is in the list-equivalent of `in-progress` while working,
-  - at completion: add a summary comment (what changed + key files + tests/build status),
-  - at completion: add a manual time entry for the actual elapsed work time,
-  - at completion: move task to the list-equivalent of `completed` (for CLIENTS list this may be `complete`).
-- If implementation finished before ClickUp was updated, you must **backfill immediately** in the same session (comment + time entry + completion status) before closing the conversation.
-- Missing ClickUp update is treated as an incomplete task, even if code changes are already done.
+5. `back-end-lambda-code-style`
+- Node.js lambda backend style for `dm_lambda_functions/paneldelivery`:
+- keep deliveryManager helper usage and existing AWS SDK style per lambda
+- prefer lodash + Bluebird iteration (`Promise.map`/`Promise.mapSeries`) over new loop constructs
+- preserve DynamoDB params-object, `CustomError`, and response conventions
 
-## 3) Before implementing: scout architecture and code paths
+6. `closeout-docs`
+- Testing status transition, closeout comments, final summaries, optional ClickUp docs.
 
-- Read the closest architecture/reference docs first (`ARCHITECTURE.md`, `README.md`, `docs/`, ADRs).
-- Identify which services/repos are involved and which is the source of truth for any data changes.
-- Use fast local search (`rg`) to locate existing contracts/fields and adjacent implementations.
-- Decide what must be persisted vs computed:
-  - Persist values that must survive refresh/devices and be historically correct.
-  - Compute derived UI-only values when safe.
+7. `sync-global-codex-assets`
+- Merge this repo's workflow overlay into `~/.codex/AGENTS.md` and sync the repo skills into `~/.codex/skills` with backup and a short sync report.
 
-## 4) Write analytical steps into the ClickUp task description
+## 4) Standard workflow (condensed)
 
-Before touching code, write a concrete plan in the ClickUp task description:
+1. Confirm context and task scope.
+2. Validate ClickUp task existence and ownership.
+3. Ensure repo linkage is present before implementation.
+4. Scout architecture and source-of-truth paths.
+5. Write concrete implementation plan into ClickUp task description.
+6. At discussion start: set list-specific in-progress status (if available) and start manual timing timeline.
+7. Ask clarifying questions and request explicit go-ahead.
+8. Ask delivery mode (`local changes` vs `PR-ready`) and target branch before editing files.
+9. Implement minimal scoped changes, mirroring existing code style.
+10. Run targeted validation (tests/build/lint as practical).
+11. Ask `push only` vs `deploy`, then execute only what user confirms.
+12. Move task to testing-equivalent status (if available), add change summary comment, and log time entry.
+13. Provide concise final summary to user.
 
-- Goal and scope (frontend/backend/both).
-- Data model changes (names, types, nullability) if any.
-- Source of truth (who writes it, who reads it).
-- Contracts (API request/response shapes; events/websocket messages).
-- UX placement and behavior (when it shows/hides, edge cases).
-- i18n keys (update all supported languages if applicable).
-- Acceptance criteria (clear, testable).
-- Test plan (unit/integration + quick manual checks).
-- Release plan (push-only vs deploy; environments).
+## 5) ClickUp MCP quick fallback
 
-If any ambiguity exists, ask clarifying questions **before** implementing.
+If ClickUp MCP fails because of auth/setup:
 
-### Mandatory approval gate (do not skip)
+1. `codex mcp list`
+2. If missing: `codex mcp add clickup --url https://mcp.clickup.com/mcp`
+3. `codex mcp login clickup`
+4. Verify with `codex mcp list --json`
+5. Retry with narrower search scope
 
-After creating/updating the ClickUp task description:
+## 6) Optional documentation closeout
 
-- Paste the proposed implementation plan back to the user (short + scannable).
-- Ask any clarifying questions needed to remove ambiguity.
-- Explicitly ask the user to review the ClickUp plan and confirm.
-- **Do not start implementing** until the user replies with an explicit go-ahead (e.g. “proceed”).
-- When the user replies with “proceed” (or equivalent):
-  - ensure the task is still in the list’s `in-progress` equivalent status,
-  - start manual time tracking locally (see section 9; use Europe/Athens timestamps).
+After implementation and validation, ask if user wants a ClickUp Doc:
 
-## 5) Implement with minimal changes (only after explicit user approval)
+- non-technical how-to
+- technical/development handoff
 
-Principles:
+When creating a ClickUp Doc, include/share with:
 
-- Touch the smallest number of repos/services required.
-- Always follow the existing project/component code style and conventions (structure, naming, patterns, formatting).
-- Prefer the same libraries/framework patterns already used in the repo; do not introduce “from scratch” rewrites or novel stacks without explicit user approval.
-- If the project is blank or style is unclear, ask the user for a similar repo/project to use as a reference for code style and patterns before implementing.
-- Preserve backward compatibility in payload normalization.
-- Keep naming consistent across writer → persistence → reader → UI.
-- Keep changes focused; avoid unrelated refactors.
+- `@Seirino`
+- `@Constantinos Adamidis`
+- `@Alexandros Nikolaos Naziris`
 
-## 6) Validation (local)
+## 7) Full reference
 
-Run targeted checks first:
+For complete legacy workflow details, templates, and expanded procedures:
 
-- Focused unit tests for changed modules, if present.
-- Build/typecheck/lint for the affected project(s) when practical.
-
-If the test suite is blocked by unrelated failures, prefer running a smaller, relevant subset and call out limitations.
-
-## 7) Decide push vs deploy (ask explicitly)
-
-Before pushing or deploying, ask the user what they want:
-
-- **Push only**: commit + push to remote.
-- **Deploy**: commit + push + deploy to the requested environment(s).
-
-Do not guess deployment targets, accounts, regions, buckets, pipelines, or branches if not clearly defined.
-
-## 8) Commit, push, and deploy (when requested)
-
-Never `git push` or deploy on your own. Always ask which option the user wants and wait for explicit confirmation.
-
-- Use focused commit messages.
-- Push to the correct default branch (`main` vs `master` varies).
-- Prefer repo-provided deploy scripts when available; otherwise ask for the intended procedure.
-
-## 9) ClickUp: time tracking and completion
-
-- **Time tracking policy (manual; do not start/stop timers):**
-  - When you begin implementing: record a `start` timestamp (Europe/Athens).
-  - When implementation is complete: record an `end` timestamp (Europe/Athens).
-  - Calculate elapsed time (round to the nearest minute).
-  - Add a ClickUp time entry for the task using `clickup_add_time_entry` with:
-    - `start` = **now** (Europe/Athens), and
-    - `duration` = the elapsed time you calculated.
-- When implementation is complete:
-  - `clickup_update_task` → move the task to the list’s `completed` (or closest) status,
-  - add a ClickUp comment/activity note summarizing what changed (repos/files, key behavior, tests run, and any follow-ups).
-
-## 10) Close out: summary to user
-
-Provide a concise summary:
-
-- What changed (by repo / key files).
-- What was pushed (if anything).
-- What was deployed (if anything; where).
-- What ClickUp updates were made (status + time entry).
-
-## 11) Optional: create a ClickUp Doc after implementation
-
-After implementation is complete (and validated), ask if the user wants a ClickUp Doc:
-
-- A “How-to” page for non-dev users.
-- A “Technical (Development)” page for developers (contracts, repos changed, examples, debug).
-  </INSTRUCTIONS>
+- `docs/AGENTS_FULL_REFERENCE.md`
