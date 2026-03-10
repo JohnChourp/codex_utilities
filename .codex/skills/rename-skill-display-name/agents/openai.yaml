@@ -1,0 +1,4 @@
+interface:
+  display_name: "Rename Skill Display Name"
+  short_description: "Rename only how a skill appears in the skills list"
+  default_prompt: "Rename only the UI-facing display name of a Codex skill in the skills list/chips. Do not change the trigger name, folder name, workflow, or behavior. Update agents/openai.yaml interface.display_name for the specified skill and verify the final value."

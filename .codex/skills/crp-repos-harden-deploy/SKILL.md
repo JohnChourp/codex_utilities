@@ -1,5 +1,5 @@
 ---
-name: crp-repos-harden-deploy
+name: "CRP Repos Harden Deploy"
 description: >-
   Runbook + execution workflow for CRP hardening flows that auto-merge + deploy
   (`crp repos harden-deploy`). Use when you need to explain what the deploy flow

@@ -1,5 +1,4 @@
 interface:
-  display_name: "Repos DS_Store Auto Commit Push"
+  display_name: "Repos DS_Store Add to .gitignore and Auto Commit Push"
   short_description: "Fix DS_Store-only changes, then auto commit and push"
   default_prompt: "Scan all repos under Downloads/lambdas and Downloads/projects, fix DS_Store-only uncommitted changes, and auto commit/push with a safety gate."
-

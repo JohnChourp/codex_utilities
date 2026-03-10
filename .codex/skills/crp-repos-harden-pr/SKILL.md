@@ -1,5 +1,5 @@
 ---
-name: crp-repos-harden-pr
+name: "CRP Repos Harden PR"
 description: >-
   Runbook + agent-mode execution workflow for `crp repos harden-pr` (PR-only
   hardening in Lambda repos: `la run harden` + `la run handled-errors-policy` +

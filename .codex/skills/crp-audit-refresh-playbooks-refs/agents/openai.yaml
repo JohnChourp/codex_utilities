@@ -1,0 +1,4 @@
+interface:
+  display_name: "CRP Audit + Refresh Playbooks Refs"
+  short_description: "Unified audit and refresh for cloud-repos-panel lambdas, playbooks, refs"
+  default_prompt: "Use $crp-audit-refresh-playbooks-refs to audit and/or refresh CRP playbooks/refs and cloud-repos-panel frontend-lambda mappings from services."

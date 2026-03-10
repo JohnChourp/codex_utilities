@@ -1,5 +1,5 @@
 ---
-name: crp-npm-install-repos
+name: "CRP npm Install Repos"
 description: Install npm dependencies across already-downloaded local CRP lambda repos under `/Users/john/Downloads/lambdas/crp_all` by running `npm i` per repo. Use when the user asks for bulk dependency install/refresh in all local CRP lambdas.
 ---
 

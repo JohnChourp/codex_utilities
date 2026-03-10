@@ -1009,6 +1009,9 @@ Entity types / item categories
 
 request/order record
 
+Canonical invariant: `payment_method` accepts only `cash|card` in request payload/storage.
+`paid` is a UI label for `card` and is not a persisted payload value.
+
 Example items (DocumentClient JSON)
 
 request — observed example (sanitized)
