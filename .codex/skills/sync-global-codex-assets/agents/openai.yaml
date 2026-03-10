@@ -1,0 +1,4 @@
+interface:
+  display_name: "Sync Global Codex Assets"
+  short_description: "Check and apply codexDevAgent updates into ~/.codex safely."
+  default_prompt: "Use this skill to check for codexDevAgent updates, clone or refresh the repo if needed, and safely merge AGENTS.md plus sync skill folders into ~/.codex."

@@ -1,54 +1,77 @@
 ---
 name: sync-global-codex-assets
-description: Merge this repo's workflow overlay into an existing global `~/.codex/AGENTS.md` and sync repo skills into `~/.codex/skills` with backup, overwrite-safe one-way copy, and a short diff/report. Use when you want to install or refresh Codex workflow assets from a source repo without replacing unrelated global instructions.
+description: Check for updates to the codexDevAgent workflow assets, clone or refresh the source repo when needed, and safely merge the managed AGENTS.md workflow block plus sync repo skill folders into ~/.codex. Use when the user asks to check for updates, run a safe update, run a clean install, refresh installed Codex skills, or update global Codex instructions from this repo.
 ---
 
 # Sync Global Codex Assets
 
-Use this skill when a workflow-assets repo should update the global Codex home safely.
+Use this skill when the user wants to update their installed Codex workflow assets from `codexDevAgent`.
 
-## 1) Preconditions
+## 1) Use the bundled script
 
-1. Confirm the source repo contains:
-   - `AGENTS.md`
-   - `skills/`
-2. Treat the source repo as the one-way source of truth for the workflow overlay and skill folders being synced.
-3. Do not replace unrelated global instructions outside the workflow overlay block.
+When the user asks to update Codex assets, first ask whether they want:
 
-## 2) Merge policy
+1. `update`
+2. `clean-install`
 
-1. Backup the current global `~/.codex/AGENTS.md` before any overwrite.
-2. Replace only the workflow/policy overlay block in the global file:
-   - detect the first heading matching `# Codex Workflow Guide (`
-   - replace from that heading to EOF with the source repo `AGENTS.md`
-3. Preserve all global instructions above that boundary.
-
-## 3) Skill sync policy
-
-1. Copy each first-level source skill directory from `skills/` into `~/.codex/skills/`.
-2. Overwrite existing target skill directories with the source copy.
-3. Keep the sync one-way: source repo -> global `.codex`.
-4. Print a short report listing:
-   - backup path
-   - workflow merge target
-   - skills copied/updated
-
-## 4) Recommended command
+Run:
 
 ```bash
-bash skills/sync-global-codex-assets/scripts/sync_global_codex_assets.sh
+skills/sync-global-codex-assets/scripts/sync_global_codex_assets.sh check
 ```
 
-Optional arguments:
+or:
 
 ```bash
-bash skills/sync-global-codex-assets/scripts/sync_global_codex_assets.sh /path/to/source/repo /path/to/target/.codex
-bash skills/sync-global-codex-assets/scripts/sync_global_codex_assets.sh --dry-run
+skills/sync-global-codex-assets/scripts/sync_global_codex_assets.sh update
 ```
+
+or:
+
+```bash
+skills/sync-global-codex-assets/scripts/sync_global_codex_assets.sh clean-install
+```
+
+Use `--dry-run` to preview mutations.
+
+## 2) Source repo resolution policy
+
+Resolve the source repo in this order:
+
+1. Use `--source <path>` when the caller provides one.
+2. If the current working directory already looks like `codexDevAgent`, use it directly.
+3. Otherwise use the cached clone at `~/.codex/repos/codexDevAgent`.
+4. If the cached clone does not exist, clone `https://github.com/Al3xSy/codexDevAgent.git`.
+5. If the cached clone exists, refresh it with `git fetch` and `git pull --ff-only`.
+6. Read the repo version from `package.json` and compare it to the installed version marker in `~/.codex/.codexDevAgent-version`.
+
+## 3) AGENTS merge policy
+
+Treat the repo `AGENTS.md` as the managed workflow overlay.
+
+On `update` and `clean-install`:
+
+1. If target `~/.codex/AGENTS.md` does not exist, create it from the repo copy.
+2. If it exists, preserve everything above the first heading that starts with:
+   - `# Codex Workflow Guide (`
+3. Replace that heading and everything below it with the repo `AGENTS.md` content.
+4. Fail fast if the target file exists but the boundary heading is missing.
+5. Create a timestamped backup before mutating the target file.
+
+## 4) Skills sync policy
+
+1. In `update`, sync each first-level folder from repo `skills/` into `~/.codex/skills/`.
+2. Overwrite same-named installed skill folders completely.
+3. In `clean-install`, also remove stale repo-managed skills recorded from prior syncs before copying the current repo skills.
+4. Do not delete unrelated installed skills.
+5. Report which skills would be added, updated, or removed.
+6. After a successful `update` or `clean-install`, write the installed source version into `~/.codex/.codexDevAgent-version`.
 
 ## 5) Safety rules
 
-1. Fail fast if the source repo is missing `AGENTS.md` or `skills/`.
-2. Fail fast if the target global file does not contain the workflow boundary heading.
-3. Never delete unrelated files under the target `.codex` root.
-4. Use this skill for merge-and-sync workflows instead of manually replacing the full global `AGENTS.md`.
+1. Run `check` before `update` or `clean-install` when the user asks whether updates exist.
+2. Use `--dry-run` whenever the user wants a preview.
+3. Do not overwrite the target `AGENTS.md` blindly.
+4. Do not delete unrelated user content from `~/.codex`.
+5. Keep `clean-install` deletions limited to repo-managed skills tracked from prior syncs.
+6. If the cached source repo is dirty, fail instead of pulling over local edits.
