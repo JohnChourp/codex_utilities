@@ -11,6 +11,7 @@ DEFAULT_TARGET="${HOME}/.codex"
 AGENTS_BOUNDARY_TEXT='# Codex Workflow Guide ('
 MANAGED_SKILLS_STATE_FILE=".codexDevAgent-managed-skills"
 VERSION_STATE_FILE=".codexDevAgent-version"
+PRESERVE_LOCAL_SKILLS_STATE_FILE=".codexDevAgent-preserve-local-skills"
 
 MODE=""
 SOURCE_PATH=""
@@ -21,6 +22,8 @@ DRY_RUN=0
 declare -a CHANGED_SKILLS=()
 declare -a NEW_SKILLS=()
 declare -a REMOVED_SKILLS=()
+declare -a PRESERVED_SKILLS=()
+declare -a PRESERVE_LOCAL_SKILLS=()
 declare -a SOURCE_SKILL_NAMES=()
 AGENTS_STATUS="unchanged"
 BACKUP_PATH=""
@@ -28,6 +31,7 @@ USING_SOURCE=""
 STATE_FILE_PATH=""
 STATE_FILE_PRESENT=0
 VERSION_FILE_PATH=""
+PRESERVE_LOCAL_SKILLS_STATE_PATH=""
 SOURCE_VERSION=""
 TARGET_VERSION=""
 
@@ -89,6 +93,23 @@ array_contains() {
   done
 
   return 1
+}
+
+load_preserve_local_skills() {
+  local preserved_skill=""
+
+  PRESERVE_LOCAL_SKILLS=()
+
+  if [[ ! -f "${PRESERVE_LOCAL_SKILLS_STATE_PATH}" ]]; then
+    return 0
+  fi
+
+  while IFS= read -r preserved_skill; do
+    preserved_skill="${preserved_skill%%#*}"
+    preserved_skill="$(printf '%s' "${preserved_skill}" | xargs)"
+    [[ -n "${preserved_skill}" ]] || continue
+    PRESERVE_LOCAL_SKILLS+=("${preserved_skill}")
+  done < "${PRESERVE_LOCAL_SKILLS_STATE_PATH}"
 }
 
 is_repo_root() {
@@ -205,6 +226,7 @@ collect_skill_changes() {
 
   CHANGED_SKILLS=()
   NEW_SKILLS=()
+  PRESERVED_SKILLS=()
   SOURCE_SKILL_NAMES=()
 
   while IFS= read -r source_skill_path; do
@@ -214,6 +236,8 @@ collect_skill_changes() {
 
     if [[ ! -d "${target_skill_path}" ]]; then
       NEW_SKILLS+=("${skill_name}")
+    elif array_contains "${skill_name}" "${PRESERVE_LOCAL_SKILLS[@]}" && ! diff -qr "${source_skill_path}" "${target_skill_path}" >/dev/null 2>&1; then
+      PRESERVED_SKILLS+=("${skill_name}")
     elif ! diff -qr "${source_skill_path}" "${target_skill_path}" >/dev/null 2>&1; then
       CHANGED_SKILLS+=("${skill_name}")
     fi
@@ -235,6 +259,10 @@ collect_removed_skills() {
 
   while IFS= read -r managed_skill; do
     [[ -n "${managed_skill}" ]] || continue
+
+    if array_contains "${managed_skill}" "${PRESERVE_LOCAL_SKILLS[@]}"; then
+      continue
+    fi
 
     if ! array_contains "${managed_skill}" "${SOURCE_SKILL_NAMES[@]}" && [[ -d "${target_skills_dir}/${managed_skill}" ]]; then
       REMOVED_SKILLS+=("${managed_skill}")
@@ -374,6 +402,13 @@ report() {
     fi
   fi
 
+  if (( ${#PRESERVED_SKILLS[@]} > 0 )); then
+    printf 'Skills preserved locally:\n'
+    for skill_name in "${PRESERVED_SKILLS[@]}"; do
+      printf '  - %s\n' "${skill_name}"
+    done
+  fi
+
   if (( ${#REMOVED_SKILLS[@]} > 0 )); then
     total_updates=$((total_updates + ${#REMOVED_SKILLS[@]}))
     if [[ "${MODE}" == "clean-install" ]]; then
@@ -460,6 +495,7 @@ TARGET_SKILLS="${TARGET_PATH}/skills"
 MERGED_AGENTS="${tmp_dir}/AGENTS.merged.md"
 STATE_FILE_PATH="${TARGET_PATH}/${MANAGED_SKILLS_STATE_FILE}"
 VERSION_FILE_PATH="${TARGET_PATH}/${VERSION_STATE_FILE}"
+PRESERVE_LOCAL_SKILLS_STATE_PATH="${TARGET_PATH}/${PRESERVE_LOCAL_SKILLS_STATE_FILE}"
 
 [[ -f "${SOURCE_AGENTS}" ]] || fail "Source AGENTS.md not found at ${SOURCE_AGENTS}"
 [[ -d "${SOURCE_SKILLS}" ]] || fail "Source skills directory not found at ${SOURCE_SKILLS}"
@@ -468,6 +504,7 @@ grep -q -m1 -F "${AGENTS_BOUNDARY_TEXT}" "${SOURCE_AGENTS}" || fail "Source AGEN
 SOURCE_VERSION=$(read_package_version "${USING_SOURCE}/package.json")
 read_target_version
 validate_source_skills "${SOURCE_SKILLS}"
+load_preserve_local_skills
 
 build_merged_agents "${SOURCE_AGENTS}" "${TARGET_AGENTS}" "${MERGED_AGENTS}"
 collect_skill_changes "${SOURCE_SKILLS}" "${TARGET_SKILLS}"

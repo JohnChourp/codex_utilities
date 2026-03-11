@@ -61,11 +61,12 @@ On `update` and `clean-install`:
 ## 4) Skills sync policy
 
 1. In `update`, sync each first-level folder from repo `skills/` into `~/.codex/skills/`.
-2. Overwrite same-named installed skill folders completely.
+2. Overwrite same-named installed skill folders completely, except skills explicitly listed in `~/.codex/.codexDevAgent-preserve-local-skills`.
 3. In `clean-install`, also remove stale repo-managed skills recorded from prior syncs before copying the current repo skills.
 4. Do not delete unrelated installed skills.
-5. Report which skills would be added, updated, or removed.
-6. After a successful `update` or `clean-install`, write the installed source version into `~/.codex/.codexDevAgent-version`.
+5. Preserve locally customized installed skills listed in `~/.codex/.codexDevAgent-preserve-local-skills`; skip both overwrite and stale-removal for those skill names.
+6. Report which skills would be added, updated, removed, or preserved locally.
+7. After a successful `update` or `clean-install`, write the installed source version into `~/.codex/.codexDevAgent-version`.
 
 ## 5) Safety rules
 
@@ -75,3 +76,4 @@ On `update` and `clean-install`:
 4. Do not delete unrelated user content from `~/.codex`.
 5. Keep `clean-install` deletions limited to repo-managed skills tracked from prior syncs.
 6. If the cached source repo is dirty, fail instead of pulling over local edits.
+7. If the user has intentional local skill customizations, record the affected skill names in `~/.codex/.codexDevAgent-preserve-local-skills` before running `update` or `clean-install`.

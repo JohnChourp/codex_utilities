@@ -9,9 +9,11 @@ Apply this style baseline before and during frontend edits.
 
 ## 1) App and stack context
 
-1. Treat `mobileorder` and `dmpanel` as Angular + Ionic apps.
-2. Follow existing Angular/Ionic and NgRx patterns from nearby components.
-3. Keep quote style, formatting, and file structure aligned with touched files.
+1. Treat `mobileorder`, `dmpanel`, `codeliver-sap`, `codeliver-panel`, `codeliver-pos`, `codeliver-app`, and `cloud-repos-panel` as supported Angular + Ionic apps for this baseline.
+2. Use `mobileorder` and `dmpanel` as canonical style references, but apply the same frontend baseline across the supported Angular/Ionic repos above.
+3. When work happens from the shared `/Users/john/Downloads/projects` workspace, apply this baseline to touched Angular/Ionic frontend repos within that workspace rather than treating it as repo-specific guidance.
+4. Follow existing Angular/Ionic and NgRx patterns from nearby components.
+5. Keep quote style, formatting, and file structure aligned with touched files.
 
 ## 2) Variable declaration order and naming
 
@@ -38,7 +40,7 @@ Naming rules:
 
 ## 4) State management and subscriptions (NgRx)
 
-Observed pattern in `mobileorder` components:
+Observed shared pattern across supported Angular/Ionic repos:
 1. Subscribe with `this.store.select("slice")` (or selector functions).
 2. Use RxJS operators like `distinctUntilChanged`, `auditTime`, `first` where needed.
 3. Track long-lived subscriptions in `Subscription` fields or `Subscription[]`.
