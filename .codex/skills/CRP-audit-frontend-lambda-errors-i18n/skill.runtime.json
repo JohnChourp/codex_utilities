@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "skill_name": "CRP Audit Frontend Lambda Errors i18n",
+  "execution_mode": "python_launcher",
+  "supported_os": [
+    "macos",
+    "linux",
+    "windows"
+  ],
+  "unsupported_behavior": "fail_fast",
+  "preflight": {
+    "cache_ttl_seconds": 600,
+    "checks": [
+      {
+        "type": "tool",
+        "name": "python",
+        "install_hint": {
+          "macos": "Install Python 3 and ensure python3 is in PATH.",
+          "linux": "Install python3 and ensure it is in PATH.",
+          "windows": "Install Python 3 or the py launcher and ensure it is in PATH."
+        }
+      }
+    ]
+  },
+  "entrypoint": {
+    "kind": "python",
+    "path": "scripts/run.py"
+  },
+  "tooling": {
+    "python": {
+      "macos": [
+        "python3"
+      ],
+      "linux": [
+        "python3"
+      ],
+      "windows": [
+        "py",
+        "-3"
+      ]
+    }
+  },
+  "default_command": "audit-frontend-lambda-errors-i18n",
+  "commands": [
+    {
+      "name": "audit-frontend-lambda-errors-i18n",
+      "description": "Run audit_frontend_lambda_errors_i18n.py",
+      "kind": "python",
+      "path": "scripts/audit_frontend_lambda_errors_i18n.py",
+      "args": []
+    },
+    {
+      "name": "check-frontend-lambda-errors-locales",
+      "description": "Run check_frontend_lambda_errors_locales.py",
+      "kind": "python",
+      "path": "scripts/check_frontend_lambda_errors_locales.py",
+      "args": []
+    },
+    {
+      "name": "collect-frontend-reachable-lambdas",
+      "description": "Run collect_frontend_reachable_lambdas.py",
+      "kind": "python",
+      "path": "scripts/collect_frontend_reachable_lambdas.py",
+      "args": []
+    }
+  ]
+}

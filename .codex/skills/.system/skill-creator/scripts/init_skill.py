@@ -1,27 +1,27 @@
 #!/usr/bin/env python3
-"""
-Skill Initializer - Creates a new skill from template
+"""Initialize a new skill with runtime metadata and optional launcher."""
 
-Usage:
-    init_skill.py <skill-name> --path <path> [--resources scripts,references,assets] [--examples] [--interface key=value]
-
-Examples:
-    init_skill.py my-new-skill --path skills/public
-    init_skill.py my-new-skill --path skills/public --resources scripts,references
-    init_skill.py my-api-helper --path skills/private --resources scripts --examples
-    init_skill.py custom-skill --path /custom/location
-    init_skill.py my-skill --path skills/public --interface short_description="Short UI label"
-"""
+from __future__ import annotations
 
 import argparse
+import json
 import re
 import sys
 from pathlib import Path
 
 from generate_openai_yaml import write_openai_yaml
 
+RUNTIME_SUPPORT_DIR = (
+    Path(__file__).resolve().parents[2] / "skill-runtime-lib" / "scripts"
+)
+if str(RUNTIME_SUPPORT_DIR) not in sys.path:
+    sys.path.insert(0, str(RUNTIME_SUPPORT_DIR))
+
+from runtime_support import validate_skill
+
 MAX_SKILL_NAME_LENGTH = 64
 ALLOWED_RESOURCES = {"scripts", "references", "assets"}
+RUNTIME_MODES = {"auto", "guidance", "python_launcher"}
 
 SKILL_TEMPLATE = """---
 name: {skill_name}
@@ -73,129 +73,63 @@ Delete this entire "Structuring This Skill" section when done - it's just guidan
 ## Resources (optional)
 
 Create only the resource directories this skill actually needs. Delete this section if no resources are required.
-
-### scripts/
-Executable code (Python/Bash/etc.) that can be run directly to perform specific operations.
-
-**Examples from other skills:**
-- PDF skill: `fill_fillable_fields.py`, `extract_form_field_info.py` - utilities for PDF manipulation
-- DOCX skill: `document.py`, `utilities.py` - Python modules for document processing
-
-**Appropriate for:** Python scripts, shell scripts, or any executable code that performs automation, data processing, or specific operations.
-
-**Note:** Scripts may be executed without loading into context, but can still be read by Codex for patching or environment adjustments.
-
-### references/
-Documentation and reference material intended to be loaded into context to inform Codex's process and thinking.
-
-**Examples from other skills:**
-- Product management: `communication.md`, `context_building.md` - detailed workflow guides
-- BigQuery: API reference documentation and query examples
-- Finance: Schema documentation, company policies
-
-**Appropriate for:** In-depth documentation, API references, database schemas, comprehensive guides, or any detailed information that Codex should reference while working.
-
-### assets/
-Files not intended to be loaded into context, but rather used within the output Codex produces.
-
-**Examples from other skills:**
-- Brand styling: PowerPoint template files (.pptx), logo files
-- Frontend builder: HTML/React boilerplate project directories
-- Typography: Font files (.ttf, .woff2)
-
-**Appropriate for:** Templates, boilerplate code, document templates, images, icons, fonts, or any files meant to be copied or used in the final output.
-
----
-
-**Not every skill requires all three types of resources.**
 """
 
-EXAMPLE_SCRIPT = '''#!/usr/bin/env python3
-"""
-Example helper script for {skill_name}
+RUN_TEMPLATE = """#!/usr/bin/env python3
+from __future__ import annotations
 
-This is a placeholder script that can be executed directly.
-Replace with actual implementation or delete if not needed.
+import sys
+from pathlib import Path
 
-Example real scripts from other skills:
-- pdf/scripts/fill_fillable_fields.py - Fills PDF form fields
-- pdf/scripts/convert_pdf_to_images.py - Converts PDF pages to images
-"""
 
-def main():
-    print("This is an example script for {skill_name}")
-    # TODO: Add actual script logic here
-    # This could be data processing, file conversion, API calls, etc.
+def _runtime_support_dir() -> Path:
+    script_path = Path(__file__).resolve()
+    candidates = [
+        script_path.parents[2] / ".system" / "skill-runtime-lib" / "scripts",
+        script_path.parents[2] / "skill-runtime-lib" / "scripts",
+        script_path.parents[3] / ".system" / "skill-runtime-lib" / "scripts",
+    ]
+    for candidate in candidates:
+        if (candidate / "runtime_support.py").is_file():
+            return candidate
+    raise SystemExit("Unable to locate shared skill runtime support.")
+
+
+RUNTIME_SUPPORT_DIR = _runtime_support_dir()
+if str(RUNTIME_SUPPORT_DIR) not in sys.path:
+    sys.path.insert(0, str(RUNTIME_SUPPORT_DIR))
+
+from runtime_support import launch_current_skill
+
 
 if __name__ == "__main__":
-    main()
-'''
-
-EXAMPLE_REFERENCE = """# Reference Documentation for {skill_title}
-
-This is a placeholder for detailed reference documentation.
-Replace with actual reference content or delete if not needed.
-
-Example real reference docs from other skills:
-- product-management/references/communication.md - Comprehensive guide for status updates
-- product-management/references/context_building.md - Deep-dive on gathering context
-- bigquery/references/ - API references and query examples
-
-## When Reference Docs Are Useful
-
-Reference docs are ideal for:
-- Comprehensive API documentation
-- Detailed workflow guides
-- Complex multi-step processes
-- Information too lengthy for main SKILL.md
-- Content that's only needed for specific use cases
-
-## Structure Suggestions
-
-### API Reference Example
-- Overview
-- Authentication
-- Endpoints with examples
-- Error codes
-- Rate limits
-
-### Workflow Guide Example
-- Prerequisites
-- Step-by-step instructions
-- Common patterns
-- Troubleshooting
-- Best practices
+    raise SystemExit(launch_current_skill(Path(__file__).resolve(), sys.argv[1:]))
 """
 
-EXAMPLE_ASSET = """# Example Asset File
+MAIN_TEMPLATE = """#!/usr/bin/env python3
+from __future__ import annotations
 
-This placeholder represents where asset files would be stored.
-Replace with actual asset files (templates, images, fonts, etc.) or delete if not needed.
 
-Asset files are NOT intended to be loaded into context, but rather used within
-the output Codex produces.
+def main() -> int:
+    print("Replace scripts/main.py with the real implementation for {skill_name}.")
+    return 0
 
-Example asset files from other skills:
-- Brand guidelines: logo.png, slides_template.pptx
-- Frontend builder: hello-world/ directory with HTML/React boilerplate
-- Typography: custom-font.ttf, font-family.woff2
-- Data: sample_data.csv, test_dataset.json
 
-## Common Asset Types
+if __name__ == "__main__":
+    raise SystemExit(main())
+"""
 
-- Templates: .pptx, .docx, boilerplate directories
-- Images: .png, .jpg, .svg, .gif
-- Fonts: .ttf, .otf, .woff, .woff2
-- Boilerplate code: Project directories, starter files
-- Icons: .ico, .svg
-- Data files: .csv, .json, .xml, .yaml
+REFERENCE_TEMPLATE = """# Reference Documentation for {skill_title}
 
-Note: This is a text placeholder. Actual assets can be any file type.
+Replace this file with the reference material that the skill should load on demand.
+"""
+
+ASSET_TEMPLATE = """This placeholder represents an output asset for the skill.
+Replace it with a real template, image, font, or other artifact when needed.
 """
 
 
-def normalize_skill_name(skill_name):
-    """Normalize a skill name to lowercase hyphen-case."""
+def normalize_skill_name(skill_name: str) -> str:
     normalized = skill_name.strip().lower()
     normalized = re.sub(r"[^a-z0-9]+", "-", normalized)
     normalized = normalized.strip("-")
@@ -203,12 +137,11 @@ def normalize_skill_name(skill_name):
     return normalized
 
 
-def title_case_skill_name(skill_name):
-    """Convert hyphenated skill name to Title Case for display."""
+def title_case_skill_name(skill_name: str) -> str:
     return " ".join(word.capitalize() for word in skill_name.split("-"))
 
 
-def parse_resources(raw_resources):
+def parse_resources(raw_resources: str) -> list[str]:
     if not raw_resources:
         return []
     resources = [item.strip() for item in raw_resources.split(",") if item.strip()]
@@ -218,8 +151,8 @@ def parse_resources(raw_resources):
         print(f"[ERROR] Unknown resource type(s): {', '.join(invalid)}")
         print(f"   Allowed: {allowed}")
         sys.exit(1)
-    deduped = []
-    seen = set()
+    deduped: list[str] = []
+    seen: set[str] = set()
     for resource in resources:
         if resource not in seen:
             deduped.append(resource)
@@ -227,124 +160,182 @@ def parse_resources(raw_resources):
     return deduped
 
 
-def create_resource_dirs(skill_dir, skill_name, skill_title, resources, include_examples):
+def resolve_runtime_mode(requested: str, resources: list[str]) -> str:
+    if requested == "auto":
+        return "python_launcher" if "scripts" in resources else "guidance"
+    return requested
+
+
+def build_runtime_config(skill_name: str, execution_mode: str) -> dict[str, object]:
+    runtime: dict[str, object] = {
+        "schema_version": 1,
+        "skill_name": skill_name,
+        "execution_mode": execution_mode,
+        "supported_os": ["macos", "linux", "windows"],
+        "unsupported_behavior": "fail_fast",
+        "preflight": {
+            "cache_ttl_seconds": 600,
+            "checks": [],
+        },
+        "entrypoint": None,
+        "tooling": {
+            "python": {
+                "macos": ["python3"],
+                "linux": ["python3"],
+                "windows": ["py", "-3"],
+            },
+            "bash": {
+                "macos": ["bash"],
+                "linux": ["bash"],
+                "windows": ["bash"],
+            },
+        },
+    }
+    if execution_mode == "python_launcher":
+        runtime["preflight"] = {
+            "cache_ttl_seconds": 600,
+            "checks": [
+                {
+                    "type": "tool",
+                    "name": "python",
+                    "install_hint": {
+                        "macos": "Install Python 3 and ensure python3 is in PATH.",
+                        "linux": "Install python3 and ensure it is in PATH.",
+                        "windows": "Install Python 3 or the py launcher and ensure it is in PATH.",
+                    },
+                }
+            ],
+        }
+        runtime["entrypoint"] = {"kind": "python", "path": "scripts/run.py"}
+        runtime["default_command"] = "main"
+        runtime["commands"] = [
+            {
+                "name": "main",
+                "description": "Primary skill command",
+                "kind": "python",
+                "path": "scripts/main.py",
+                "args": [],
+            }
+        ]
+    return runtime
+
+
+def write_text_file(path: Path, content: str, executable: bool = False) -> None:
+    path.write_text(content, encoding="utf-8")
+    if executable:
+        path.chmod(0o755)
+
+
+def create_resource_dirs(
+    skill_dir: Path,
+    skill_name: str,
+    skill_title: str,
+    resources: list[str],
+    execution_mode: str,
+) -> None:
     for resource in resources:
         resource_dir = skill_dir / resource
         resource_dir.mkdir(exist_ok=True)
-        if resource == "scripts":
-            if include_examples:
-                example_script = resource_dir / "example.py"
-                example_script.write_text(EXAMPLE_SCRIPT.format(skill_name=skill_name))
-                example_script.chmod(0o755)
-                print("[OK] Created scripts/example.py")
-            else:
-                print("[OK] Created scripts/")
-        elif resource == "references":
-            if include_examples:
-                example_reference = resource_dir / "api_reference.md"
-                example_reference.write_text(EXAMPLE_REFERENCE.format(skill_title=skill_title))
-                print("[OK] Created references/api_reference.md")
-            else:
-                print("[OK] Created references/")
+        if resource == "references":
+            write_text_file(resource_dir / "reference.md", REFERENCE_TEMPLATE.format(skill_title=skill_title))
+            print("[OK] Created references/reference.md")
         elif resource == "assets":
-            if include_examples:
-                example_asset = resource_dir / "example_asset.txt"
-                example_asset.write_text(EXAMPLE_ASSET)
-                print("[OK] Created assets/example_asset.txt")
-            else:
-                print("[OK] Created assets/")
+            write_text_file(resource_dir / "asset.txt", ASSET_TEMPLATE)
+            print("[OK] Created assets/asset.txt")
+        elif resource == "scripts":
+            print("[OK] Created scripts/")
+
+    if execution_mode == "python_launcher":
+        scripts_dir = skill_dir / "scripts"
+        scripts_dir.mkdir(exist_ok=True)
+        write_text_file(scripts_dir / "run.py", RUN_TEMPLATE, executable=True)
+        write_text_file(
+            scripts_dir / "main.py",
+            MAIN_TEMPLATE.format(skill_name=skill_name),
+            executable=True,
+        )
+        print("[OK] Created scripts/run.py")
+        print("[OK] Created scripts/main.py")
 
 
-def init_skill(skill_name, path, resources, include_examples, interface_overrides):
-    """
-    Initialize a new skill directory with template SKILL.md.
-
-    Args:
-        skill_name: Name of the skill
-        path: Path where the skill directory should be created
-        resources: Resource directories to create
-        include_examples: Whether to create example files in resource directories
-
-    Returns:
-        Path to created skill directory, or None if error
-    """
-    # Determine skill directory path
+def init_skill(
+    skill_name: str,
+    path: str,
+    resources: list[str],
+    interface_overrides: list[str],
+    runtime_mode: str,
+) -> Path | None:
     skill_dir = Path(path).resolve() / skill_name
-
-    # Check if directory already exists
     if skill_dir.exists():
         print(f"[ERROR] Skill directory already exists: {skill_dir}")
         return None
 
-    # Create skill directory
     try:
         skill_dir.mkdir(parents=True, exist_ok=False)
         print(f"[OK] Created skill directory: {skill_dir}")
-    except Exception as e:
-        print(f"[ERROR] Error creating directory: {e}")
+    except Exception as exc:
+        print(f"[ERROR] Error creating directory: {exc}")
         return None
 
-    # Create SKILL.md from template
     skill_title = title_case_skill_name(skill_name)
-    skill_content = SKILL_TEMPLATE.format(skill_name=skill_name, skill_title=skill_title)
-
-    skill_md_path = skill_dir / "SKILL.md"
     try:
-        skill_md_path.write_text(skill_content)
+        write_text_file(
+            skill_dir / "SKILL.md",
+            SKILL_TEMPLATE.format(skill_name=skill_name, skill_title=skill_title),
+        )
         print("[OK] Created SKILL.md")
-    except Exception as e:
-        print(f"[ERROR] Error creating SKILL.md: {e}")
+    except Exception as exc:
+        print(f"[ERROR] Error creating SKILL.md: {exc}")
         return None
 
-    # Create agents/openai.yaml
     try:
         result = write_openai_yaml(skill_dir, skill_name, interface_overrides)
         if not result:
             return None
-    except Exception as e:
-        print(f"[ERROR] Error creating agents/openai.yaml: {e}")
+    except Exception as exc:
+        print(f"[ERROR] Error creating agents/openai.yaml: {exc}")
         return None
 
-    # Create resource directories if requested
-    if resources:
-        try:
-            create_resource_dirs(skill_dir, skill_name, skill_title, resources, include_examples)
-        except Exception as e:
-            print(f"[ERROR] Error creating resource directories: {e}")
-            return None
+    try:
+        create_resource_dirs(skill_dir, skill_name, skill_title, resources, runtime_mode)
+        runtime_path = skill_dir / "skill.runtime.json"
+        runtime_payload = build_runtime_config(skill_name, runtime_mode)
+        runtime_path.write_text(json.dumps(runtime_payload, indent=2) + "\n", encoding="utf-8")
+        print("[OK] Created skill.runtime.json")
+    except Exception as exc:
+        print(f"[ERROR] Error creating runtime resources: {exc}")
+        return None
 
-    # Print next steps
+    issues = validate_skill(skill_dir)
+    errors = [issue for issue in issues if issue.level == "ERROR"]
+    if errors:
+        for issue in errors:
+            print(issue.format(), file=sys.stderr)
+        print("[ERROR] New skill failed validation")
+        return None
+
     print(f"\n[OK] Skill '{skill_name}' initialized successfully at {skill_dir}")
     print("\nNext steps:")
-    print("1. Edit SKILL.md to complete the TODO items and update the description")
-    if resources:
-        if include_examples:
-            print("2. Customize or delete the example files in scripts/, references/, and assets/")
-        else:
-            print("2. Add resources to scripts/, references/, and assets/ as needed")
+    print("1. Edit SKILL.md to replace the TODO placeholders.")
+    print("2. Update skill.runtime.json to declare the final preflight and supported OS matrix.")
+    if runtime_mode == "python_launcher":
+        print("3. Replace scripts/main.py with the real implementation and keep scripts/run.py as the canonical launcher.")
     else:
-        print("2. Create resource directories only if needed (scripts/, references/, assets/)")
-    print("3. Update agents/openai.yaml if the UI metadata should differ")
-    print("4. Run the validator when ready to check the skill structure")
-
+        print("3. Add scripts/ only if the skill later becomes executable, then switch runtime_mode to python_launcher.")
+    print("4. Run the validator again before installing or syncing the skill.")
     return skill_dir
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="Create a new skill directory with a SKILL.md template.",
-    )
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Create a new skill directory with runtime metadata.")
     parser.add_argument("skill_name", help="Skill name (normalized to hyphen-case)")
     parser.add_argument("--path", required=True, help="Output directory for the skill")
+    parser.add_argument("--resources", default="", help="Comma-separated list: scripts,references,assets")
     parser.add_argument(
-        "--resources",
-        default="",
-        help="Comma-separated list: scripts,references,assets",
-    )
-    parser.add_argument(
-        "--examples",
-        action="store_true",
-        help="Create example files inside the selected resource directories",
+        "--runtime-mode",
+        default="auto",
+        choices=sorted(RUNTIME_MODES),
+        help="Runtime mode for the new skill. Defaults to auto.",
     )
     parser.add_argument(
         "--interface",
@@ -369,28 +360,21 @@ def main():
         print(f"Note: Normalized skill name from '{raw_skill_name}' to '{skill_name}'.")
 
     resources = parse_resources(args.resources)
-    if args.examples and not resources:
-        print("[ERROR] --examples requires --resources to be set.")
-        sys.exit(1)
-
-    path = args.path
+    runtime_mode = resolve_runtime_mode(args.runtime_mode, resources)
+    if runtime_mode == "python_launcher" and "scripts" not in resources:
+        resources = ["scripts", *resources]
 
     print(f"Initializing skill: {skill_name}")
-    print(f"   Location: {path}")
+    print(f"   Location: {args.path}")
+    print(f"   Runtime mode: {runtime_mode}")
     if resources:
         print(f"   Resources: {', '.join(resources)}")
-        if args.examples:
-            print("   Examples: enabled")
     else:
-        print("   Resources: none (create as needed)")
+        print("   Resources: none")
     print()
 
-    result = init_skill(skill_name, path, resources, args.examples, args.interface)
-
-    if result:
-        sys.exit(0)
-    else:
-        sys.exit(1)
+    result = init_skill(skill_name, args.path, resources, args.interface, runtime_mode)
+    sys.exit(0 if result else 1)
 
 
 if __name__ == "__main__":

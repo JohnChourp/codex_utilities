@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "skill_name": "android-debug-deploy",
+  "execution_mode": "python_launcher",
+  "supported_os": [
+    "macos",
+    "linux",
+    "windows"
+  ],
+  "unsupported_behavior": "fail_fast",
+  "preflight": {
+    "cache_ttl_seconds": 600,
+    "checks": [
+      {
+        "type": "tool",
+        "name": "bash",
+        "install_hint": {
+          "macos": "Install bash and ensure it is in PATH.",
+          "linux": "Install bash and ensure it is in PATH.",
+          "windows": "Install Git Bash or another bash-compatible shell and ensure bash is in PATH."
+        }
+      },
+      {
+        "type": "tool",
+        "name": "adb",
+        "install_hint": {
+          "default": "Install Android platform-tools and ensure adb is in PATH."
+        }
+      },
+      {
+        "type": "tool",
+        "name": "emulator",
+        "install_hint": {
+          "default": "Install Android Emulator and ensure emulator is in PATH."
+        }
+      }
+    ]
+  },
+  "entrypoint": {
+    "kind": "python",
+    "path": "scripts/run.py"
+  },
+  "tooling": {
+    "bash": {
+      "macos": [
+        "bash"
+      ],
+      "linux": [
+        "bash"
+      ],
+      "windows": [
+        "bash"
+      ]
+    },
+    "adb": {
+      "macos": [
+        "adb"
+      ],
+      "linux": [
+        "adb"
+      ],
+      "windows": [
+        "adb"
+      ]
+    },
+    "emulator": {
+      "macos": [
+        "emulator"
+      ],
+      "linux": [
+        "emulator"
+      ],
+      "windows": [
+        "emulator"
+      ]
+    }
+  },
+  "default_command": "android-debug-deploy",
+  "commands": [
+    {
+      "name": "android-debug-deploy",
+      "description": "Run android_debug_deploy.sh",
+      "kind": "shell",
+      "path": "scripts/android_debug_deploy.sh",
+      "args": []
+    }
+  ]
+}

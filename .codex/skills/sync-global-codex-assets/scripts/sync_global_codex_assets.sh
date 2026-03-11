@@ -4,6 +4,7 @@ set -euo pipefail
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 SKILL_DIR=$(cd "${SCRIPT_DIR}/.." && pwd)
 REPO_FROM_SKILL=$(cd "${SKILL_DIR}/../../.." && pwd)
+RUNTIME_VALIDATOR="${SKILL_DIR}/../.system/skill-runtime-lib/scripts/validate_skills.py"
 DEFAULT_REPO_URL="https://github.com/Al3xSy/codexDevAgent.git"
 DEFAULT_CACHE_SOURCE="${HOME}/.codex/repos/codexDevAgent"
 DEFAULT_TARGET="${HOME}/.codex"
@@ -151,6 +152,16 @@ resolve_source_repo() {
   fi
 
   is_repo_root "${USING_SOURCE}" || fail "Source repo not valid: ${USING_SOURCE}"
+}
+
+validate_source_skills() {
+  local source_skills_dir="$1"
+
+  [[ -f "${RUNTIME_VALIDATOR}" ]] || fail "Runtime validator not found at ${RUNTIME_VALIDATOR}"
+  command -v python3 >/dev/null 2>&1 || fail "python3 is required to validate skills."
+
+  info "Validating source skills runtime contracts"
+  python3 "${RUNTIME_VALIDATOR}" --tree --include-hidden "${source_skills_dir}" || fail "Source skills validation failed."
 }
 
 build_merged_agents() {
@@ -456,6 +467,7 @@ VERSION_FILE_PATH="${TARGET_PATH}/${VERSION_STATE_FILE}"
 grep -q -m1 -F "${AGENTS_BOUNDARY_TEXT}" "${SOURCE_AGENTS}" || fail "Source AGENTS.md does not contain the managed workflow boundary."
 SOURCE_VERSION=$(read_package_version "${USING_SOURCE}/package.json")
 read_target_version
+validate_source_skills "${SOURCE_SKILLS}"
 
 build_merged_agents "${SOURCE_AGENTS}" "${TARGET_AGENTS}" "${MERGED_AGENTS}"
 collect_skill_changes "${SOURCE_SKILLS}" "${TARGET_SKILLS}"

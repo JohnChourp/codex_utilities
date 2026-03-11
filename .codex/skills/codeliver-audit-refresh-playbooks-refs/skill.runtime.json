@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "skill_name": "codeliver-audit-refresh-playbooks-refs",
+  "execution_mode": "python_launcher",
+  "supported_os": [
+    "macos",
+    "linux",
+    "windows"
+  ],
+  "unsupported_behavior": "fail_fast",
+  "preflight": {
+    "cache_ttl_seconds": 600,
+    "checks": [
+      {
+        "type": "tool",
+        "name": "python",
+        "install_hint": {
+          "macos": "Install Python 3 and ensure python3 is in PATH.",
+          "linux": "Install python3 and ensure it is in PATH.",
+          "windows": "Install Python 3 or the py launcher and ensure it is in PATH."
+        }
+      }
+    ]
+  },
+  "entrypoint": {
+    "kind": "python",
+    "path": "scripts/run.py"
+  },
+  "tooling": {
+    "python": {
+      "macos": [
+        "python3"
+      ],
+      "linux": [
+        "python3"
+      ],
+      "windows": [
+        "py",
+        "-3"
+      ]
+    }
+  },
+  "default_command": "collect-doc-inventory",
+  "commands": [
+    {
+      "name": "collect-doc-inventory",
+      "description": "Run collect_doc_inventory.py",
+      "kind": "python",
+      "path": "scripts/collect_doc_inventory.py",
+      "args": []
+    },
+    {
+      "name": "extract-frontend-http-calls",
+      "description": "Run extract_frontend_http_calls.py",
+      "kind": "python",
+      "path": "scripts/extract_frontend_http_calls.py",
+      "args": []
+    },
+    {
+      "name": "scan-infra-keywords",
+      "description": "Run scan_infra_keywords.py",
+      "kind": "python",
+      "path": "scripts/scan_infra_keywords.py",
+      "args": []
+    }
+  ]
+}

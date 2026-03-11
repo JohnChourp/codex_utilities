@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "skill_name": "learn-byzantine-android-release",
+  "execution_mode": "python_launcher",
+  "supported_os": [
+    "macos",
+    "linux",
+    "windows"
+  ],
+  "unsupported_behavior": "fail_fast",
+  "preflight": {
+    "cache_ttl_seconds": 600,
+    "checks": [
+      {
+        "type": "tool",
+        "name": "bash",
+        "install_hint": {
+          "macos": "Install bash and ensure it is in PATH.",
+          "linux": "Install bash and ensure it is in PATH.",
+          "windows": "Install Git Bash or another bash-compatible shell and ensure bash is in PATH."
+        }
+      },
+      {
+        "type": "tool",
+        "name": "git",
+        "install_hint": {
+          "default": "Install Git and ensure it is in PATH."
+        }
+      },
+      {
+        "type": "tool",
+        "name": "node",
+        "install_hint": {
+          "default": "Install Node.js and ensure node is in PATH."
+        }
+      },
+      {
+        "type": "tool",
+        "name": "npm",
+        "install_hint": {
+          "default": "Install npm and ensure it is in PATH."
+        }
+      }
+    ]
+  },
+  "entrypoint": {
+    "kind": "python",
+    "path": "scripts/run.py"
+  },
+  "tooling": {
+    "bash": {
+      "macos": [
+        "bash"
+      ],
+      "linux": [
+        "bash"
+      ],
+      "windows": [
+        "bash"
+      ]
+    },
+    "git": {
+      "macos": [
+        "git"
+      ],
+      "linux": [
+        "git"
+      ],
+      "windows": [
+        "git"
+      ]
+    },
+    "node": {
+      "macos": [
+        "node"
+      ],
+      "linux": [
+        "node"
+      ],
+      "windows": [
+        "node"
+      ]
+    },
+    "npm": {
+      "macos": [
+        "npm"
+      ],
+      "linux": [
+        "npm"
+      ],
+      "windows": [
+        "npm"
+      ]
+    }
+  },
+  "default_command": "run-release",
+  "commands": [
+    {
+      "name": "run-release",
+      "description": "Run run_release.sh",
+      "kind": "shell",
+      "path": "scripts/run_release.sh",
+      "args": []
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "skill_name": "ios-simulator-open",
+  "execution_mode": "python_launcher",
+  "supported_os": [
+    "macos"
+  ],
+  "unsupported_behavior": "fail_fast",
+  "preflight": {
+    "cache_ttl_seconds": 600,
+    "checks": [
+      {
+        "type": "tool",
+        "name": "bash",
+        "install_hint": {
+          "macos": "Install bash and ensure it is in PATH.",
+          "linux": "Install bash and ensure it is in PATH.",
+          "windows": "Install Git Bash or another bash-compatible shell and ensure bash is in PATH."
+        }
+      },
+      {
+        "type": "tool",
+        "name": "xcrun",
+        "install_hint": {
+          "macos": "Install Xcode Command Line Tools and ensure xcrun is in PATH."
+        }
+      }
+    ]
+  },
+  "entrypoint": {
+    "kind": "python",
+    "path": "scripts/run.py"
+  },
+  "tooling": {
+    "bash": {
+      "macos": [
+        "bash"
+      ]
+    },
+    "xcrun": {
+      "macos": [
+        "xcrun"
+      ]
+    }
+  },
+  "default_command": "ios-simulator-open",
+  "commands": [
+    {
+      "name": "ios-simulator-open",
+      "description": "Run ios_simulator_open.sh",
+      "kind": "shell",
+      "path": "scripts/ios_simulator_open.sh",
+      "args": []
+    }
+  ]
+}

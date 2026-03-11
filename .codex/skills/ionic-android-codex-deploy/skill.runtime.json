@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "skill_name": "ionic-android-codex-deploy",
+  "execution_mode": "python_launcher",
+  "supported_os": [
+    "macos",
+    "linux",
+    "windows"
+  ],
+  "unsupported_behavior": "fail_fast",
+  "preflight": {
+    "cache_ttl_seconds": 600,
+    "checks": [
+      {
+        "type": "tool",
+        "name": "bash",
+        "install_hint": {
+          "macos": "Install bash and ensure it is in PATH.",
+          "linux": "Install bash and ensure it is in PATH.",
+          "windows": "Install Git Bash or another bash-compatible shell and ensure bash is in PATH."
+        }
+      },
+      {
+        "type": "tool",
+        "name": "node",
+        "install_hint": {
+          "default": "Install Node.js and ensure node is in PATH."
+        }
+      },
+      {
+        "type": "tool",
+        "name": "npm",
+        "install_hint": {
+          "default": "Install npm and ensure it is in PATH."
+        }
+      },
+      {
+        "type": "tool",
+        "name": "npx",
+        "install_hint": {
+          "default": "Install npm and ensure npx is in PATH."
+        }
+      },
+      {
+        "type": "tool",
+        "name": "adb",
+        "install_hint": {
+          "default": "Install Android platform-tools and ensure adb is in PATH."
+        }
+      },
+      {
+        "type": "tool",
+        "name": "emulator",
+        "install_hint": {
+          "default": "Install Android Emulator and ensure emulator is in PATH."
+        }
+      }
+    ]
+  },
+  "entrypoint": {
+    "kind": "python",
+    "path": "scripts/run.py"
+  },
+  "tooling": {
+    "bash": {
+      "macos": [
+        "bash"
+      ],
+      "linux": [
+        "bash"
+      ],
+      "windows": [
+        "bash"
+      ]
+    },
+    "node": {
+      "macos": [
+        "node"
+      ],
+      "linux": [
+        "node"
+      ],
+      "windows": [
+        "node"
+      ]
+    },
+    "npm": {
+      "macos": [
+        "npm"
+      ],
+      "linux": [
+        "npm"
+      ],
+      "windows": [
+        "npm"
+      ]
+    },
+    "npx": {
+      "macos": [
+        "npx"
+      ],
+      "linux": [
+        "npx"
+      ],
+      "windows": [
+        "npx"
+      ]
+    },
+    "adb": {
+      "macos": [
+        "adb"
+      ],
+      "linux": [
+        "adb"
+      ],
+      "windows": [
+        "adb"
+      ]
+    },
+    "emulator": {
+      "macos": [
+        "emulator"
+      ],
+      "linux": [
+        "emulator"
+      ],
+      "windows": [
+        "emulator"
+      ]
+    }
+  },
+  "default_command": "ionic-android-codex-deploy",
+  "commands": [
+    {
+      "name": "ionic-android-codex-deploy",
+      "description": "Run ionic_android_codex_deploy.sh",
+      "kind": "shell",
+      "path": "scripts/ionic_android_codex_deploy.sh",
+      "args": []
+    }
+  ]
+}

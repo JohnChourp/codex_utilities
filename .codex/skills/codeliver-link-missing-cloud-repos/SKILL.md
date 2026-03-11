@@ -97,7 +97,7 @@ CODELIVER_AUTH_TOKEN="<your-token>" ~/.codex/skills/codeliver-link-missing-cloud
 
 ## Optional env vars
 
-- `CONCURRENCY` (default: `20`) for sync stage
+- `CONCURRENCY` (default: `20`) for sync stage parallel workers
 - `REPORT_DIR` (default: `/Users/john/Downloads/lambdas/_sync_reports`) for sync stage text reports
 - `CODELIVER_AUTH_TOKEN` (optional) auto-bootstrap token for `~/.codeliver/config.json` when missing
 

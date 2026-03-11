@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 from dataclasses import dataclass
 import os
+from pathlib import Path
 import shutil
 import subprocess
 import sys
@@ -15,6 +16,15 @@ import urllib.parse
 import zipfile
 
 from github_utils import github_request
+
+RUNTIME_SUPPORT_DIR = (
+    Path(__file__).resolve().parents[2] / "skill-runtime-lib" / "scripts"
+)
+if str(RUNTIME_SUPPORT_DIR) not in sys.path:
+    sys.path.insert(0, str(RUNTIME_SUPPORT_DIR))
+
+from runtime_support import validate_skill
+
 DEFAULT_REF = "main"
 
 
@@ -167,6 +177,10 @@ def _validate_skill(path: str) -> None:
     skill_md = os.path.join(path, "SKILL.md")
     if not os.path.isfile(skill_md):
         raise InstallError("SKILL.md not found in selected skill directory.")
+    issues = validate_skill(path)
+    if issues:
+        formatted = "\n".join(issue.format() for issue in issues)
+        raise InstallError(f"Skill runtime validation failed:\n{formatted}")
 
 
 def _copy_skill(src: str, dest_dir: str) -> None:

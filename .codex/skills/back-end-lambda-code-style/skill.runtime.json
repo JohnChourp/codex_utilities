@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "skill_name": "back-end-lambda-code-style",
+  "execution_mode": "guidance",
+  "supported_os": [
+    "macos",
+    "linux",
+    "windows"
+  ],
+  "unsupported_behavior": "fail_fast",
+  "preflight": {
+    "cache_ttl_seconds": 600,
+    "checks": []
+  },
+  "entrypoint": null,
+  "tooling": {}
+}

@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "skill_name": "ionic-ios-codex-deploy",
+  "execution_mode": "python_launcher",
+  "supported_os": [
+    "macos"
+  ],
+  "unsupported_behavior": "fail_fast",
+  "preflight": {
+    "cache_ttl_seconds": 600,
+    "checks": [
+      {
+        "type": "tool",
+        "name": "bash",
+        "install_hint": {
+          "macos": "Install bash and ensure it is in PATH.",
+          "linux": "Install bash and ensure it is in PATH.",
+          "windows": "Install Git Bash or another bash-compatible shell and ensure bash is in PATH."
+        }
+      },
+      {
+        "type": "tool",
+        "name": "node",
+        "install_hint": {
+          "default": "Install Node.js and ensure node is in PATH."
+        }
+      },
+      {
+        "type": "tool",
+        "name": "npm",
+        "install_hint": {
+          "default": "Install npm and ensure it is in PATH."
+        }
+      },
+      {
+        "type": "tool",
+        "name": "npx",
+        "install_hint": {
+          "default": "Install npm and ensure npx is in PATH."
+        }
+      },
+      {
+        "type": "tool",
+        "name": "xcrun",
+        "install_hint": {
+          "macos": "Install Xcode Command Line Tools and ensure xcrun is in PATH."
+        }
+      },
+      {
+        "type": "tool",
+        "name": "rg",
+        "install_hint": {
+          "default": "Install ripgrep and ensure rg is in PATH."
+        }
+      }
+    ]
+  },
+  "entrypoint": {
+    "kind": "python",
+    "path": "scripts/run.py"
+  },
+  "tooling": {
+    "bash": {
+      "macos": [
+        "bash"
+      ]
+    },
+    "node": {
+      "macos": [
+        "node"
+      ]
+    },
+    "npm": {
+      "macos": [
+        "npm"
+      ]
+    },
+    "npx": {
+      "macos": [
+        "npx"
+      ]
+    },
+    "xcrun": {
+      "macos": [
+        "xcrun"
+      ]
+    },
+    "rg": {
+      "macos": [
+        "rg"
+      ]
+    }
+  },
+  "default_command": "ionic-ios-codex-deploy",
+  "commands": [
+    {
+      "name": "ionic-ios-codex-deploy",
+      "description": "Run ionic_ios_codex_deploy.sh",
+      "kind": "shell",
+      "path": "scripts/ionic_ios_codex_deploy.sh",
+      "args": []
+    }
+  ]
+}

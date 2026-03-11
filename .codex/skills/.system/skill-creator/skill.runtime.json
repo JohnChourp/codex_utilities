@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "skill_name": "skill-creator",
+  "execution_mode": "python_launcher",
+  "supported_os": [
+    "macos",
+    "linux",
+    "windows"
+  ],
+  "unsupported_behavior": "fail_fast",
+  "preflight": {
+    "cache_ttl_seconds": 600,
+    "checks": [
+      {
+        "type": "tool",
+        "name": "python",
+        "install_hint": {
+          "macos": "Install Python 3 and ensure python3 is in PATH.",
+          "linux": "Install python3 and ensure it is in PATH.",
+          "windows": "Install Python 3 or the py launcher and ensure it is in PATH."
+        }
+      }
+    ]
+  },
+  "entrypoint": {
+    "kind": "python",
+    "path": "scripts/run.py"
+  },
+  "tooling": {
+    "python": {
+      "macos": [
+        "python3"
+      ],
+      "linux": [
+        "python3"
+      ],
+      "windows": [
+        "py",
+        "-3"
+      ]
+    }
+  },
+  "default_command": "generate-openai-yaml",
+  "commands": [
+    {
+      "name": "generate-openai-yaml",
+      "description": "Run generate_openai_yaml.py",
+      "kind": "python",
+      "path": "scripts/generate_openai_yaml.py",
+      "args": []
+    },
+    {
+      "name": "init-skill",
+      "description": "Run init_skill.py",
+      "kind": "python",
+      "path": "scripts/init_skill.py",
+      "args": []
+    },
+    {
+      "name": "quick-validate",
+      "description": "Run quick_validate.py",
+      "kind": "python",
+      "path": "scripts/quick_validate.py",
+      "args": []
+    }
+  ]
+}

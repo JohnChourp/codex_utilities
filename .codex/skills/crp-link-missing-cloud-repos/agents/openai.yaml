@@ -1,4 +1,4 @@
 interface:
   display_name: "CRP Link Repos"
   short_description: "Link missing CRP cloud repos for GitHub crp-* and sync local repos"
-  default_prompt: "Use $crp-link-missing-cloud-repos to discover GitHub repos containing 'crp-' (exclude archived), ensure they are linked as cloud repos in CRP project 'crp' (auto-create in cloud-repos-auto-linking/auto-linked-crp-repos when missing), then sync local repos. Keep cloud-repos-panel and crp-cli in /Users/john/Downloads/projects and all other repos in /Users/john/Downloads/lambdas/crp_all."
+  default_prompt: "Use $crp-link-missing-cloud-repos to discover GitHub repos containing 'crp-' (exclude archived), ensure they are linked as cloud repos in CRP project 'crp' (auto-create in cloud-repos-auto-linking/auto-linked-crp-repos when missing), then sync local repos with default CONCURRENCY=20 unless overridden via env. Keep cloud-repos-panel and crp-cli in /Users/john/Downloads/projects and all other repos in /Users/john/Downloads/lambdas/crp_all."

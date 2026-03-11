@@ -1,0 +1,196 @@
+{
+  "schema_version": 1,
+  "skill_name": "CRP Repos Harden PR",
+  "execution_mode": "python_launcher",
+  "supported_os": [
+    "macos",
+    "linux",
+    "windows"
+  ],
+  "unsupported_behavior": "fail_fast",
+  "preflight": {
+    "cache_ttl_seconds": 600,
+    "checks": [
+      {
+        "type": "tool",
+        "name": "bash",
+        "install_hint": {
+          "macos": "Install bash and ensure it is in PATH.",
+          "linux": "Install bash and ensure it is in PATH.",
+          "windows": "Install Git Bash or another bash-compatible shell and ensure bash is in PATH."
+        }
+      },
+      {
+        "type": "tool",
+        "name": "npm",
+        "install_hint": {
+          "default": "Install npm and ensure it is in PATH."
+        }
+      },
+      {
+        "type": "tool",
+        "name": "node",
+        "install_hint": {
+          "default": "Install Node.js and ensure node is in PATH."
+        }
+      },
+      {
+        "type": "tool",
+        "name": "git",
+        "install_hint": {
+          "default": "Install Git and ensure it is in PATH."
+        }
+      },
+      {
+        "type": "tool",
+        "name": "gh",
+        "install_hint": {
+          "default": "Install GitHub CLI and ensure gh is in PATH."
+        }
+      },
+      {
+        "type": "tool",
+        "name": "aws",
+        "install_hint": {
+          "default": "Install AWS CLI and ensure aws is in PATH."
+        }
+      },
+      {
+        "type": "tool",
+        "name": "crp",
+        "install_hint": {
+          "default": "Install the crp CLI and ensure it is in PATH."
+        }
+      },
+      {
+        "type": "tool",
+        "name": "la",
+        "install_hint": {
+          "default": "Install the la CLI and ensure it is in PATH."
+        }
+      },
+      {
+        "type": "tool",
+        "name": "whc",
+        "install_hint": {
+          "default": "Install the whc CLI and ensure it is in PATH."
+        }
+      }
+    ]
+  },
+  "entrypoint": {
+    "kind": "python",
+    "path": "scripts/run.py"
+  },
+  "tooling": {
+    "bash": {
+      "macos": [
+        "bash"
+      ],
+      "linux": [
+        "bash"
+      ],
+      "windows": [
+        "bash"
+      ]
+    },
+    "npm": {
+      "macos": [
+        "npm"
+      ],
+      "linux": [
+        "npm"
+      ],
+      "windows": [
+        "npm"
+      ]
+    },
+    "node": {
+      "macos": [
+        "node"
+      ],
+      "linux": [
+        "node"
+      ],
+      "windows": [
+        "node"
+      ]
+    },
+    "git": {
+      "macos": [
+        "git"
+      ],
+      "linux": [
+        "git"
+      ],
+      "windows": [
+        "git"
+      ]
+    },
+    "gh": {
+      "macos": [
+        "gh"
+      ],
+      "linux": [
+        "gh"
+      ],
+      "windows": [
+        "gh"
+      ]
+    },
+    "aws": {
+      "macos": [
+        "aws"
+      ],
+      "linux": [
+        "aws"
+      ],
+      "windows": [
+        "aws"
+      ]
+    },
+    "crp": {
+      "macos": [
+        "crp"
+      ],
+      "linux": [
+        "crp"
+      ],
+      "windows": [
+        "crp"
+      ]
+    },
+    "la": {
+      "macos": [
+        "la"
+      ],
+      "linux": [
+        "la"
+      ],
+      "windows": [
+        "la"
+      ]
+    },
+    "whc": {
+      "macos": [
+        "whc"
+      ],
+      "linux": [
+        "whc"
+      ],
+      "windows": [
+        "whc"
+      ]
+    }
+  },
+  "default_command": "crp-harden-preflight",
+  "commands": [
+    {
+      "name": "crp-harden-preflight",
+      "description": "Run crp_harden_preflight.sh",
+      "kind": "shell",
+      "path": "scripts/crp_harden_preflight.sh",
+      "args": []
+    }
+  ]
+}
