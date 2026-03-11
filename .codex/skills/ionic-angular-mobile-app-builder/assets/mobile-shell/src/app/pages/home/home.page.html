@@ -1,0 +1,58 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-title>__APP_TITLE__</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="page-shell home-shell">
+    <section class="hero glass-card">
+      <div class="hero-copy">
+        <div class="section-label">
+          <ion-icon [icon]="heroIcon"></ion-icon>
+          <span>__PROJECT_TYPE__</span>
+        </div>
+        <h1 class="section-title">A brighter mobile start for __APP_TITLE__.</h1>
+        <p class="section-copy">__TAGLINE__</p>
+        <div class="hero-actions">
+          <ion-button color="primary" routerLink="/discover">
+            Explore the flow
+            <ion-icon slot="end" [icon]="ctaIcon"></ion-icon>
+          </ion-button>
+          <ion-button fill="clear" routerLink="/profile">
+            Tune the experience
+          </ion-button>
+        </div>
+      </div>
+      <div class="hero-panel">
+        <div class="hero-badge">Mobile shell</div>
+        <div class="hero-panel__card">
+          <strong>Launch-ready foundation</strong>
+          <span>Ionic UI, Angular standalone, Capacitor sync, and native project hooks are already wired.</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="stats-grid">
+      <article class="stat-card glass-card" *ngFor="let stat of stats">
+        <ion-icon [icon]="stat.icon"></ion-icon>
+        <span>{{ stat.label }}</span>
+        <strong>{{ stat.value }}</strong>
+        <p>{{ stat.detail }}</p>
+      </article>
+    </section>
+
+    <section class="insights glass-card">
+      <div>
+        <div class="section-label">Starter highlights</div>
+        <h2>Designed for clarity on a phone-sized screen.</h2>
+      </div>
+      <div class="insight-list">
+        <article *ngFor="let item of highlights">
+          <h3>{{ item.title }}</h3>
+          <p>{{ item.copy }}</p>
+        </article>
+      </div>
+    </section>
+  </div>
+</ion-content>

@@ -1,0 +1,37 @@
+.discover-shell {
+  display: grid;
+  gap: 18px;
+}
+
+.discover-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.discover-card {
+  display: grid;
+  gap: 10px;
+  padding: 20px;
+}
+
+.discover-card ion-icon {
+  font-size: 1.4rem;
+  color: var(--ion-color-primary);
+}
+
+.discover-card h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.discover-card p {
+  margin: 0;
+  color: var(--app-muted);
+  line-height: 1.6;
+}
+
+@media (min-width: 768px) {
+  .discover-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

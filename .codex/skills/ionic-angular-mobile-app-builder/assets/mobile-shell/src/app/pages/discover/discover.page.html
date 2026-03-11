@@ -1,0 +1,28 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Discover</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="page-shell discover-shell">
+    <section>
+      <div class="section-label">Screen two</div>
+      <h1 class="section-title">__DISCOVERY_TITLE__</h1>
+      <p class="section-copy">
+        This screen is a starter pattern for feature exploration, curated content, and guided actions.
+      </p>
+    </section>
+
+    <section class="discover-grid">
+      <article class="discover-card glass-card" *ngFor="let card of cards">
+        <ion-icon [icon]="card.icon"></ion-icon>
+        <h2>{{ card.title }}</h2>
+        <p>{{ card.copy }}</p>
+      </article>
+    </section>
+  </div>
+</ion-content>

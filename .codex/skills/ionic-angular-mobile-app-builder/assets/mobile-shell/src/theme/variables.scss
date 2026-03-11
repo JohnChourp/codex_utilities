@@ -1,0 +1,33 @@
+:root {
+  --ion-color-primary: __PRIMARY__;
+  --ion-color-primary-rgb: 15, 118, 110;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: __PRIMARY__;
+  --ion-color-primary-tint: __SECONDARY__;
+
+  --ion-color-secondary: __SECONDARY__;
+  --ion-color-secondary-rgb: 20, 184, 166;
+  --ion-color-secondary-contrast: #082f2b;
+  --ion-color-secondary-contrast-rgb: 8, 47, 43;
+  --ion-color-secondary-shade: __SECONDARY__;
+  --ion-color-secondary-tint: __ACCENT__;
+
+  --ion-color-tertiary: __ACCENT__;
+  --ion-color-tertiary-rgb: 245, 158, 11;
+  --ion-color-tertiary-contrast: #1f2937;
+  --ion-color-tertiary-contrast-rgb: 31, 41, 55;
+  --ion-color-tertiary-shade: __ACCENT__;
+  --ion-color-tertiary-tint: __ACCENT__;
+
+  --ion-background-color: __SURFACE__;
+  --ion-background-color-rgb: 244, 251, 250;
+  --ion-text-color: __INK__;
+  --ion-text-color-rgb: 15, 23, 42;
+
+  --app-surface: __SURFACE__;
+  --app-surface-strong: __SURFACE_STRONG__;
+  --app-ink: __INK__;
+  --app-muted: __MUTED__;
+  --app-gradient: linear-gradient(135deg, __PRIMARY__ 0%, __SECONDARY__ 58%, __ACCENT__ 100%);
+}

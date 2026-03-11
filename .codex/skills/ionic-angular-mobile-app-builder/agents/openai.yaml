@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ionic Angular App Builder"
+  short_description: "Scaffold polished Ionic Angular mobile apps"
+  default_prompt: "Use $ionic-angular-mobile-app-builder to create a new Ionic Angular mobile app from a project type."

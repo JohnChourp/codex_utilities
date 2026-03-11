@@ -1,0 +1,34 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Profile</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="page-shell profile-shell">
+    <section class="glass-card intro-card">
+      <div class="section-label">Screen three</div>
+      <h1 class="section-title">__PROFILE_TITLE__</h1>
+      <p class="section-copy">
+        Use this starter screen for settings, account state, saved items, or personalization flows.
+      </p>
+    </section>
+
+    <ion-list class="settings-list glass-card" lines="none">
+      <ion-item *ngFor="let preference of preferences">
+        <ion-label>
+          <h2>{{ preference.title }}</h2>
+          <p>{{ preference.detail }}</p>
+        </ion-label>
+        <ion-toggle [checked]="preference.enabled" slot="end"></ion-toggle>
+      </ion-item>
+    </ion-list>
+
+    <ion-note>
+      The generated app shell is intentionally small. Replace these placeholders with real flows instead of expanding them ad hoc in templates.
+    </ion-note>
+  </div>
+</ion-content>

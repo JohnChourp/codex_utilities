@@ -1,0 +1,149 @@
+.home-shell {
+  display: grid;
+  gap: 18px;
+}
+
+.hero {
+  position: relative;
+  display: grid;
+  gap: 20px;
+  padding: 24px;
+  overflow: hidden;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: auto -40px -80px auto;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: var(--app-gradient);
+  filter: blur(12px);
+  opacity: 0.18;
+}
+
+.hero-copy,
+.hero-panel {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+.hero-panel {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+
+.hero-badge {
+  width: fit-content;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--app-ink);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.hero-panel__card {
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+  border-radius: 22px;
+  background: var(--app-gradient);
+  color: #ffffff;
+}
+
+.hero-panel__card span {
+  line-height: 1.6;
+  opacity: 0.92;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.stat-card {
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+}
+
+.stat-card ion-icon {
+  font-size: 1.25rem;
+  color: var(--ion-color-primary);
+}
+
+.stat-card span {
+  color: var(--app-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.stat-card strong {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.stat-card p {
+  margin: 0;
+  color: var(--app-muted);
+  line-height: 1.5;
+}
+
+.insights {
+  display: grid;
+  gap: 18px;
+  padding: 22px;
+}
+
+.insights h2 {
+  margin: 12px 0 0;
+  font-size: 1.4rem;
+}
+
+.insight-list {
+  display: grid;
+  gap: 12px;
+}
+
+.insight-list article {
+  padding: 16px 18px;
+  border-radius: 22px;
+  background: var(--app-surface);
+}
+
+.insight-list h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.insight-list p {
+  margin: 0;
+  color: var(--app-muted);
+  line-height: 1.6;
+}
+
+@media (max-width: 720px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 768px) {
+  .hero {
+    grid-template-columns: minmax(0, 1.4fr) minmax(260px, 0.8fr);
+    align-items: center;
+  }
+}
