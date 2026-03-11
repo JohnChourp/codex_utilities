@@ -1,6 +1,6 @@
 ---
 name: closeout-docs
-description: Complete closeout with ClickUp updates, testing transitions, and concise delivery summaries.
+description: Complete end-of-task closeout with ClickUp updates, testing-status transitions, and concise delivery summaries. Use when implementation or discussion work is done and task closure artifacts must be recorded consistently.
 ---
 
 # Closeout Docs

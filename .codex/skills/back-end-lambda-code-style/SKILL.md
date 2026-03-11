@@ -1,6 +1,6 @@
 ---
 name: back-end-lambda-code-style
-description: Apply the standard Node.js backend style for paneldelivery lambda implementation and refactoring.
+description: Apply backend coding style for Node.js lambdas in `dm_lambda_functions/paneldelivery`. Use when implementing or refactoring paneldelivery lambdas and you need consistent deliveryManager module usage, lodash and Bluebird iteration style, DynamoDB params patterns, validation/error handling, and API response conventions.
 ---
 
 # Back End Lambda Code Style
