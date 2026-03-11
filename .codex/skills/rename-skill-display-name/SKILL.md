@@ -1,6 +1,6 @@
 ---
 name: "Rename Skill Display Name"
-description: Update only the UI-facing display name of an existing Codex skill in the skills list/chips without changing its trigger name, path, workflow, or behavior.
+description: Update a skill's UI display name without changing its trigger, path, or behavior.
 ---
 
 # Rename Skill Display Name

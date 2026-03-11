@@ -1,6 +1,6 @@
 ---
 name: android-debug-deploy
-description: Build, install, archive, and launch an Android debug APK on a connected device in one run. Use when the user asks to avoid repetitive terminal commands like `./gradlew installDebug`, manual APK copying, and `adb` launch commands.
+description: Build, install, archive, and launch one Android debug APK in a single workflow.
 ---
 
 # Android Debug Deploy

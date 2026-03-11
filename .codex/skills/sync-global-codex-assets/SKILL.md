@@ -1,6 +1,6 @@
 ---
 name: sync-global-codex-assets
-description: Check for updates to the codexDevAgent workflow assets, clone or refresh the source repo when needed, and safely merge the managed AGENTS.md workflow block plus sync repo skill folders into ~/.codex. Use when the user asks to check for updates, run a safe update, run a clean install, refresh installed Codex skills, or update global Codex instructions from this repo.
+description: Refresh global codexDevAgent assets and merge managed AGENTS and skill updates safely.
 ---
 
 # Sync Global Codex Assets

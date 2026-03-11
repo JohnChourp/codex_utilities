@@ -1,6 +1,6 @@
 ---
 name: codeliver-audit-refresh-playbooks-refs
-description: Combine frontend-lambda refs audit, playbooks/refs coverage audit, and playbooks/refs refresh after infra changes into one CodeDeliver workflow.
+description: Audit and refresh CodeDeliver frontend refs, playbooks, and infra-derived reference files.
 ---
 
 # codeliver-audit-refresh-playbooks-refs

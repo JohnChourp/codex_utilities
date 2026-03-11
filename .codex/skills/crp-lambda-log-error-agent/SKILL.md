@@ -1,6 +1,6 @@
 ---
 name: "CRP Lambda Log Error Agent"
-description: "Agent-native runbook for end-to-end Lambda error investigation through CRP CLI without lambda-ai-tools dependency. Supports single incident triage and batch triage for all locally downloaded CRP lambdas under /home/dm-soft-1/Downloads/lambdas/crp_all."
+description: Investigate CRP lambda errors end-to-end for single incidents or batch local triage.
 ---
 
 # CRP Lambda Log Error Agent

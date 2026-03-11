@@ -1,6 +1,6 @@
 ---
 name: clickup-repo-linking
-description: Link implementation tasks to repository registry tasks in ClickUp with safe ownership checks and validated relationships. Use when work spans one or more repos and task-to-repo linkage must be established before implementation.
+description: Link ClickUp implementation tasks to repository registry tasks with validated ownership and relationships.
 ---
 
 # Clickup Repo Linking

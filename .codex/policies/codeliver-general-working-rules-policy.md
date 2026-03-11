@@ -1,0 +1,32 @@
+# CodeDeliver General Working Rules Policy (On-Demand)
+
+Load this policy when a task needs non-MCP, non-ClickUp, non-lambda-hardening behavioral rules.
+
+## General implementation and UX rules
+
+- Prefer minimal, style-consistent changes; avoid large refactors unless explicitly requested.
+- When changes are needed in files under `ios/` or `android/` (regenerated on deploy), do **not** edit those files directly. Create/update a script (e.g., `build-before.js`, `build-after.js`, `capacitor-project.ts`) that applies the changes during build/deploy.
+- Ask clarifying questions only in Plan Mode (via interactive options UI) or when execution is blocked by a truly mandatory user decision that cannot be inferred from code/context.
+- **Re-entrant pending-selection safety (mandatory):** when implementing any pending UI selection flow that opens map markers/info windows (or any handler that can trigger state refresh), always apply `clear-before-open` and `restore-on-miss`.
+  - Required pattern: copy pending id locally -> set pending state to `null` -> attempt selection/open -> if selection target is missing, restore pending id.
+  - Forbidden pattern: clearing pending id only after `open...()`/selection handler returns, because those handlers may synchronously trigger refresh cycles and re-enter the pending-flush method, causing recursion and stack overflows.
+  - Quick self-check: verify no cycle of the form `flushPending* -> open/select* -> refresh* -> flushPending*` can run with the same pending id still set.
+- **Plan Mode question UX (mandatory):** when in Plan Mode, ask clarifying questions through the interactive options UI (`request_user_input`) and avoid posting free-form question lists in plain chat. Keep asking through the interactive UI until required decisions are collected, then present the final plan so the user can choose “Implement Plan”.
+
+## Frontend translation and template rules
+
+- Translation rule (UI text in templates): never hardcode user-visible labels/messages/statuses (including Greek text such as `ενεργο` / `ανενεργο`) directly in templates. Always use the translate pipe with a key (e.g., `{{ "store-status-active" | translate }}`) and add/update that key in **every** `src/assets/i18n/*.json` language file.
+- Translation completion gate (mandatory): for every change that adds/updates translation key usage (`| translate`, `translate.instant`, `translate.get`, `translate.stream`), run a key-coverage check against all `src/assets/i18n/*.json` files of the impacted frontend project before completing the task.
+  - If any used key is missing from at least one locale file, the task is **not complete**.
+  - Final reply must include: (a) the checked key set, and (b) the locale files where keys were added/updated.
+- Translation key safety: do not introduce dotted translation keys that collide with existing **string** keys (e.g. avoid `statistics.week-grouping-hint` if `statistics` is already a string). Prefer flat keys like `statistics-week-grouping-hint`, or ensure the parent key is an object in all locales.
+- UI affordance rule (chips): do **not** render `ion-chip` elements that look clickable but perform no action on tap/click. If the content is informational only, use `ion-badge`, `ion-text`, `ion-label`, or plain text containers instead.
+
+## Engineering quality rules
+
+- Logging: when dumping events for troubleshooting, do not redact `event.body`; keep it intact while still redacting auth tokens, cookies, and passwords.
+- **Clarity over efficiency:** if there is a trade-off between performance and readability/maintainability, prefer the simplest correct implementation (even if it is less efficient).
+- Avoid `ng-template`/`ngTemplateOutlet`; keep the full markup inline inside each `@for` loop, even if it duplicates markup.
+- In Angular templates, prefer the new control flow blocks; use `@if`/`@for` and avoid `*ngIf`/`*ngFor`.
+- Ionic modal safety rule (componentProps vs signals): values passed through `modalController.create({ componentProps: ... })` are assigned directly on the component instance. Do **not** model those props as callable signal inputs (`input()` / `InputSignal`) unless callers pass signals explicitly. For primitive/array/object props (e.g. `mode`, `title`, `items`), use plain `@Input()` properties; otherwise runtime errors like `TypeError: this.<prop> is not a function` can occur.
+- **Dependency hygiene (always):** remove unused dependencies from `package.json`; do not keep deps “just in case”.

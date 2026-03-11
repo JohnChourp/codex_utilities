@@ -1,6 +1,6 @@
 ---
 name: clickup-task-lifecycle
-description: Manage ClickUp task handling from discovery through execution gating and status hygiene. Use when a request involves ClickUp task lookup, task ownership checks, status changes, time tracking rules, language mirroring, or safe task updates.
+description: Handle ClickUp task discovery, ownership checks, status hygiene, and safe execution updates.
 ---
 
 # Clickup Task Lifecycle

@@ -1,6 +1,6 @@
 ---
 name: "CRP Link Repos"
-description: Sync CRP cloud repos for GitHub `crp-*` repos (project `crp`), auto-link missing cloud repos, then keep local repos updated under `Downloads/lambdas/crp_all` with special project placement for `cloud-repos-panel` and `crp-cli`.
+description: Sync CRP repos locally and in cloud, including missing cloud-repo auto-linking.
 ---
 
 # CRP Link Repos

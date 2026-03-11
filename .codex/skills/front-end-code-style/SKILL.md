@@ -1,6 +1,6 @@
 ---
 name: front-end-code-style
-description: Apply frontend coding style for Angular Ionic applications in `mobileorder` and `dmpanel`. Use when implementing or refactoring frontend code and you need consistent declaration order, naming, state subscription patterns, and template performance rules.
+description: Apply the standard Angular Ionic frontend style for implementation and refactoring.
 ---
 
 # Front End Code Style

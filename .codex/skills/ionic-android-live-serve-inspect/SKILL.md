@@ -1,6 +1,6 @@
 ---
 name: ionic-android-live-serve-inspect
-description: Start Ionic live dev server on port 8206, wire Android USB device with adb reverse, install/launch Capacitor app, and open chrome://inspect/#devices for live debugging.
+description: Start Ionic live serve, wire Android debugging, and open Chrome device inspection.
 ---
 
 # Ionic Android Live Serve Inspect

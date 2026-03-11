@@ -1,6 +1,6 @@
 ---
 name: drawio-architecture-auto-export
-description: Create a complete architecture diagram for app pages/subpages by reading ARCHITECTURE.md, writing ARCHITECTURE.drawio with a short description in every box, and auto-exporting ARCHITECTURE.png. Use when the user asks for page-flow diagrams, draw.io architecture maps, or automatic drawio+png generation from documented navigation.
+description: Generate ARCHITECTURE.drawio and PNG diagrams from documented app page flows.
 ---
 
 # Drawio Architecture Auto Export

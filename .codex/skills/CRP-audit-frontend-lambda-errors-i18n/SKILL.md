@@ -1,6 +1,6 @@
 ---
 name: "CRP Audit Frontend Lambda Errors i18n"
-description: Audit and autofix frontend-visible CRP lambda error translation coverage for cloud-repos-panel using one-hop lambda expansion and OpenAI auto-translation.
+description: Audit and autofix CRP frontend-visible lambda error translations for cloud-repos-panel.
 ---
 
 # CRP Audit Frontend Lambda Errors i18n

@@ -1,6 +1,6 @@
 ---
 name: ios-simulator-open
-description: Create or reuse an iPhone 17 Pro Max iOS Simulator, boot it, open the Simulator app on that device, and keep it running for manual testing.
+description: Create or reuse an iPhone 17 Pro Max simulator for manual iOS testing.
 ---
 
 # iOS Simulator Open

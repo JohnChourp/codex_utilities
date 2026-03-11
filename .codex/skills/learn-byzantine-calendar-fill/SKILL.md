@@ -1,6 +1,6 @@
 ---
 name: learn-byzantine-calendar-fill
-description: Fill one requested month in LearnByzantineMusic calendar dataset with celebrations and readings using the project month-fill pipeline.
+description: Fill one LearnByzantineMusic calendar month with celebrations and liturgical readings.
 ---
 
 # learn-byzantine-calendar-fill

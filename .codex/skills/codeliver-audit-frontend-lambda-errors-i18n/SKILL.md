@@ -1,6 +1,6 @@
 ---
 name: codeliver-audit-frontend-lambda-errors-i18n
-description: Audit and autofix frontend-visible lambda CustomError translation coverage across impacted CodeDeliver frontends using caller-based translation paths.
+description: Audit and autofix frontend-visible CodeDeliver lambda CustomError translation coverage gaps.
 ---
 
 # codeliver-audit-frontend-lambda-errors-i18n

@@ -1,6 +1,6 @@
 ---
 name: codeliver-sync-global-modal-styles
-description: Sync shared modal-related global.scss selectors from codeliver-panel to codeliver-sap/codeliver-pos with dry-run reports and safe exact-name parity rules.
+description: Sync shared modal global.scss selectors from codeliver-panel into parity targets safely.
 ---
 
 # codeliver-sync-global-modal-styles

@@ -1,12 +1,6 @@
 ---
 name: "CRP Repos Harden PR"
-description: >-
-  Runbook + agent-mode execution workflow for `crp repos harden-pr` (PR-only
-  hardening in Lambda repos: `la run harden` + `la run handled-errors-policy` +
-  open PR; no merge, no deploy, no AWS mutations). Use when you want to
-  harden/upgrade a Lambda repo safely via PR review, avoid nested `codex exec`
-  terminals, or when a legacy runtime/arch/SDK migration is needed but
-  merge+deploy must stay out of scope.
+description: Run or explain the PR-only CRP hardening flow without merge or deploy.
 ---
 
 # CRP repos harden-pr

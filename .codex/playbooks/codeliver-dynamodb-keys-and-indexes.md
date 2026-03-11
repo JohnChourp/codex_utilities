@@ -84,7 +84,8 @@ Primary key
 
 Secondary indexes
 
-- GSI: None
+- GSI:
+  - group_delivery_guy_id-type-index: PK group_delivery_guy_id (String), SK type (String)
 - LSI: None
 
 ### codeliver-delivery-guys-coordinates
@@ -313,7 +314,8 @@ Primary key
 
 Secondary indexes
 
-- GSI: None
+- GSI:
+  - group_request_id-type-index: PK group_request_id (String), SK type (String)
 - LSI: None
 
 ### codeliver-requests-calculations

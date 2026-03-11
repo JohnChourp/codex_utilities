@@ -1,6 +1,6 @@
 ---
 name: crp-audit-refresh-playbooks-refs
-description: Combine frontend-lambda refs audit, playbooks/refs coverage audit, and playbooks/refs refresh after infra changes into one CRP workflow for cloud-repos-panel and crp_all.
+description: Audit and refresh CRP frontend refs, playbooks, and infra-derived reference files.
 ---
 
 # crp-audit-refresh-playbooks-refs

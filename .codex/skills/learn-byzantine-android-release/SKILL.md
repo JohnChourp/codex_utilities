@@ -1,6 +1,6 @@
 ---
 name: learn-byzantine-android-release
-description: Create a new Android app release for LearnByzantineMusic by bumping version, building release APK/AAB, creating git tag, and pushing so GitHub Release assets are published automatically.
+description: Create a LearnByzantineMusic Android release with version bump, build, tag, and push.
 ---
 
 # Learn Byzantine Android Release

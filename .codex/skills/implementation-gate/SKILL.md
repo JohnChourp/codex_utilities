@@ -1,6 +1,6 @@
 ---
 name: implementation-gate
-description: Enforce pre-implementation planning, ambiguity cleanup, and explicit go-ahead before coding. Use when a task needs architecture scouting, concrete implementation planning, user confirmation, and controlled transition into active development.
+description: Enforce pre-implementation planning, ambiguity cleanup, and explicit go-ahead before coding.
 ---
 
 # Implementation Gate

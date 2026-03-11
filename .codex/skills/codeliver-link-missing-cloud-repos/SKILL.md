@@ -1,6 +1,6 @@
 ---
 name: "Codeliver Link Repos"
-description: Sync Codeliver cloud repos for GitHub `codeliver-*` repos (project `codeliver`), auto-link missing cloud repos, then keep local repos updated under `Downloads/lambdas/codeliver_all` with special project placement for `codeliver-sap`  and `codeliver-panel` and `codeliver-pos` and `codeliver-app` and `codeliver-cost-wizard-react` and `codeliver-website` and `codeliver-integration-partners` and `codeliver-partners-panel` and `codeliver-io`.
+description: Sync CodeDeliver repos locally and in cloud, including missing cloud-repo auto-linking.
 ---
 
 # Codeliver Link Repos

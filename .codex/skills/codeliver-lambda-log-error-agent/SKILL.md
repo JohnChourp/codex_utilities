@@ -1,6 +1,6 @@
 ---
 name: codeliver-lambda-log-error-agent
-description: "Agent-native runbook for end-to-end Lambda error investigation for CodeDeliver. Supports single incident triage and batch triage for all locally downloaded lambdas under /home/dm-soft-1/Downloads/lambdas/codeliver_all with evidence correlation across lambdas and /home/dm-soft-1/Downloads/projects/codeliver."
+description: Investigate CodeDeliver lambda errors end-to-end for single incidents or batch local triage.
 ---
 
 # CodeDeliver Lambda Log Error Agent

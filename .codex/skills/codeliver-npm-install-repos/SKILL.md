@@ -1,6 +1,6 @@
 ---
 name: codeliver-npm-install-repos
-description: Install npm dependencies across already-downloaded local Codeliver lambda repos under `/Users/john/Downloads/lambdas/codeliver_all` by running `npm i` per repo. Use when the user asks for bulk dependency install/refresh in all local Codeliver lambdas.
+description: Run bulk npm install across already-downloaded local CodeDeliver lambda repositories.
 ---
 
 # Codeliver npm install Repos

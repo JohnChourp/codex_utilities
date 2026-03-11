@@ -1,6 +1,6 @@
 ---
 name: ionic-android-codex-deploy
-description: Build, sync, install, archive, and launch an Ionic/Angular Capacitor app on an Android emulator/device with Codex-friendly defaults. Use when the user wants one-command Android debug deploy for Ionic projects (not native-only Gradle projects).
+description: Build, sync, install, archive, and launch an Ionic Android app with Codex defaults.
 ---
 
 # Ionic Android Codex Deploy

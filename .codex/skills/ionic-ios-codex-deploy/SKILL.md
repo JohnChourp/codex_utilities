@@ -1,6 +1,6 @@
 ---
 name: ionic-ios-codex-deploy
-description: Build, sync, install, archive, and launch an Ionic/Angular Capacitor app on an iOS simulator with Codex defaults. Use when the user wants one-command iOS simulator deploy for Ionic projects.
+description: Build, sync, install, archive, and launch an Ionic iOS simulator app.
 ---
 
 # Ionic iOS Codex Deploy

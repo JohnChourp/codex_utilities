@@ -1,6 +1,6 @@
 ---
 name: repos-dsstore-auto-commit-push
-description: Scan all repos under Downloads/lambdas and Downloads/projects, auto-fix DS_Store-only uncommitted changes, then auto-commit and push safely.
+description: Auto-fix DS_Store-only repo changes, then commit and push them safely.
 ---
 
 # Repos DS_Store Auto Commit Push
