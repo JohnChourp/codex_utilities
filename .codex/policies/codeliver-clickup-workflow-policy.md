@@ -21,7 +21,11 @@ Always confirm:
 ### ClickUp task and write safety
 
 - Ask for existing ClickUp task link/ID before ClickUp write operations.
-- If no task exists, create one only after user confirms target List.
+- If the current discussion introduces new work, follow-up, bug, idea, or requested change and no ClickUp task exists yet, create a ClickUp task for it by default instead of leaving it untracked.
+- For CodeDeliver work, route new tasks to the best-fit List among `codeliver-sap`, `codeliver-panel`, `codeliver-pos`, `codeliver-app`, and `codeliver-globals-tasks`.
+- Treat `cloud-repos-panel` requests as routing to the `codeliver-panel` List unless the user explicitly says otherwise.
+- If the user has already scoped the target project clearly enough to infer the List safely, do not block on an extra List confirmation.
+- If the scope is still ambiguous across multiple Lists, ask only the minimum clarifying question needed before creating the task.
 - Write only on tasks assigned to the requesting user.
 - Treat tasks assigned to others as read-only.
 - Do not change due date, priority, assignees, or move to done/closed unless explicitly requested.
