@@ -11,6 +11,7 @@ Run complete Lambda error investigation for CodeDeliver as an agent, without man
 The skill supports:
 - Single incident mode (one function/request id)
 - Batch mode (all local CodeDeliver lambda repos under `/home/dm-soft-1/Downloads/lambdas/codeliver_all`)
+- Cross-product auth-drift audit mode (`codeliver-pos`, `codeliver-panel`, `codeliver-sap`, `codeliver-app`)
 
 ## Required Input
 Collect at least one entry input:
@@ -22,6 +23,12 @@ For batch mode (all CodeDeliver lambdas), collect:
 - Region
 - Time window (for example last 24h)
 - Optional limit for max lambdas to inspect
+
+For auth-drift audit mode, collect:
+- Region for optional live log sweep
+- Time window (for example last 24h or last 7d)
+- Optional product subset (`pos`, `panel`, `sap`, `app`)
+- Optional live-sweep toggle (`static-only` or `static + logs`)
 
 Use `--dest` when the user asks for a specific workspace location.
 
@@ -119,6 +126,64 @@ Batch report requirements:
 - per-function latest `request_id`
 - per-function top hypothesis + fix + verify step
 - global health verdict split (production vs smoke/test)
+
+### 3b. Cross-product auth-drift audit mode
+Use this mode when the user asks whether stale/invalid auth-context failures can happen across products, not just in one lambda.
+
+Audit products:
+- `codeliver-pos`
+- `codeliver-panel`
+- `codeliver-sap`
+- `codeliver-app`
+
+Static inventory commands:
+
+```bash
+rg -n "authorizer|renew-token|login|jwt.verify|expiresIn|users\\[0\\]|no_user_found|user_does_not_exist|delivery_guy_does_not_exist|device_does_not_exist|login_completed" \
+  /home/dm-soft-1/Downloads/lambdas/codeliver_all \
+  /home/dm-soft-1/Downloads/projects/codeliver
+```
+
+Per-product inventory requirements:
+- `login_lambda`
+- `renew_lambda`
+- `authorizer`
+- `frontend_auth_entry`
+- `identity_source_table`
+- `late_failure_signatures`
+- `risk_level`
+- `recommended_fix_wave`
+
+High-signal discovery signatures:
+- blind selection such as `users[0]`
+- long-lived token TTLs such as `expiresIn: 2000000` or `1209600`
+- authorizers that only do JWT verify and do not check the canonical identity table
+- protected lambdas that re-check the same identity and fail late with `no_user_found`, `user_does_not_exist`, `delivery_guy_does_not_exist`, `device_does_not_exist`
+- frontend renew/retry flows that restore `login_completed` or otherwise keep stale sessions alive
+
+Optional live log sweep for auth-drift signatures:
+
+```bash
+start_ms=$(date -d '24 hours ago' +%s000)
+
+while read -r fn; do
+  aws logs filter-log-events \
+    --log-group-name "/aws/lambda/$fn" \
+    --region <region> \
+    --start-time "$start_ms" \
+    --filter-pattern '"user_does_not_exist" || "user_not_found" || "no_user_found" || "delivery_guy_does_not_exist" || "device_does_not_exist" || "Unauthorized" || "502"' \
+    --output json > "/tmp/${fn}.auth-drift.json"
+done < /tmp/codeliver_all.lambda_functions.txt
+```
+
+Auth-drift deliverable requirements:
+- `auth_surface_inventory`
+- `suspected_fail_open_paths`
+- `late_identity_failure_signatures`
+- `ttl_mismatches`
+- `frontend_fail_close_gaps`
+- `recommended_remediation_waves`
+- remediation matrix with one row per product
 
 ### 4. Capture investigation artifacts
 Capture and normalize:
@@ -237,6 +302,12 @@ Always include:
   - why it happens
   - impact/what happens next
 
+For cross-product auth-drift audit mode, use `<skill-root>/references/auth-drift-report-template.md` instead and include:
+- remediation matrix row for each product
+- explicit classification per product: `confirmed systemic risk`, `likely risk`, or `monitor-only`
+- rollout order and why
+- clear split between static findings and live-log-confirmed findings
+
 ## Guardrails
 - Do not rely on lambda-ai-tools output.
 - Do not ask the user to manually copy logs when AWS CLI can fetch them.
@@ -248,6 +319,8 @@ Always include:
 - Do not stop at findings only; always propose fix + verification commands.
 - Do not omit `group`, `store`, `store_id`, `store_name` in the final report; if unavailable, state `unknown` and the data source checked.
 - Do not end the report without an explicit final conclusion.
+- Do not treat auth-drift audit as a single-incident triage. It must inventory all auth surfaces for the selected products before ranking risk.
+- Do not classify a product as `confirmed systemic risk` from static code smell alone; require either repeated late-failure paths across multiple lambdas or live log confirmation.
 
 ## References
 Load these only when needed:
@@ -255,3 +328,7 @@ Load these only when needed:
 - `<skill-root>/references/search-patterns.md`
 - `<skill-root>/references/smoke-profiles.md`
 - `<skill-root>/references/health-verdict-filters.md`
+- `<skill-root>/references/auth-drift-audit-rubric.md`
+- `<skill-root>/references/auth-drift-search-patterns.md`
+- `<skill-root>/references/auth-drift-report-template.md`
+- `<skill-root>/references/auth-drift-current-findings.md`

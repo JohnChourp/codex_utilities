@@ -8,8 +8,8 @@ from pathlib import Path
 TARGET_PROJECT = "cloud-repos-panel"
 METHODS = ["get", "post", "put", "delete", "patch"]
 
-API_GATEWAYS_DEFAULT = "/Users/john/.codex/playbooks/crp-api-gateways.md"
-REFS_DIR_DEFAULT = "/Users/john/.codex/refs"
+API_GATEWAYS_DEFAULT = "/home/dm-soft-1/.codex/playbooks/crp-api-gateways.md"
+REFS_DIR_DEFAULT = "/home/dm-soft-1/.codex/refs"
 INDEX_FILENAME_DEFAULT = "crp-refs-frontend-index.generated.md"
 
 EXECUTE_API_RE = re.compile(

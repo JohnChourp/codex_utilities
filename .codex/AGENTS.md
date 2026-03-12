@@ -71,8 +71,26 @@ Always confirm:
 
 ### ClickUp task and write safety
 
-- Ask for existing ClickUp task link/ID before ClickUp write operations.
-- If no task exists, create one only after user confirms target List.
+- Every new discussion, actionable request, work item, bug, change, follow-up, or implementation discussion must be tracked in a ClickUp task, even if the user did not explicitly ask to create one.
+- Before creating a task, search for an existing strongly matching task and reuse it instead of opening a duplicate.
+- If no relevant task exists, create one by default without asking whether a task should be created.
+- Compose the task title automatically from the request using a short, concrete implementation title.
+- Compose the task description automatically with the request context, current repo/folder, scope, and requested outcome.
+- Known routing is deterministic and must not trigger an extra List question:
+- `codeliver-panel` -> `codeliver-panel`
+- `codeliver-sap` -> `codeliver-sap`
+- `codeliver-pos` -> `codeliver-pos`
+- `codeliver-app` -> `codeliver-app`
+- generic or ambiguous `codeliver` work -> `codeliver-globals-tasks`
+- `cloud-repos-panel` -> `cloud-repos-panel`
+- For any other project or repo name, extract the likely project identifier from the request or current repo context and search ClickUp Lists for exact or close matches first.
+- If one plausible existing List is found, use it directly without asking.
+- If multiple plausible existing Lists are found, ask only which of those Lists should receive the task.
+- If no plausible List exists, create a new List with the project name.
+- New List creation defaults:
+- CodeDeliver-family projects -> space `CoDeliver.io`
+- `cloud-repos-panel` family -> folder `DM / Projects`
+- all other projects -> folder `DM / Projects`
 - Write only on tasks assigned to the requesting user.
 - Treat tasks assigned to others as read-only.
 - Do not change due date, priority, assignees, or move to done/closed unless explicitly requested.

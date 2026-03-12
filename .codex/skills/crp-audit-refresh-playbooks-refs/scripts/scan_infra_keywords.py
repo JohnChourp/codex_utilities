@@ -18,7 +18,7 @@ KEYWORDS = [
     "API Gateway",
 ]
 
-DEFAULT_OUT = "/Users/john/.codex/refs/crp-infra-scan.generated.md"
+DEFAULT_OUT = "/home/dm-soft-1/.codex/refs/crp-infra-scan.generated.md"
 
 
 def iter_files(root: Path):
@@ -70,7 +70,7 @@ def render_md(results, root: Path, limit: int):
 
 def main():
     parser = argparse.ArgumentParser(description="Scan CRP lambdas for infra keyword hints.")
-    parser.add_argument("--root", default="/Users/john/Downloads/lambdas/crp_all", help="CRP lambdas root")
+    parser.add_argument("--root", default="/home/dm-soft-1/Downloads/lambdas/crp_all", help="CRP lambdas root")
     parser.add_argument("--limit", type=int, default=200, help="Max matches to print")
     parser.add_argument("--format", choices=["text", "md", "json"], default="text")
     parser.add_argument(

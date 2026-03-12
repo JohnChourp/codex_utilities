@@ -50,3 +50,10 @@ Always report:
 - `production_failures`
 - `smoke_or_test_failures`
 - `critical_signatures`
+
+## Auth-Drift Audit Addendum
+When the run is cross-product auth-drift audit, also report:
+- `late_identity_failure_signatures`
+- `ttl_mismatches`
+- which findings are `static_only`
+- which findings are `live_log_confirmed`

@@ -9,10 +9,19 @@ Apply this workflow in order.
 
 ## 1) Validate task and ownership
 
-1. Ask for an existing ClickUp task link/ID before any ClickUp write operation.
-2. Create a task only when no relevant task exists, and ask which List to use.
-3. Resolve assignee if unclear and ensure the task is assigned to the requesting user before any write.
-4. Treat tasks assigned to other users as read-only.
+1. Treat every new discussion, actionable request, work item, bug, change, follow-up, or implementation discussion as something that must be tracked in ClickUp, even if the user did not explicitly ask to create a task.
+2. Search for an existing strongly matching task first and reuse it instead of creating a duplicate.
+3. If no relevant task exists, create one by default without asking whether a task should be created.
+4. Compose the task title automatically from the request using a short, concrete implementation title.
+5. Compose the task description automatically with the request context, current repo/folder, scope, and requested outcome.
+6. Apply routing in this order:
+   - Use deterministic routing directly for `codeliver-panel`, `codeliver-sap`, `codeliver-pos`, `codeliver-app`, generic `codeliver` work, and `cloud-repos-panel`.
+   - If the repo or project name is different, search ClickUp Lists for exact or close matches based on the request and current repo context.
+   - If one plausible List is found, use it directly without asking.
+   - If multiple plausible Lists are found, ask only which of those Lists should receive the task.
+   - If no plausible List exists, create a new List with the project name. Use space `CoDeliver.io` for CodeDeliver-family projects and folder `DM / Projects` for other families.
+7. Resolve assignee if unclear and ensure the task is assigned to the requesting user before any write.
+8. Treat tasks assigned to other users as read-only.
 
 ## 2) Enforce write safety
 

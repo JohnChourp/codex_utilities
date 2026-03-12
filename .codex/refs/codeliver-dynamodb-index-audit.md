@@ -1,0 +1,251 @@
+# CodeDeliver DynamoDB index audit
+
+- Root: `/home/dm-soft-1/Downloads/lambdas/codeliver_all`
+- Mode: `live`
+- Account ID: `957873067375`
+- Profile: `active AWS CLI profile`
+- Region: `active AWS CLI region`
+- Scanned lambdas: `235`
+- Scanned JS files: `1127`
+- Unique tables: `16`
+- Resolved table/index pairs: `42`
+- Confirmed present: `42`
+- Missing in DynamoDB: `0`
+- Unresolved needs manual review: `7`
+- Table errors: `0`
+
+## Confirmed present
+- `codeliver-customers -> group-phone-index`
+- `codeliver-customers -> group-timestamp-index`
+- `codeliver-customers -> store_id-phone-index`
+- `codeliver-customers -> store_id-timestamp-index`
+- `codeliver-delivery-guys -> group-mobile-index`
+- `codeliver-delivery-guys -> mobile-index`
+- `codeliver-delivery-guys -> status-group_delivery_guy_id-index`
+- `codeliver-delivery-guys -> store_id-phone-index`
+- `codeliver-delivery-guys-actions -> group_delivery_guy_id-type-index`
+- `codeliver-devices -> android_id-index`
+- `codeliver-devices-sockets -> group-expire-index`
+- `codeliver-devices-sockets -> group_device_id-expire-index`
+- `codeliver-localserver-logs -> server_id_type-timestamp-index`
+- `codeliver-localserver-sockets -> group-expire-index`
+- `codeliver-localserver-sockets -> group_store_id-expire-index`
+- `codeliver-notifications -> group_delivery_guy_id-timestamp-index`
+- `codeliver-notifications -> mobile-type_timestamp-index-all`
+- `codeliver-notifications -> notification_id-index`
+- `codeliver-panel-sockets -> group-expire-index`
+- `codeliver-panel-sockets -> store_id-expire-index`
+- `codeliver-pos-sockets -> group-expire-index`
+- `codeliver-pos-sockets -> store_id-expire-index`
+- `codeliver-requests -> delivery_guy_id-batchNumber-index`
+- `codeliver-requests -> delivery_guy_id-phone-index`
+- `codeliver-requests -> delivery_guy_id-timestamp-index`
+- `codeliver-requests -> group-nextShortCfRequestId-index`
+- `codeliver-requests -> group-phone-index`
+- `codeliver-requests -> group-route_id-index`
+- `codeliver-requests -> group-status-index`
+- `codeliver-requests -> group-timestamp-index`
+- `codeliver-requests -> status-timestamp-index`
+- `codeliver-requests -> store_id-phone-index`
+- `codeliver-requests -> store_id-timestamp-index`
+- `codeliver-requests -> zone_id-timestamp-index`
+- `codeliver-requests-actions -> group_request_id-type-index`
+- `codeliver-requests-calculations -> group_request_id-timestamp-index`
+- `codeliver-routes -> group-delivery_guy_id-index`
+- `codeliver-routes -> group-status-index`
+- `codeliver-routes -> group-updated_timestamp-index`
+- `codeliver-routes-paths -> route_id-position-index`
+- `codeliver-routes-paths-calculations -> route_id-timestamp-index`
+- `codeliver-routes-paths-calculations -> route_id_delivery_guy_id-timestamp-index`
+
+## Missing in DynamoDB
+- None
+
+## Unresolved needs manual review
+- `codeliver-app-fetch-delivery-requests/dynamo_db_functions.js:69` `table=TABLE_REQUESTS` `index="delivery_guy_id-timestamp-index"`
+  - Reason: `dynamic expression: process.env.TABLE_REQUESTS || "codeliver-requests"`
+- `codeliver-app-fetch-delivery-requests/dynamo_db_functions.js:102` `table=TABLE_REQUESTS` `index="group-route_id-index"`
+  - Reason: `dynamic expression: process.env.TABLE_REQUESTS || "codeliver-requests"`
+- `codeliver-create-routes-orchestrator/scripts/backfill-route-accepted-timestamps.js:314` `table=ROUTES_TABLE` `index=ROUTES_GROUP_STATUS_INDEX`
+  - Reason: `dynamic expression: process.env.ROUTES_TABLE || "codeliver-routes"; dynamic expression: process.env.ROUTES_GROUP_STATUS_INDEX || "group-status-index"`
+- `codeliver-panel-fetch-devices/dynamo_db_functions.js:145` `table=deliveryGuysActionsTableName` `index=DELIVERY_GUY_ACTIONS_TYPE_INDEX_NAME`
+  - Reason: `dynamic expression: process.env.CODEDELIVER_DELIVERY_GUYS_ACTIONS_TABLE_NAME || "codeliver-delivery-guys-actions"`
+- `codeliver-sap-fetch-delivery-devices/dynamo_db_functions.js:147` `table=deliveryGuysActionsTableName` `index=DELIVERY_GUY_ACTIONS_TYPE_INDEX_NAME`
+  - Reason: `dynamic expression: process.env.CODEDELIVER_DELIVERY_GUYS_ACTIONS_TABLE_NAME || "codeliver-delivery-guys-actions"`
+- `codeliver-sap-handle-group/dynamo_db_functions.js:26` `table=params.TableName` `index=params.IndexName`
+  - Reason: `dynamic expression: params.TableName; dynamic expression: params.IndexName`
+- `codeliver-sap-ws-cloud-command-response/dynamo_db_functions.js:20` `table=get_sap_sockets_table_name()` `index="store_id-expire-index"`
+  - Reason: `dynamic expression: get_sap_sockets_table_name()`
+
+## Table errors
+- None
+
+## Resolved table/index pairs
+- `codeliver-customers -> group-phone-index`
+  - `codeliver-panel-search-group-delivery-customers/dynamo_db_functions.js:70` (codeliver-panel-search-group-delivery-customers)
+- `codeliver-customers -> group-timestamp-index`
+  - `codeliver-panel-search-group-delivery-customers/dynamo_db_functions.js:37` (codeliver-panel-search-group-delivery-customers)
+- `codeliver-customers -> store_id-phone-index`
+  - `codeliver-create-external-request/dynamo_db_functions.js:113` (codeliver-create-external-request)
+  - `codeliver-panel-search-group-delivery-customers/dynamo_db_functions.js:138` (codeliver-panel-search-group-delivery-customers)
+  - `codeliver-pos-search-customers/dynamo_db_functions.js:74` (codeliver-pos-search-customers)
+- `codeliver-customers -> store_id-timestamp-index`
+  - `codeliver-panel-handle-store/dynamo_db_functions.js:377` (codeliver-panel-handle-store)
+  - `codeliver-panel-search-group-delivery-customers/dynamo_db_functions.js:105` (codeliver-panel-search-group-delivery-customers)
+  - `codeliver-pos-search-customers/dynamo_db_functions.js:41` (codeliver-pos-search-customers)
+  - `codeliver-sap-handle-store/dynamo_db_functions.js:386` (codeliver-sap-handle-store)
+- `codeliver-delivery-guys -> group-mobile-index`
+  - `codeliver-app-sync-actions/dynamo_db_functions.js:1366` (codeliver-app-sync-actions)
+  - `codeliver-create-routes-orchestrator/dynamo_db_functions.js:1279` (codeliver-create-routes-orchestrator)
+  - `codeliver-routes-stream-update-routes-sqs-trigger/dynamo_db_functions.js:19` (codeliver-routes-stream-update-routes-sqs-trigger)
+- `codeliver-delivery-guys -> mobile-index`
+  - `codeliver-app-login-mobile-pin/dynamo_db_functions.js:204` (codeliver-app-login-mobile-pin)
+  - `codeliver-panel-handle-delivery-guy/dynamo_db_functions.js:305` (codeliver-panel-handle-delivery-guy)
+  - `codeliver-panel-handle-delivery-guy/dynamo_db_functions.js:332` (codeliver-panel-handle-delivery-guy)
+  - `codeliver-pos-handle-delivery-guy/dynamo_db_functions.js:305` (codeliver-pos-handle-delivery-guy)
+  - `codeliver-pos-handle-delivery-guy/dynamo_db_functions.js:332` (codeliver-pos-handle-delivery-guy)
+- `codeliver-delivery-guys -> status-group_delivery_guy_id-index`
+  - `codeliver-group-requests-simulation/dynamo_db_functions.js:57` (codeliver-group-requests-simulation)
+- `codeliver-delivery-guys -> store_id-phone-index`
+  - `codeliver-pos-fetch-delivery-guys/dynamo_db_functions.js:72` (codeliver-pos-fetch-delivery-guys)
+- `codeliver-delivery-guys-actions -> group_delivery_guy_id-type-index`
+  - `codeliver-panel-fetch-delivery-guys-actions/dynamo_db_functions.js:167` (codeliver-panel-fetch-delivery-guys-actions)
+  - `codeliver-panel-fetch-delivery-guys-actions/dynamo_db_functions.js:206` (codeliver-panel-fetch-delivery-guys-actions)
+  - `codeliver-sap-fetch-delivery-guys-actions/dynamo_db_functions.js:166` (codeliver-sap-fetch-delivery-guys-actions)
+  - `codeliver-sap-fetch-delivery-guys-actions/dynamo_db_functions.js:205` (codeliver-sap-fetch-delivery-guys-actions)
+- `codeliver-devices -> android_id-index`
+  - `codeliver-app-device-login/dynamo_db_functions.js:148` (codeliver-app-device-login)
+  - `codeliver-panel-handle-device/dynamo_db_functions.js:193` (codeliver-panel-handle-device)
+  - `codeliver-sap-handle-device/dynamo_db_functions.js:298` (codeliver-sap-handle-device)
+- `codeliver-devices-sockets -> group-expire-index`
+  - `codeliver-delivery-requests-stream-ws/dynamo_db_functions.js:77` (codeliver-delivery-requests-stream-ws)
+  - `codeliver-groups-stream-ws/dynamo_db_functions.js:124` (codeliver-groups-stream-ws)
+  - `codeliver-notifications-stream-ws/dynamo_db_functions.js:45` (codeliver-notifications-stream-ws)
+  - `codeliver-panel-delivery-guys-stream-ws/dynamo_db_functions.js:101` (codeliver-panel-delivery-guys-stream-ws)
+  - `codeliver-panel-devices-stream-ws/dynamo_db_functions.js:45` (codeliver-panel-devices-stream-ws)
+- `codeliver-devices-sockets -> group_device_id-expire-index`
+  - `codeliver-panel-device-send-cloud-command/dynamo_db_functions.js:19` (codeliver-panel-device-send-cloud-command)
+  - `codeliver-sap-device-send-cloud-command/dynamo_db_functions.js:19` (codeliver-sap-device-send-cloud-command)
+- `codeliver-localserver-logs -> server_id_type-timestamp-index`
+  - `codeliver-panel-search-localserver-logs/dynamo_db_functions.js:39` (codeliver-panel-search-localserver-logs)
+- `codeliver-localserver-sockets -> group-expire-index`
+  - `codeliver-panel-fetch-localserver-sockets/dynamo_db_functions.js:18` (codeliver-panel-fetch-localserver-sockets)
+- `codeliver-localserver-sockets -> group_store_id-expire-index`
+  - `codeliver-localserver-stream-localserverws/dynamo_db_functions.js:17` (codeliver-localserver-stream-localserverws)
+  - `codeliver-localserver-ws-connect-group-store/dynamo_db_functions.js:19` (codeliver-localserver-ws-connect-group-store)
+  - `codeliver-localserver-ws-ping/dynamo_db_functions.js:19` (codeliver-localserver-ws-ping)
+  - `codeliver-localservers-pings-sqs-trigger/dynamo_db_functions.js:19` (codeliver-localservers-pings-sqs-trigger)
+  - `codeliver-panel-send-cloud-command/dynamo_db_functions.js:22` (codeliver-panel-send-cloud-command)
+- `codeliver-notifications -> group_delivery_guy_id-timestamp-index`
+  - `codeliver-app-fetch-notifications/dynamo_db_functions.js:65` (codeliver-app-fetch-notifications)
+- `codeliver-notifications -> mobile-type_timestamp-index-all`
+  - `codeliver-send-sms-gateway/dynamo_db_functions.js:29` (codeliver-send-sms-gateway)
+- `codeliver-notifications -> notification_id-index`
+  - `codeliver-apifon-webhook/dynamo_db_functions.js:28` (codeliver-apifon-webhook)
+- `codeliver-panel-sockets -> group-expire-index`
+  - `codeliver-charges-stream-ws/dynamo_db_functions.js:17` (codeliver-charges-stream-ws)
+  - `codeliver-customers-stream-ws/dynamo_db_functions.js:17` (codeliver-customers-stream-ws)
+  - `codeliver-delivery-guy-coordinates-stream-ws/dynamo_db_functions.js:17` (codeliver-delivery-guy-coordinates-stream-ws)
+  - `codeliver-delivery-request-actions/dynamo_db_functions.js:17` (codeliver-delivery-request-actions)
+  - `codeliver-delivery-requests-stream-ws/dynamo_db_functions.js:17` (codeliver-delivery-requests-stream-ws)
+- `codeliver-panel-sockets -> store_id-expire-index`
+  - `codeliver-panel-disconnect-user/dynamo_db_functions.js:39` (codeliver-panel-disconnect-user)
+- `codeliver-pos-sockets -> group-expire-index`
+  - `codeliver-panel-fetch-pos-users-sockets/dynamo_db_functions.js:18` (codeliver-panel-fetch-pos-users-sockets)
+  - `codeliver-sap-fetch-pos-users-sockets/dynamo_db_functions.js:37` (codeliver-sap-fetch-pos-users-sockets)
+- `codeliver-pos-sockets -> store_id-expire-index`
+  - `codeliver-customers-stream-ws/dynamo_db_functions.js:45` (codeliver-customers-stream-ws)
+  - `codeliver-delivery-requests-stream-ws/dynamo_db_functions.js:45` (codeliver-delivery-requests-stream-ws)
+  - `codeliver-groups-stream-ws/dynamo_db_functions.js:92` (codeliver-groups-stream-ws)
+  - `codeliver-localserver-ws-cloud-command-response/dynamo_db_functions.js:46` (codeliver-localserver-ws-cloud-command-response)
+  - `codeliver-panel-delivery-guys-stream-ws/dynamo_db_functions.js:70` (codeliver-panel-delivery-guys-stream-ws)
+- `codeliver-requests -> delivery_guy_id-batchNumber-index`
+  - `codeliver-app-fetch-delivery-guy-data/dynamo_db_functions.js:142` (codeliver-app-fetch-delivery-guy-data)
+  - `codeliver-app-fetch-delivery-requests/dynamo_db_functions.js:130` (codeliver-app-fetch-delivery-requests)
+  - `codeliver-app-get-requests-stats/dynamo_db_functions.js:83` (codeliver-app-get-requests-stats)
+  - `codeliver-app-sync-actions/dynamo_db_functions.js:646` (codeliver-app-sync-actions)
+  - `codeliver-panel-fetch-batches/dynamo_db_functions.js:101` (codeliver-panel-fetch-batches)
+- `codeliver-requests -> delivery_guy_id-phone-index`
+  - `codeliver-panel-search-group-delivery-requests/dynamo_db_functions.js:632` (codeliver-panel-search-group-delivery-requests)
+  - `codeliver-pos-search-delivery-requests/dynamo_db_functions.js:334` (codeliver-pos-search-delivery-requests)
+- `codeliver-requests -> delivery_guy_id-timestamp-index`
+  - `codeliver-app-get-requests-stats/dynamo_db_functions.js:118` (codeliver-app-get-requests-stats)
+  - `codeliver-delivery-request-estimation/dynamo_db_functions.js:89` (codeliver-delivery-request-estimation)
+  - `codeliver-delivery-request-estimation/dynamo_db_functions.js:120` (codeliver-delivery-request-estimation)
+  - `codeliver-delivery-request-estimation/dynamo_db_functions.js:183` (codeliver-delivery-request-estimation)
+  - `codeliver-panel-search-group-delivery-requests/dynamo_db_functions.js:205` (codeliver-panel-search-group-delivery-requests)
+- `codeliver-requests -> group-nextShortCfRequestId-index`
+  - `codeliver-panel-search-group-delivery-requests/dynamo_db_functions.js:461` (codeliver-panel-search-group-delivery-requests)
+  - `codeliver-pos-search-delivery-requests/dynamo_db_functions.js:417` (codeliver-pos-search-delivery-requests)
+- `codeliver-requests -> group-phone-index`
+  - `codeliver-panel-search-group-delivery-requests/dynamo_db_functions.js:423` (codeliver-panel-search-group-delivery-requests)
+- `codeliver-requests -> group-route_id-index`
+  - `codeliver-app-device-login/dynamo_db_functions.js:300` (codeliver-app-device-login)
+  - `codeliver-app-fetch-delivery-guy-data/dynamo_db_functions.js:190` (codeliver-app-fetch-delivery-guy-data)
+  - `codeliver-app-fetch-routes-paths-calculations/dynamo_db_functions.js:91` (codeliver-app-fetch-routes-paths-calculations)
+  - `codeliver-app-login-mobile-pin/dynamo_db_functions.js:410` (codeliver-app-login-mobile-pin)
+  - `codeliver-app-renew-device-token/dynamo_db_functions.js:274` (codeliver-app-renew-device-token)
+- `codeliver-requests -> group-status-index`
+  - `codeliver-create-routes-orchestrator/dynamo_db_functions.js:262` (codeliver-create-routes-orchestrator)
+  - `codeliver-group-data-simulation/dynamo_db_functions.js:174` (codeliver-group-data-simulation)
+  - `codeliver-group-requests-simulation/dynamo_db_functions.js:124` (codeliver-group-requests-simulation)
+  - `codeliver-panel-search-group-delivery-requests/dynamo_db_functions.js:501` (codeliver-panel-search-group-delivery-requests)
+  - `codeliver-pos-search-delivery-requests/dynamo_db_functions.js:461` (codeliver-pos-search-delivery-requests)
+- `codeliver-requests -> group-timestamp-index`
+  - `codeliver-fix-requests-delivery-stats/dynamo_db_functions.js:190` (codeliver-fix-requests-delivery-stats)
+  - `codeliver-panel-search-group-delivery-requests/dynamo_db_functions.js:289` (codeliver-panel-search-group-delivery-requests)
+  - `codeliver-panel-search-group-delivery-requests/dynamo_db_functions.js:391` (codeliver-panel-search-group-delivery-requests)
+- `codeliver-requests -> status-timestamp-index`
+  - `codeliver-panel-get-requests-stats/dynamo_db_functions.js:38` (codeliver-panel-get-requests-stats)
+  - `codeliver-panel-get-requests-stats/dynamo_db_functions.js:65` (codeliver-panel-get-requests-stats)
+  - `codeliver-panel-get-requests-stats/dynamo_db_functions.js:139` (codeliver-panel-get-requests-stats)
+- `codeliver-requests -> store_id-phone-index`
+  - `codeliver-panel-search-group-delivery-requests/dynamo_db_functions.js:566` (codeliver-panel-search-group-delivery-requests)
+  - `codeliver-pos-search-delivery-requests/dynamo_db_functions.js:372` (codeliver-pos-search-delivery-requests)
+- `codeliver-requests -> store_id-timestamp-index`
+  - `codeliver-external-request-pickup-ready/dynamo_db_functions.js:77` (codeliver-external-request-pickup-ready)
+  - `codeliver-panel-search-group-delivery-requests/dynamo_db_functions.js:109` (codeliver-panel-search-group-delivery-requests)
+  - `codeliver-panel-search-group-delivery-requests/dynamo_db_functions.js:534` (codeliver-panel-search-group-delivery-requests)
+  - `codeliver-pos-search-delivery-requests/dynamo_db_functions.js:126` (codeliver-pos-search-delivery-requests)
+  - `codeliver-pos-search-delivery-requests/dynamo_db_functions.js:173` (codeliver-pos-search-delivery-requests)
+- `codeliver-requests -> zone_id-timestamp-index`
+  - `codeliver-external-precalculate-request/dynamo_db_functions.js:46` (codeliver-external-precalculate-request)
+- `codeliver-requests-actions -> group_request_id-type-index`
+  - `codeliver-panel-fetch-delivery-requests-actions/dynamo_db_functions.js:86` (codeliver-panel-fetch-delivery-requests-actions)
+  - `codeliver-panel-fetch-routes/dynamo_db_functions.js:581` (codeliver-panel-fetch-routes)
+  - `codeliver-sap-fetch-routes/dynamo_db_functions.js:545` (codeliver-sap-fetch-routes)
+- `codeliver-requests-calculations -> group_request_id-timestamp-index`
+  - `codeliver-fix-requests-delivery-stats/dynamo_db_functions.js:132` (codeliver-fix-requests-delivery-stats)
+  - `codeliver-panel-delivery-request-calculations/dynamo_db_functions.js:37` (codeliver-panel-delivery-request-calculations)
+  - `codeliver-panel-fetch-routes/dynamo_db_functions.js:496` (codeliver-panel-fetch-routes)
+  - `codeliver-sap-fetch-routes/dynamo_db_functions.js:460` (codeliver-sap-fetch-routes)
+- `codeliver-routes -> group-delivery_guy_id-index`
+  - `codeliver-app-fetch-routes/dynamo_db_functions.js:37` (codeliver-app-fetch-routes)
+  - `codeliver-panel-fetch-routes/dynamo_db_functions.js:335` (codeliver-panel-fetch-routes)
+  - `codeliver-sap-fetch-routes/dynamo_db_functions.js:299` (codeliver-sap-fetch-routes)
+- `codeliver-routes -> group-status-index`
+  - `codeliver-app-fetch-delivery-guy-data/dynamo_db_functions.js:118` (codeliver-app-fetch-delivery-guy-data)
+  - `codeliver-app-fetch-routes/dynamo_db_functions.js:72` (codeliver-app-fetch-routes)
+  - `codeliver-backend-check-delivery-requests/dynamo_db_functions.js:17` (codeliver-backend-check-delivery-requests)
+  - `codeliver-create-routes-orchestrator/dynamo_db_functions.js:94` (codeliver-create-routes-orchestrator)
+  - `codeliver-group-data-simulation/dynamo_db_functions.js:119` (codeliver-group-data-simulation)
+- `codeliver-routes -> group-updated_timestamp-index`
+  - `codeliver-panel-fetch-routes/dynamo_db_functions.js:268` (codeliver-panel-fetch-routes)
+  - `codeliver-pos-fetch-routes/dynamo_db_functions.js:61` (codeliver-pos-fetch-routes)
+  - `codeliver-sap-fetch-routes/dynamo_db_functions.js:234` (codeliver-sap-fetch-routes)
+- `codeliver-routes-paths -> route_id-position-index`
+  - `codeliver-create-routes-orchestrator/dynamo_db_functions.js:1368` (codeliver-create-routes-orchestrator)
+  - `codeliver-recalculate-route-and-paths-distances-and-polylines/dynamo_db_functions.js:79` (codeliver-recalculate-route-and-paths-distances-and-polylines)
+  - `codeliver-routes-paths-stream-update-routes-requests-paths/dynamo_db_functions.js:83` (codeliver-routes-paths-stream-update-routes-requests-paths)
+- `codeliver-routes-paths-calculations -> route_id-timestamp-index`
+  - `codeliver-app-fetch-routes-paths-calculations/dynamo_db_functions.js:64` (codeliver-app-fetch-routes-paths-calculations)
+  - `codeliver-panel-fetch-routes/dynamo_db_functions.js:428` (codeliver-panel-fetch-routes)
+  - `codeliver-panel-fetch-routes-paths-calculations/dynamo_db_functions.js:158` (codeliver-panel-fetch-routes-paths-calculations)
+  - `codeliver-routes-merge/dynamo_db_functions.js:69` (codeliver-routes-merge)
+  - `codeliver-routes-merge/dynamo_db_functions.js:90` (codeliver-routes-merge)
+- `codeliver-routes-paths-calculations -> route_id_delivery_guy_id-timestamp-index`
+  - `codeliver-app-fetch-routes-paths-calculations/dynamo_db_functions.js:37` (codeliver-app-fetch-routes-paths-calculations)
+  - `codeliver-app-sync-actions/dynamo_db_functions.js:738` (codeliver-app-sync-actions)
+  - `codeliver-panel-fetch-routes-paths-calculations/dynamo_db_functions.js:43` (codeliver-panel-fetch-routes-paths-calculations)
+  - `codeliver-panel-fetch-routes-paths-calculations/dynamo_db_functions.js:68` (codeliver-panel-fetch-routes-paths-calculations)
+  - `codeliver-pos-fetch-routes-paths-calculations/dynamo_db_functions.js:44` (codeliver-pos-fetch-routes-paths-calculations)

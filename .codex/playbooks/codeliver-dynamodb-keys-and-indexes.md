@@ -236,6 +236,7 @@ Secondary indexes
 
 - GSI:
   - group-expire-index: PK group (String), SK expire (Number)
+  - store_id-expire-index: PK store_id (String), SK expire (Number)
   - sessionID-expire-index: PK sessionID (String), SK expire (Number)
 - LSI: None
 
