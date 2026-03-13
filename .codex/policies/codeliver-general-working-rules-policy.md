@@ -6,6 +6,7 @@ Load this policy when a task needs non-MCP, non-ClickUp, non-lambda-hardening be
 
 - Prefer minimal, style-consistent changes; avoid large refactors unless explicitly requested.
 - When changes are needed in files under `ios/` or `android/` (regenerated on deploy), do **not** edit those files directly. Create/update a script (e.g., `build-before.js`, `build-after.js`, `capacitor-project.ts`) that applies the changes during build/deploy.
+- In repos that ship live JS updates, do **not** introduce a new native plugin path or native-only method call unless the already installed binaries contain it. If binary compatibility is uncertain, keep the JS path guarded and provide a fallback that works on the currently deployed app version.
 - Ask clarifying questions only in Plan Mode (via interactive options UI) or when execution is blocked by a truly mandatory user decision that cannot be inferred from code/context.
 - **Re-entrant pending-selection safety (mandatory):** when implementing any pending UI selection flow that opens map markers/info windows (or any handler that can trigger state refresh), always apply `clear-before-open` and `restore-on-miss`.
   - Required pattern: copy pending id locally -> set pending state to `null` -> attempt selection/open -> if selection target is missing, restore pending id.

@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "skill_name": "codeliver-simulation-emergency-audit",
+  "execution_mode": "python",
+  "supported_os": [
+    "macos",
+    "linux",
+    "windows"
+  ],
+  "unsupported_behavior": "fail_fast",
+  "preflight": {
+    "cache_ttl_seconds": 600,
+    "checks": [
+      {
+        "type": "tool",
+        "name": "python",
+        "install_hint": {
+          "macos": "Install Python 3 and ensure python3 is in PATH.",
+          "linux": "Install python3 and ensure it is in PATH.",
+          "windows": "Install Python 3 or the py launcher and ensure it is in PATH."
+        }
+      },
+      {
+        "type": "tool",
+        "name": "aws",
+        "install_hint": {
+          "macos": "Install AWS CLI v2 and ensure aws is in PATH.",
+          "linux": "Install AWS CLI v2 and ensure aws is in PATH.",
+          "windows": "Install AWS CLI v2 and ensure aws.exe is in PATH."
+        }
+      },
+      {
+        "type": "tool",
+        "name": "jq",
+        "install_hint": {
+          "macos": "Install jq and ensure jq is in PATH.",
+          "linux": "Install jq and ensure jq is in PATH.",
+          "windows": "Install jq and ensure jq.exe is in PATH."
+        }
+      }
+    ]
+  },
+  "entrypoint": {
+    "kind": "python",
+    "path": "scripts/run.py"
+  },
+  "tooling": {
+    "python": {
+      "macos": [
+        "python3"
+      ],
+      "linux": [
+        "python3"
+      ],
+      "windows": [
+        "py",
+        "-3"
+      ]
+    }
+  },
+  "default_command": "audit",
+  "commands": [
+    {
+      "name": "audit",
+      "description": "Run the simulation emergency backlog audit",
+      "kind": "python",
+      "path": "scripts/run.py",
+      "args": [
+        "audit"
+      ]
+    },
+    {
+      "name": "test",
+      "description": "Run fixture-based local tests",
+      "kind": "python",
+      "path": "scripts/run.py",
+      "args": [
+        "test"
+      ]
+    }
+  ]
+}
+

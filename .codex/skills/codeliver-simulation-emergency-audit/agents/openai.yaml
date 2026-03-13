@@ -1,0 +1,5 @@
+interface:
+  display_name: "CodeDeliver Simulation Emergency Audit"
+  short_description: "Audit per-group simulation bottlenecks and emergency activation outcomes"
+  default_prompt: "Use $codeliver-simulation-emergency-audit to determine whether a specific group bottlenecked, what the peak ready-unassigned backlog was, and why emergency off-duty activation did or did not happen."
+

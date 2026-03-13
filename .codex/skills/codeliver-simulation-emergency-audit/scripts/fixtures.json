@@ -1,0 +1,89 @@
+{
+  "below_threshold": {
+    "analysis_start_ms": 1000,
+    "analysis_end_ms": 9000000,
+    "threshold_wait_minutes": 15,
+    "request_item": {
+      "request_id": "req-1",
+      "status": "pending",
+      "readyToPickUp": true,
+      "route_id": "",
+      "delivery_guy_id": ""
+    },
+    "actions": [
+      { "type": "request_initialized", "timestamp": "1000" },
+      { "type": "request_ready_to_be_picked_up", "timestamp": "60000" },
+      { "type": "request_routed", "timestamp": "1020000" }
+    ],
+    "group_summary": {
+      "simulation": true,
+      "emergency_threshold_count": 2
+    },
+    "log_counts": {
+      "activation_done": 0,
+      "app_sync_activation_logs": 0,
+      "backlog_detected": 0,
+      "activation_attempted": 0,
+      "activation_skipped_no_eligible": 0
+    },
+    "current_eligible_off_duty_count": 1
+  },
+  "above_threshold_attempted_not_persisted": {
+    "analysis_start_ms": 0,
+    "analysis_end_ms": 5000,
+    "intervals": [
+      [1000, 4000, "r1"],
+      [1000, 4000, "r2"],
+      [1000, 4000, "r3"]
+    ],
+    "group_summary": {
+      "simulation": true,
+      "emergency_threshold_count": 3
+    },
+    "log_counts": {
+      "activation_done": 0,
+      "app_sync_activation_logs": 0,
+      "backlog_detected": 1,
+      "activation_attempted": 1,
+      "activation_skipped_no_eligible": 0
+    },
+    "current_eligible_off_duty_count": 1
+  },
+  "above_threshold_no_eligible": {
+    "analysis_start_ms": 0,
+    "analysis_end_ms": 5000,
+    "intervals": [
+      [1000, 4000, "r1"],
+      [1000, 4000, "r2"],
+      [1000, 4000, "r3"],
+      [1000, 4000, "r4"]
+    ],
+    "group_summary": {
+      "simulation": true,
+      "emergency_threshold_count": 3
+    },
+    "log_counts": {
+      "activation_done": 0,
+      "app_sync_activation_logs": 0,
+      "backlog_detected": 1,
+      "activation_attempted": 0,
+      "activation_skipped_no_eligible": 1
+    },
+    "current_eligible_off_duty_count": 0
+  },
+  "activation_done": {
+    "peak_count": 5,
+    "group_summary": {
+      "simulation": true,
+      "emergency_threshold_count": 3
+    },
+    "log_counts": {
+      "activation_done": 1,
+      "app_sync_activation_logs": 1,
+      "backlog_detected": 1,
+      "activation_attempted": 1,
+      "activation_skipped_no_eligible": 0
+    },
+    "current_eligible_off_duty_count": 0
+  }
+}

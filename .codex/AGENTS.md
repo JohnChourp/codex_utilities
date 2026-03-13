@@ -15,6 +15,10 @@ Global guidance for Codex assistance on CodeDeliver.
 - Always reply in Greek.
 - Keep replies concise, actionable, and grounded in repository code.
 - In default mode, act autonomously and avoid clarifying questions unless a missing answer would be risky.
+- For local skill execution, prefer an internal recovery loop before surfacing failure: inspect the blocker, try the narrowest safe fallback, verify the result, and only then report the outcome.
+- Keep skill-execution chat quiet during retries; avoid step-by-step retry narration unless the user explicitly asks for debugging detail.
+- Write back skill/policy knowledge only after a fallback is confirmed by a successful end result. Do not persist failed or speculative recoveries.
+- When a local installed skill gains proven recovery knowledge, also protect it from future sync overwrite via the local preserve-skills mechanism.
 - Before any cross-project parity change, ask which targets must stay in lockstep. If the user asks for scoped work, keep that scope and state the parity exception.
 - Do not run credentialed AWS commands unless the current prompt explicitly asks for them. Otherwise give exact commands for local execution.
 - If asked to build or install, keep iterating until success or a hard external blocker. For Android `installDebug`, uninstall and retry on `INSTALL_FAILED_UPDATE_INCOMPATIBLE`.
@@ -34,6 +38,7 @@ Global guidance for Codex assistance on CodeDeliver.
 | Lambda contracts/hardening/deploy/handled errors | `.codex/policies/codeliver-lambda-hardening-policy.md` |
 | README or ROADMAP behavior | `.codex/policies/codeliver-documentation-roadmap-policy.md` |
 | ClickUp lifecycle or MCP workflow | `.codex/policies/codeliver-clickup-workflow-policy.md` |
+| Skill-only local utility/debug execution | `.codex/policies/codeliver-skill-execution-policy.md` |
 
 Keep `.codex/playbooks/*` and `.codex/refs/*` as canonical lookup sources.
 
@@ -72,6 +77,7 @@ Always confirm:
 ### ClickUp task and write safety
 
 - Every new discussion, actionable request, work item, bug, change, follow-up, or implementation discussion must be tracked in a ClickUp task, even if the user did not explicitly ask to create one.
+- Exception: skill-only execution requests follow `.codex/policies/codeliver-skill-execution-policy.md` and do not create or update ClickUp tasks.
 - Before creating a task, search for an existing strongly matching task and reuse it instead of opening a duplicate.
 - If no relevant task exists, create one by default without asking whether a task should be created.
 - Compose the task title automatically from the request using a short, concrete implementation title.
@@ -105,6 +111,7 @@ Always confirm:
 ### Approval and release controls
 
 - Do not implement before explicit user go-ahead.
+- Exception: skill-only execution requests follow `.codex/policies/codeliver-skill-execution-policy.md` and run directly without delivery-mode, branch, or release questions.
 - Before any code changes, ask delivery mode and branch:
 - `local changes only` or `PR-ready changes`
 - target branch name (create/switch branch only after user confirms)
@@ -156,6 +163,8 @@ Use these skills as the default source of detailed instructions.
 - Project-local helper for codexDevAgent updates. Ask whether the user wants `update` or `clean-install`, then clone or refresh the repo when needed, compare repo version from `package.json`, merge the managed `AGENTS.md` workflow block, sync repo skill folders into `~/.codex`, skip local-only skills, and honor the machine-local overlay file at `~/.codex/policies/sync-global-codex-assets.local.md` when it exists.
 
 ## 4) Standard workflow (condensed)
+
+Skill-only execution requests use the dedicated carve-out policy and skip the ClickUp/branch/release workflow below.
 
 1. Confirm context and task scope.
 2. Validate ClickUp task existence and ownership.

@@ -21,9 +21,17 @@ Always confirm:
 
 ## 2) Non-negotiable rules
 
+### Skill-only execution carve-out
+
+- If the user asks only to run an existing local utility/debug skill or equivalent local automation, do not create or update a ClickUp task for that request.
+- This carve-out covers execution-only flows such as local live serve, inspect, install, launch, USB debugging, and similar existing helper workflows.
+- This carve-out does not apply to implementation, refactor, bugfix, documentation, release, or PM/admin work.
+- When the carve-out applies, skip ClickUp search, repo-linking, time tracking, status updates, and closeout comments entirely.
+
 ### ClickUp task and write safety
 
 - Every new discussion, actionable request, work item, bug, change, follow-up, or implementation discussion must be tracked in a ClickUp task, even if the user did not explicitly ask to create one.
+- Exception: the skill-only execution carve-out above bypasses ClickUp handling completely.
 - Before creating a task, search for an existing strongly matching task and reuse it instead of opening a duplicate.
 - If no relevant task exists, create one by default without asking whether a task should be created or asking the user to provide a title, description, or target List when routing can be inferred safely.
 - Compose the task title automatically from the request using a short, concrete implementation title.
@@ -57,6 +65,7 @@ Always confirm:
 ### Approval and release controls
 
 - Do not implement before explicit user go-ahead.
+- Exception: skill-only execution requests run directly and do not require delivery-mode, branch, `push only`, or `deploy` questions.
 - Before any code changes, ask delivery mode and branch:
 - `local changes only` or `PR-ready changes`
 - target branch name (create/switch branch only after user confirms)
@@ -108,6 +117,8 @@ Use these skills as the default source of detailed instructions.
 - Check for codexDevAgent updates, ask whether the user wants `update` or `clean-install`, then clone or refresh the repo when needed, compare repo version from `package.json`, and merge the managed `AGENTS.md` workflow block plus sync repo skill folders into `~/.codex`.
 
 ## 4) Standard workflow (condensed)
+
+Skill-only execution requests bypass this workflow and use the carve-out above.
 
 1. Confirm context and task scope.
 2. Discover, reuse, or auto-create the ClickUp task and validate ownership.

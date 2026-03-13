@@ -14,15 +14,21 @@ Options:
   --package <id>         Override package/applicationId detection
   --activity <name>      Activity to launch (e.g. .MainActivity)
   --open-inspect         Open chrome://inspect/#devices automatically
+  --full-prepare         Force full prepare flow (npm install/configure/icons/build-after)
   --skip-prepare         Skip project prepare flow (npm install/configure/icons/build-after)
   --skip-inspect-open    Do not open chrome://inspect/#devices
   --skip-launch          Install only, do not launch app
+  --verbose              Stream detailed command output
   -h, --help             Show help
 USAGE
 }
 
 log() {
     printf '[ionic-android-live-serve-inspect] %s\n' "$*"
+}
+
+warn() {
+    printf '[ionic-android-live-serve-inspect] Warning: %s\n' "$*" >&2
 }
 
 fail() {
@@ -38,11 +44,17 @@ PACKAGE_NAME=""
 ACTIVITY_NAME=""
 SKIP_INSPECT_OPEN=1
 SKIP_LAUNCH=0
-SKIP_PREPARE=0
+PREPARE_MODE="auto"
+PREPARE_LOG_LABEL="auto"
+VERBOSE=0
 ADB_BIN=""
 SERVE_PID=""
+TAIL_PID=""
 ACTIVE_SERIAL=""
 ADB_REVERSE_SET=0
+LOG_DIR=""
+LAST_LOG_FILE=""
+SERVE_LOG_FILE=""
 
 while (($# > 0)); do
     case "$1" in
@@ -67,8 +79,14 @@ while (($# > 0)); do
             ACTIVITY_NAME="${2:-}"
             shift 2
             ;;
+        --full-prepare)
+            PREPARE_MODE="full"
+            PREPARE_LOG_LABEL="--full-prepare"
+            shift
+            ;;
         --skip-prepare)
-            SKIP_PREPARE=1
+            PREPARE_MODE="skip"
+            PREPARE_LOG_LABEL="--skip-prepare"
             shift
             ;;
         --open-inspect)
@@ -81,6 +99,10 @@ while (($# > 0)); do
             ;;
         --skip-launch)
             SKIP_LAUNCH=1
+            shift
+            ;;
+        --verbose)
+            VERBOSE=1
             shift
             ;;
         -h|--help)
@@ -112,6 +134,11 @@ on_signal() {
 }
 
 cleanup() {
+    if [[ -n "$TAIL_PID" ]] && kill -0 "$TAIL_PID" >/dev/null 2>&1; then
+        kill "$TAIL_PID" >/dev/null 2>&1 || true
+        wait "$TAIL_PID" 2>/dev/null || true
+    fi
+
     if [[ $ADB_REVERSE_SET -eq 1 && -n "$ACTIVE_SERIAL" && -n "$ADB_BIN" ]]; then
         "$ADB_BIN" -s "$ACTIVE_SERIAL" reverse --remove "tcp:$PORT" >/dev/null 2>&1 || true
         log "Removed adb reverse tcp:$PORT from device $ACTIVE_SERIAL"
@@ -126,6 +153,64 @@ cleanup() {
 
 trap on_signal INT TERM
 trap cleanup EXIT
+
+init_log_dir() {
+    LOG_DIR="$(mktemp -d "${TMPDIR:-/tmp}/ionic-android-live-serve-inspect.XXXXXX")"
+}
+
+make_log_file() {
+    local label="$1"
+    local safe_label
+    safe_label="$(printf '%s' "$label" | tr ' /' '__' | tr -cd '[:alnum:]_.-')"
+    [[ -n "$safe_label" ]] || safe_label="command"
+    printf '%s/%s.log\n' "$LOG_DIR" "$safe_label"
+}
+
+show_log_excerpt() {
+    local logfile="$1"
+    if [[ ! -f "$logfile" ]]; then
+        return 0
+    fi
+
+    echo "Log file: $logfile" >&2
+    echo "Last output:" >&2
+    tail -n 25 "$logfile" >&2 || true
+}
+
+run_logged_command() {
+    local label="$1"
+    shift
+
+    local logfile status
+    logfile="$(make_log_file "$label")"
+    LAST_LOG_FILE="$logfile"
+
+    if [[ $VERBOSE -eq 1 ]]; then
+        set +e
+        "$@" 2>&1 | tee "$logfile"
+        status=${PIPESTATUS[0]}
+        set -e
+    else
+        set +e
+        "$@" >"$logfile" 2>&1
+        status=$?
+        set -e
+    fi
+
+    return "$status"
+}
+
+run_project_command() {
+    local label="$1"
+    shift
+    run_logged_command "$label" bash -lc "cd \"$PROJECT_DIR\" && $*"
+}
+
+run_android_command() {
+    local label="$1"
+    shift
+    run_logged_command "$label" bash -lc "cd \"$PROJECT_DIR/android\" && $*"
+}
 
 ensure_adb() {
     if command -v adb >/dev/null 2>&1; then
@@ -182,10 +267,10 @@ NODE
 
 run_npm_install() {
     log "Running npm install"
-    (
-        cd "$PROJECT_DIR"
-        npm install
-    )
+    run_project_command "npm-install" "npm install" || {
+        show_log_excerpt "$LAST_LOG_FILE"
+        fail "npm install failed"
+    }
 }
 
 has_npm_script() {
@@ -206,10 +291,10 @@ ensure_android_platform() {
     fi
 
     log "Android platform missing; running npx cap add android"
-    (
-        cd "$PROJECT_DIR"
-        printf 'n\n' | npx cap add android
-    )
+    run_project_command "cap-add-android" "printf 'n\n' | npx cap add android" || {
+        show_log_excerpt "$LAST_LOG_FILE"
+        fail "npx cap add android failed"
+    }
 
     if [[ ! -f "$PROJECT_DIR/android/gradlew" ]]; then
         fail "android/gradlew is still missing after npx cap add android"
@@ -218,10 +303,10 @@ ensure_android_platform() {
 
 sync_android_platform() {
     log "Running npx cap sync android"
-    (
-        cd "$PROJECT_DIR"
-        npx cap sync android
-    )
+    run_project_command "cap-sync-android" "npx cap sync android" || {
+        show_log_excerpt "$LAST_LOG_FILE"
+        fail "npx cap sync android failed"
+    }
 }
 
 run_configure_if_available() {
@@ -230,30 +315,22 @@ run_configure_if_available() {
     fi
 
     log "Running npm run configure (resilient mode)"
-    local tmp status
-    tmp="$(mktemp)"
-
     set +e
-    (
-        cd "$PROJECT_DIR"
-        npm run configure 2>&1
-    ) | tee "$tmp"
-    status=${PIPESTATUS[0]}
+    run_project_command "npm-run-configure" "npm run configure"
+    local status=$?
     set -e
 
     if [[ $status -eq 0 ]]; then
-        rm -f "$tmp"
         return 0
     fi
 
-    if rg -q "spawn pod ENOENT|Updating iOS native dependencies with pod install - failed|AccessDenied|ListObjectsV2 operation: Access Denied" "$tmp"; then
+    if rg -q "spawn pod ENOENT|Updating iOS native dependencies with pod install - failed|AccessDenied|ListObjectsV2 operation: Access Denied" "$LAST_LOG_FILE"; then
         log "configure hit non-Android prerequisites (iOS pods/AWS). Continuing with Android flow."
-        rm -f "$tmp"
         return 0
     fi
 
-    log "configure exited with status $status. Continuing with Android flow."
-    rm -f "$tmp"
+    warn "configure exited with status $status. Continuing with Android flow."
+    show_log_excerpt "$LAST_LOG_FILE"
     return 0
 }
 
@@ -263,10 +340,10 @@ run_push_icons_android_if_available() {
     fi
 
     log "Refreshing Android launcher icons (npm run push_icons_android)"
-    (
-        cd "$PROJECT_DIR"
-        npm run push_icons_android
-    )
+    run_project_command "push-icons-android" "npm run push_icons_android" || {
+        show_log_excerpt "$LAST_LOG_FILE"
+        fail "npm run push_icons_android failed"
+    }
 }
 
 run_build_after_if_present() {
@@ -275,10 +352,97 @@ run_build_after_if_present() {
     fi
 
     log "Running build-after.js to apply native post-processing"
-    (
-        cd "$PROJECT_DIR"
-        node build-after.js
-    )
+    run_project_command "build-after" "node build-after.js" || {
+        show_log_excerpt "$LAST_LOG_FILE"
+        fail "build-after.js failed"
+    }
+}
+
+manifest_references_resource() {
+    local resource_ref="$1"
+    local manifest_file="$PROJECT_DIR/android/app/src/main/AndroidManifest.xml"
+    [[ -f "$manifest_file" ]] || return 1
+    rg -q "$resource_ref" "$manifest_file"
+}
+
+android_generated_resources_ready() {
+    local strings_file="$PROJECT_DIR/android/app/src/main/res/values/strings.xml"
+    local icon_file="$PROJECT_DIR/android/app/src/main/res/drawable/ic_tracking.png"
+
+    if manifest_references_resource '@string/applink_host|@string/applink_host_alternate|@string/branch_key|@string/branch_test_key|@bool/branch_test_mode'; then
+        [[ -f "$strings_file" ]] || return 1
+        rg -q '<string name="branch_key">[^<]+' "$strings_file" || return 1
+        rg -q '<string name="applink_host">[^<]+' "$strings_file" || return 1
+        rg -q '<string name="applink_host_alternate">[^<]+' "$strings_file" || return 1
+        rg -q '<string name="branch_test_key">[^<]+' "$strings_file" || return 1
+        rg -q '<bool name="branch_test_mode">[^<]+' "$strings_file" || return 1
+    fi
+
+    if manifest_references_resource '@string/default_notification_channel_id|@string/default_notification_channel_name'; then
+        [[ -f "$strings_file" ]] || return 1
+        rg -q '<string name="default_notification_channel_id">[^<]+' "$strings_file" || return 1
+        rg -q '<string name="default_notification_channel_name">[^<]+' "$strings_file" || return 1
+    fi
+
+    if manifest_references_resource '@drawable/ic_tracking'; then
+        [[ -f "$icon_file" ]] || return 1
+    fi
+
+    return 0
+}
+
+recover_android_generated_resources() {
+    log "Recovering Android generated resources before install retry"
+    run_push_icons_android_if_available
+    run_build_after_if_present
+    sync_android_platform
+
+    if ! android_generated_resources_ready; then
+        fail "Android generated resources are still incomplete after recovery"
+    fi
+}
+
+normalize_native_audio_duplicate_methods() {
+    local native_audio_file="$PROJECT_DIR/node_modules/@capacitor-community/native-audio/android/src/main/java/com/getcapacitor/community/audio/NativeAudio.java"
+    [[ -f "$native_audio_file" ]] || return 0
+
+    node - "$native_audio_file" <<'NODE'
+const fs = require('fs');
+const file = process.argv[2];
+const source = fs.readFileSync(file, 'utf8');
+const duplicateBlock = `    private void requestAudioFocusIfNeeded() {\n        if (this.audioManager != null && this.focusAudio) {\n            this.audioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);\n        }\n    }\n\n    private void abandonAudioFocusIfNeeded() {\n        if (this.audioManager != null && this.focusAudio) {\n            this.audioManager.abandonAudioFocus(this);\n        }\n    }\n\n    private void requestAudioFocusIfNeeded() {\n        if (this.audioManager != null && this.focusAudio) {\n            this.audioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);\n        }\n    }\n\n    private void abandonAudioFocusIfNeeded() {\n        if (this.audioManager != null) {\n            this.audioManager.abandonAudioFocus(this);\n        }\n    }\n`;
+const canonicalBlock = `    private void requestAudioFocusIfNeeded() {\n        if (this.audioManager != null && this.focusAudio) {\n            this.audioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);\n        }\n    }\n\n    private void abandonAudioFocusIfNeeded() {\n        if (this.audioManager != null && this.focusAudio) {\n            this.audioManager.abandonAudioFocus(this);\n        }\n    }\n`;
+let next = source;
+if (next.includes(duplicateBlock)) {
+  next = next.replace(duplicateBlock, canonicalBlock);
+}
+const requestMatches = next.match(/private void requestAudioFocusIfNeeded\(\)/g) || [];
+const abandonMatches = next.match(/private void abandonAudioFocusIfNeeded\(\)/g) || [];
+if (requestMatches.length > 1 || abandonMatches.length > 1) {
+  console.error('NativeAudio.java still contains duplicate audio focus helper methods');
+  process.exit(1);
+}
+if (next !== source) {
+  fs.writeFileSync(file, next, 'utf8');
+}
+NODE
+}
+
+repair_native_audio_patch_if_needed() {
+    local patch_script="$PROJECT_DIR/build_scripts/patch-native-audio-plugin.js"
+    local native_audio_file="$PROJECT_DIR/node_modules/@capacitor-community/native-audio/android/src/main/java/com/getcapacitor/community/audio/NativeAudio.java"
+
+    [[ -f "$native_audio_file" ]] || return 0
+
+    if [[ -f "$patch_script" ]]; then
+        log "Re-running native-audio patch before install retry"
+        run_project_command "native-audio-repatch" "node build_scripts/patch-native-audio-plugin.js" || {
+            show_log_excerpt "$LAST_LOG_FILE"
+            fail "native-audio re-patch failed"
+        }
+    fi
+
+    normalize_native_audio_duplicate_methods || fail "native-audio duplicate-method recovery failed"
 }
 
 ensure_branch_resources_if_needed() {
@@ -314,6 +478,33 @@ prepare_android_project() {
     run_build_after_if_present
     sync_android_platform
     ensure_branch_resources_if_needed
+    if ! android_generated_resources_ready; then
+        recover_android_generated_resources
+    fi
+}
+
+project_supports_fast_prepare_skip() {
+    [[ -d "$PROJECT_DIR/node_modules" ]] || return 1
+    [[ -f "$PROJECT_DIR/android/gradlew" ]] || return 1
+    [[ -f "$PROJECT_DIR/android/app/src/main/assets/capacitor.config.json" ]] || return 1
+    return 0
+}
+
+resolve_prepare_mode() {
+    if [[ "$PREPARE_MODE" == "skip" || "$PREPARE_MODE" == "full" ]]; then
+        return 0
+    fi
+
+    if project_supports_fast_prepare_skip; then
+        PREPARE_MODE="skip"
+        PREPARE_LOG_LABEL="auto fast path"
+        log "Using fast Android-only path (auto --skip-prepare)"
+        return 0
+    fi
+
+    PREPARE_MODE="full"
+    PREPARE_LOG_LABEL="auto full prepare"
+    log "Fast path unavailable; running full prepare"
 }
 
 detect_package_name() {
@@ -402,24 +593,37 @@ start_ionic_serve() {
     fi
 
     log "Starting ionic serve on port $PORT"
+    SERVE_LOG_FILE="$(make_log_file "ionic-serve")"
     (
         cd "$PROJECT_DIR"
-        npx ionic serve --port "$PORT" --host 0.0.0.0 --no-open --no-interactive
-    ) &
+        exec npx ionic serve --port "$PORT" --host 0.0.0.0 --no-open --no-interactive
+    ) >"$SERVE_LOG_FILE" 2>&1 &
     SERVE_PID="$!"
+
+    if [[ $VERBOSE -eq 1 ]]; then
+        tail -n +1 -f "$SERVE_LOG_FILE" &
+        TAIL_PID="$!"
+    fi
 
     local i
     for i in {1..90}; do
         if ! kill -0 "$SERVE_PID" >/dev/null 2>&1; then
-            fail "ionic serve exited early (pid: $SERVE_PID). Check output above"
+            show_log_excerpt "$SERVE_LOG_FILE"
+            fail "ionic serve exited early (pid: $SERVE_PID)"
         fi
         if is_server_ready "$PORT"; then
+            if [[ -n "$TAIL_PID" ]] && kill -0 "$TAIL_PID" >/dev/null 2>&1; then
+                kill "$TAIL_PID" >/dev/null 2>&1 || true
+                wait "$TAIL_PID" 2>/dev/null || true
+                TAIL_PID=""
+            fi
             log "Ionic live server is ready at http://127.0.0.1:$PORT"
             return 0
         fi
         sleep 1
     done
 
+    show_log_excerpt "$SERVE_LOG_FILE"
     fail "Ionic server did not become ready in time on port $PORT"
 }
 
@@ -491,28 +695,61 @@ NODE
 }
 
 run_gradle_install() {
-    local tmp status
-    tmp="$(mktemp)"
-
     set +e
-    (
-        cd "$PROJECT_DIR/android"
-        ./gradlew installDebug --warning-mode all 2>&1
-    ) | tee "$tmp"
-    status=${PIPESTATUS[0]}
+    run_android_command "gradlew-install-debug" "./gradlew installDebug --warning-mode all"
+    local status=$?
     set -e
 
     if [[ $status -ne 0 ]]; then
-        if rg -q "INSTALL_FAILED_UPDATE_INCOMPATIBLE|INSTALL_FAILED_VERSION_DOWNGRADE" "$tmp"; then
-            rm -f "$tmp"
+        if rg -q "INSTALL_FAILED_UPDATE_INCOMPATIBLE|INSTALL_FAILED_VERSION_DOWNGRADE" "$LAST_LOG_FILE"; then
             return 2
         fi
-        rm -f "$tmp"
+        show_log_excerpt "$LAST_LOG_FILE"
         return "$status"
     fi
 
-    rm -f "$tmp"
     return 0
+}
+
+attempt_gradle_install_with_recovery() {
+    local install_status
+    local did_recover_resources=0
+    local did_repair_native_audio=0
+
+    while true; do
+        set +e
+        run_gradle_install
+        install_status=$?
+        set -e
+
+        if [[ $install_status -eq 0 ]]; then
+            return 0
+        fi
+
+        if [[ $install_status -eq 2 ]]; then
+            log "Detected incompatible installed package; uninstalling and retrying installDebug"
+            "$ADB_BIN" -s "$ACTIVE_SERIAL" uninstall "$PACKAGE_NAME" >/dev/null 2>&1 || true
+            run_android_command "gradlew-install-debug-retry" "./gradlew installDebug --warning-mode all" || {
+                show_log_excerpt "$LAST_LOG_FILE"
+                fail "installDebug retry failed"
+            }
+            return 0
+        fi
+
+        if [[ $did_recover_resources -eq 0 ]] && rg -q "resource string/applink_host|resource string/applink_host_alternate|resource string/branch_key|resource string/branch_test_key|resource bool/branch_test_mode|resource drawable/ic_tracking|resource string/default_notification_channel_id|resource string/default_notification_channel_name" "$LAST_LOG_FILE"; then
+            did_recover_resources=1
+            recover_android_generated_resources
+            continue
+        fi
+
+        if [[ $did_repair_native_audio -eq 0 ]] && rg -q "requestAudioFocusIfNeeded\\(\\) is already defined|abandonAudioFocusIfNeeded\\(\\) is already defined" "$LAST_LOG_FILE"; then
+            did_repair_native_audio=1
+            repair_native_audio_patch_if_needed
+            continue
+        fi
+
+        return "$install_status"
+    done
 }
 
 launch_app() {
@@ -522,6 +759,7 @@ launch_app() {
     fi
 
     local adb_cmd=("$ADB_BIN" -s "$ACTIVE_SERIAL")
+    local logfile status
 
     if [[ -n "$ACTIVITY_NAME" ]]; then
         local component="$ACTIVITY_NAME"
@@ -534,21 +772,32 @@ launch_app() {
                 component="${PACKAGE_NAME}/.${component}"
             fi
         fi
-        "${adb_cmd[@]}" shell am start -W -n "$component"
+
+        logfile="$(make_log_file "launch-activity")"
+        LAST_LOG_FILE="$logfile"
+        set +e
+        "${adb_cmd[@]}" shell am start -W -n "$component" >"$logfile" 2>&1
+        status=$?
+        set -e
+        if [[ $status -ne 0 ]]; then
+            show_log_excerpt "$logfile"
+            return "$status"
+        fi
         log "Launched component: $component"
         return 0
     fi
 
+    logfile="$(make_log_file "launch-monkey")"
+    LAST_LOG_FILE="$logfile"
     set +e
-    local launch_output launch_status
-    launch_output="$("${adb_cmd[@]}" shell monkey -p "$PACKAGE_NAME" -c android.intent.category.LAUNCHER 1 2>&1)"
-    launch_status=$?
+    "${adb_cmd[@]}" shell monkey -p "$PACKAGE_NAME" -c android.intent.category.LAUNCHER 1 >"$logfile" 2>&1
+    status=$?
     set -e
 
-    printf '%s\n' "$launch_output"
-    if [[ $launch_status -ne 0 ]]; then
-        log "monkey launch returned $launch_status"
-        return "$launch_status"
+    if [[ $status -ne 0 ]]; then
+        show_log_excerpt "$logfile"
+        log "monkey launch returned $status"
+        return "$status"
     fi
 
     log "Launch intent sent for package: $PACKAGE_NAME"
@@ -578,7 +827,7 @@ open_inspect_tab() {
         fi
     fi
 
-    log "Warning: could not open chrome://inspect/#devices automatically"
+    warn "could not open chrome://inspect/#devices automatically"
     return 0
 }
 
@@ -595,6 +844,8 @@ if ! ensure_adb; then
     fail "adb not found in PATH or common Android SDK locations"
 fi
 
+init_log_dir
+
 if [[ ! -f "$PROJECT_DIR/package.json" ]]; then
     fail "package.json not found in $PROJECT_DIR"
 fi
@@ -604,10 +855,15 @@ fi
 
 "$ADB_BIN" start-server >/dev/null 2>&1 || true
 
-if [[ $SKIP_PREPARE -eq 1 ]]; then
-    log "Project prepare skipped (--skip-prepare)"
+resolve_prepare_mode
+
+if [[ "$PREPARE_MODE" == "skip" ]]; then
+    log "Project prepare skipped ($PREPARE_LOG_LABEL)"
     ensure_android_platform
     sync_android_platform
+    if ! android_generated_resources_ready; then
+        recover_android_generated_resources
+    fi
 else
     prepare_android_project
 fi
@@ -627,18 +883,13 @@ ensure_android_manifest_allows_cleartext
 ADB_REVERSE_SET=1
 log "Applied adb reverse tcp:$PORT tcp:$PORT on device $ACTIVE_SERIAL"
 
-if ! run_gradle_install; then
-    status=$?
-    if [[ $status -eq 2 ]]; then
-        log "Detected incompatible installed package; uninstalling and retrying installDebug"
-        "$ADB_BIN" -s "$ACTIVE_SERIAL" uninstall "$PACKAGE_NAME" >/dev/null 2>&1 || true
-        (
-            cd "$PROJECT_DIR/android"
-            ./gradlew installDebug --warning-mode all
-        )
-    else
-        exit "$status"
-    fi
+set +e
+attempt_gradle_install_with_recovery
+gradle_status=$?
+set -e
+
+if [[ $gradle_status -ne 0 ]]; then
+    exit "$gradle_status"
 fi
 
 launch_app
@@ -651,16 +902,12 @@ log "Live URL: http://localhost:$PORT"
 log "Inspect URL: chrome://inspect/#devices"
 log "Session active. Press Ctrl+C to stop"
 
-echo "Debug commands:"
-echo "  adb -s $ACTIVE_SERIAL logcat"
-echo "  adb -s $ACTIVE_SERIAL reverse --list"
-echo "  chrome://inspect/#devices"
-
 set +e
 wait "$SERVE_PID"
 serve_status=$?
 set -e
 
 if [[ $serve_status -ne 0 ]]; then
+    show_log_excerpt "$SERVE_LOG_FILE"
     fail "ionic serve exited with status $serve_status"
 fi
