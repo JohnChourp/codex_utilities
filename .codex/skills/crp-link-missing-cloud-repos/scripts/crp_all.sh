@@ -200,6 +200,9 @@ cloud_args=()
 has_cloud_arg() {
   local wanted="$1"
   local arg
+  if [[ ${#cloud_args[@]} -eq 0 ]]; then
+    return 1
+  fi
   for arg in "${cloud_args[@]}"; do
     if [[ "$arg" == "$wanted" || "$arg" == "$wanted="* ]]; then
       return 0
@@ -276,7 +279,9 @@ if [[ ${mode_cloud_link_clone} -eq 1 ]]; then
   if [[ ${user_provided_cloud_out} -eq 0 ]]; then
     cloud_cmd+=(--out "$cloud_report_out")
   fi
-  cloud_cmd+=("${cloud_args[@]}")
+  if [[ ${#cloud_args[@]} -gt 0 ]]; then
+    cloud_cmd+=("${cloud_args[@]}")
+  fi
   "${cloud_cmd[@]}"
 fi
 

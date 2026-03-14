@@ -22,7 +22,10 @@ Default behavior:
 4. Local sync/clone:
    - `codeliver-sap`, `codeliver-panel`, `codeliver-pos`, `codeliver-app`, `codeliver-cost-wizard-react`, `codeliver-website`, `codeliver-integration-partners`, `codeliver-partners-panel`, `codeliver-io` -> `/Users/john/Downloads/projects/<repo>`
    - all other target repos -> `/Users/john/Downloads/lambdas/codeliver_all/<repo>`
-   - existing repos: `fetch --all --prune` + `pull --ff-only`
+   - existing repos: `fetch --all --prune` + `pull --ff-only` only when the working tree is clean
+   - exception: if the only local dirty file is `package-lock.json`, the sync stage auto-reverts that file and continues with `pull --ff-only`
+   - dirty repos are never auto-stashed or auto-merged; the sync report now records their `ahead/behind` state after fetch
+   - if a dirty repo is still behind its upstream after fetch, the repo is reported as a sync failure (`SKIPPED_PULL_DIRTY_BEHIND` / `SKIPPED_PULL_DIRTY_DIVERGED`) so it cannot be mistaken for a successful sync
    - missing repos: clone with preferred protocol; auto-fallback from SSH to HTTPS on publickey failures
 5. Refresh project repo artifacts:
   - `/Users/john/Downloads/lambdas/codeliver_all/current-codeliver-project-repos-full-list.json`
@@ -109,6 +112,14 @@ CODELIVER_AUTH_TOKEN="<your-token>" ~/.codex/skills/codeliver-link-missing-cloud
   - cloud stage report
   - target repos list
   - sync text reports
+
+## Dirty repo safety
+
+- The sync stage always runs `fetch` first.
+- If the only local dirty file is `package-lock.json`, the skill reverts that file automatically and proceeds with sync.
+- If the repo has local uncommitted changes, the skill does not run `pull --ff-only`.
+- The report detail includes the branch divergence against upstream after fetch.
+- If the repo is dirty and `behind > 0`, treat that repo as not synced and resolve it manually by either committing/stashing/discarding local changes and rerunning the sync, or pulling the repo explicitly once it is clean.
 
 ## CRP project mode
 

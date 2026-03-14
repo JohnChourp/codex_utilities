@@ -284,7 +284,10 @@ if [[ ! -f "$TARGET_REPOS_FILE" ]]; then
   exit 2
 fi
 
-mapfile -t TARGET_REPOS < <(sed -e 's/#.*$//' -e 's/^ *//' -e 's/ *$//' "$TARGET_REPOS_FILE" | awk 'NF>0' | sort -u)
+TARGET_REPOS=()
+while IFS= read -r repo_name; do
+  TARGET_REPOS+=("$repo_name")
+done < <(sed -e 's/#.*$//' -e 's/^ *//' -e 's/ *$//' "$TARGET_REPOS_FILE" | awk 'NF>0' | sort -u)
 
 if [[ ${#TARGET_REPOS[@]} -eq 0 ]]; then
   echo "Target repos file is empty: $TARGET_REPOS_FILE" >&2

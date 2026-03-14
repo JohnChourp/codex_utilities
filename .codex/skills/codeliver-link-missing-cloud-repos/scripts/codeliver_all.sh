@@ -327,6 +327,11 @@ cloud_args=()
 has_cloud_arg() {
   local wanted="$1"
   local arg
+
+  if [[ ${#cloud_args[@]} -eq 0 ]]; then
+    return 1
+  fi
+
   for arg in "${cloud_args[@]}"; do
     if [[ "$arg" == "$wanted" || "$arg" == "$wanted="* ]]; then
       return 0
@@ -443,7 +448,9 @@ if [[ ${mode_cloud_link_clone} -eq 1 ]]; then
     if ! has_cloud_arg "--projects-root"; then
       cloud_cmd+=(--projects-root "$resolved_projects_root")
     fi
-    cloud_cmd+=("${cloud_args[@]}")
+    if [[ ${#cloud_args[@]} -gt 0 ]]; then
+      cloud_cmd+=("${cloud_args[@]}")
+    fi
     "${cloud_cmd[@]}"
     feature_cloud_out="$(get_cloud_arg_value "--all-cloud-repos-out" "$DEFAULT_PROJECT_REPOS_LIST_JSON")"
     if [[ -s "$feature_cloud_out" ]]; then

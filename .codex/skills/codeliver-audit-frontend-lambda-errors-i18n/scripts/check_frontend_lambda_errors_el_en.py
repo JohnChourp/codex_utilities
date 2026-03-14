@@ -5,13 +5,18 @@ from collections import Counter
 from pathlib import Path
 
 
+def default_report_json():
+    home = Path.home()
+    return home / ".codex" / "tmp" / "frontend-lambda-errors-i18n-report.json"
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Fast el/en validation from frontend lambda error translation report."
     )
     parser.add_argument(
         "--report-json",
-        default="/home/dm-soft-1/.codex/tmp/frontend-lambda-errors-i18n-report.json",
+        default=str(default_report_json()),
     )
     parser.add_argument("--fail-on-missing", action="store_true", default=True)
     parser.add_argument("--no-fail-on-missing", action="store_false", dest="fail_on_missing")

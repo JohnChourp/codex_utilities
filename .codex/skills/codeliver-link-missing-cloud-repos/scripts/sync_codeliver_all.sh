@@ -137,10 +137,66 @@ log_repo_status() {
   append_report "$line"
 
   case "$status" in
-    FETCH_FAILED|PULL_FAILED|RECLONE_FAILED|MOVE_TO_PROJECTS_FAILED|SKIPPED_PULL_DIRTY|SKIPPED_PULL_NO_UPSTREAM|MISSING_TARGET_REPO)
+    FETCH_FAILED|PULL_FAILED|RECLONE_FAILED|REVERT_PACKAGE_LOCK_FAILED|MOVE_TO_PROJECTS_FAILED|SKIPPED_PULL_DIRTY|SKIPPED_PULL_DIRTY_BEHIND|SKIPPED_PULL_DIRTY_DIVERGED|SKIPPED_PULL_NO_UPSTREAM|MISSING_TARGET_REPO)
       append_failure "$line"
       ;;
   esac
+}
+
+get_upstream_divergence() {
+  local repo_dir="$1"
+  local upstream_ref="$2"
+  local counts ahead behind
+
+  counts="$(git -C "$repo_dir" rev-list --left-right --count "HEAD...${upstream_ref}" 2>/dev/null || true)"
+  ahead="${counts%%$'\t'*}"
+  behind="${counts##*$'\t'}"
+
+  if [[ -z "$ahead" || -z "$behind" || "$ahead" == "$counts" ]]; then
+    return 1
+  fi
+
+  printf "%s\t%s\n" "$ahead" "$behind"
+  return 0
+}
+
+has_only_package_lock_changes() {
+  local status_output="$1"
+  local line path seen=0
+
+  [[ -n "$status_output" ]] || return 1
+
+  while IFS= read -r line; do
+    [[ -n "$line" ]] || continue
+
+    case "$line" in
+      R*|C*|?R*|?C*)
+        return 1
+        ;;
+    esac
+
+    path="${line:3}"
+    if [[ "$path" != "package-lock.json" ]]; then
+      return 1
+    fi
+    seen=1
+  done <<< "$status_output"
+
+  [[ "$seen" -eq 1 ]]
+}
+
+revert_package_lock_changes() {
+  local repo_dir="$1"
+  local package_lock_path="${repo_dir}/package-lock.json"
+
+  if git -C "$repo_dir" ls-files --error-unmatch -- package-lock.json >/dev/null 2>&1; then
+    git -C "$repo_dir" reset --quiet HEAD -- package-lock.json >/dev/null 2>&1 || return 1
+    git -C "$repo_dir" checkout --quiet -- package-lock.json >/dev/null 2>&1 || return 1
+    return 0
+  fi
+
+  rm -f "$package_lock_path" || return 1
+  return 0
 }
 
 sync_repo() {
@@ -148,6 +204,8 @@ sync_repo() {
   local timestamp repo_name toplevel
   local origin_url current_branch upstream_ref
   local fetch_err_file pull_err_file fetch_err pull_err
+  local divergence_counts ahead_count behind_count dirty_detail dirty_status
+  local worktree_status sync_detail package_lock_reverted=0
 
   timestamp="$(date -Iseconds)"
   repo_name="$(basename "$repo_dir")"
@@ -214,16 +272,54 @@ sync_repo() {
     return 1
   fi
 
-  if [[ -n "$(git -C "$repo_dir" status --porcelain 2>/dev/null || true)" ]]; then
-    log_repo_status "$timestamp" "$repo_name" "SKIPPED_PULL_DIRTY" "$repo_dir" "Skipped pull because local uncommitted changes exist"
-    rm -f "$fetch_err_file" "$pull_err_file"
-    return 0
-  fi
-
   current_branch="$(git -C "$repo_dir" symbolic-ref --short -q HEAD 2>/dev/null || true)"
   upstream_ref=""
   if [[ -n "$current_branch" ]]; then
     upstream_ref="$(git -C "$repo_dir" rev-parse --abbrev-ref --symbolic-full-name "@{u}" 2>/dev/null || true)"
+  fi
+
+  worktree_status="$(git -C "$repo_dir" status --porcelain 2>/dev/null || true)"
+  if [[ -n "$worktree_status" ]]; then
+    if has_only_package_lock_changes "$worktree_status"; then
+      if ! revert_package_lock_changes "$repo_dir"; then
+        log_repo_status "$timestamp" "$repo_name" "REVERT_PACKAGE_LOCK_FAILED" "$repo_dir" "Failed to revert package-lock.json-only local changes before pull"
+        rm -f "$fetch_err_file" "$pull_err_file"
+        return 1
+      fi
+      package_lock_reverted=1
+      worktree_status="$(git -C "$repo_dir" status --porcelain 2>/dev/null || true)"
+    fi
+  fi
+
+  if [[ -n "$worktree_status" ]]; then
+    dirty_status="SKIPPED_PULL_DIRTY"
+    dirty_detail="Skipped pull because local uncommitted changes exist"
+
+    if [[ -n "$current_branch" && -n "$upstream_ref" ]]; then
+      divergence_counts="$(get_upstream_divergence "$repo_dir" "$upstream_ref" || true)"
+      if [[ -n "$divergence_counts" ]]; then
+        ahead_count="${divergence_counts%%$'\t'*}"
+        behind_count="${divergence_counts##*$'\t'}"
+        dirty_detail="${dirty_detail}; branch is ahead ${ahead_count} and behind ${behind_count} vs ${upstream_ref}"
+        if [[ "$behind_count" =~ ^[0-9]+$ ]] && [[ "$ahead_count" =~ ^[0-9]+$ ]]; then
+          if [[ "$behind_count" -gt 0 && "$ahead_count" -gt 0 ]]; then
+            dirty_status="SKIPPED_PULL_DIRTY_DIVERGED"
+          elif [[ "$behind_count" -gt 0 ]]; then
+            dirty_status="SKIPPED_PULL_DIRTY_BEHIND"
+          fi
+        fi
+      fi
+    fi
+
+    log_repo_status "$timestamp" "$repo_name" "$dirty_status" "$repo_dir" "$dirty_detail"
+    rm -f "$fetch_err_file" "$pull_err_file"
+
+    case "$dirty_status" in
+      SKIPPED_PULL_DIRTY_BEHIND|SKIPPED_PULL_DIRTY_DIVERGED)
+        return 1
+        ;;
+    esac
+    return 0
   fi
 
   if [[ -z "$current_branch" || -z "$upstream_ref" ]]; then
@@ -239,7 +335,12 @@ sync_repo() {
     return 1
   fi
 
-  log_repo_status "$timestamp" "$repo_name" "SYNCED" "$repo_dir" "Fetch and pull completed"
+  sync_detail="Fetch and pull completed"
+  if [[ "$package_lock_reverted" -eq 1 ]]; then
+    sync_detail="Reverted package-lock.json-only local changes; fetch and pull completed"
+  fi
+
+  log_repo_status "$timestamp" "$repo_name" "SYNCED" "$repo_dir" "$sync_detail"
   rm -f "$fetch_err_file" "$pull_err_file"
   return 0
 }
@@ -289,6 +390,9 @@ export -f append_failure
 export -f is_special_repo
 export -f resolve_special_repo_target
 export -f resolve_special_repo_target_parent
+export -f get_upstream_divergence
+export -f has_only_package_lock_changes
+export -f revert_package_lock_changes
 export -f log_repo_status
 export -f sync_repo
 export -f sync_target_repo
@@ -324,7 +428,10 @@ if [[ ! -f "$TARGET_REPOS_FILE" ]]; then
   exit 2
 fi
 
-mapfile -t TARGET_REPOS < <(sed -e 's/#.*$//' -e 's/^ *//' -e 's/ *$//' "$TARGET_REPOS_FILE" | awk 'NF>0' | sort -u)
+TARGET_REPOS=()
+while IFS= read -r repo; do
+  TARGET_REPOS+=("$repo")
+done < <(sed -e 's/#.*$//' -e 's/^ *//' -e 's/ *$//' "$TARGET_REPOS_FILE" | awk 'NF>0' | sort -u)
 
 if [[ ${#TARGET_REPOS[@]} -eq 0 ]]; then
   echo "Target repos file is empty: $TARGET_REPOS_FILE" >&2

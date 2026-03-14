@@ -1,0 +1,4 @@
+interface:
+  display_name: "OPTC Box Audit Loop"
+  short_description: "Run a saved OPTC case folder, inspect mismatches, and improve matching iteratively"
+  default_prompt: "Audit an OPTC Box Exporter case folder that contains one screenshot and expected.json, write artifacts next to the case, and improve the repo until the ordered output is correct."

@@ -35,6 +35,61 @@ TODO_PLACEHOLDER_RE = re.compile(r"^\s*TODO\([^)]+\)\s*$", re.IGNORECASE)
 GREEK_CHAR_RE = re.compile(r"[Α-Ωα-ω]")
 SUPPORTED_LOCALE_FILES = {"el.json", "en.json"}
 
+
+def first_existing_path(candidates, fallback: Path):
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return fallback
+
+
+def default_refs_dir():
+    home = Path.home()
+    return first_existing_path(
+        [
+            home / ".codex" / "refs",
+            Path("/Users/john/.codex/refs"),
+            Path("/home/dm-soft-1/.codex/refs"),
+        ],
+        home / ".codex" / "refs",
+    )
+
+
+def default_projects_root():
+    home = Path.home()
+    return first_existing_path(
+        [
+            home / "Downloads" / "projects",
+            Path("/Users/john/Downloads/projects"),
+            Path("/home/dm-soft-1/Downloads/projects"),
+        ],
+        home / "Downloads" / "projects",
+    )
+
+
+def default_lambdas_root():
+    home = Path.home()
+    return first_existing_path(
+        [
+            home / "Downloads" / "lambdas",
+            Path("/Users/john/Downloads/lambdas"),
+            Path("/home/dm-soft-1/Downloads/lambdas"),
+        ],
+        home / "Downloads" / "lambdas",
+    )
+
+
+def default_tmp_dir():
+    home = Path.home()
+    return first_existing_path(
+        [
+            home / ".codex" / "tmp",
+            Path("/Users/john/.codex/tmp"),
+            Path("/home/dm-soft-1/.codex/tmp"),
+        ],
+        home / ".codex" / "tmp",
+    )
+
 ERROR_CODE_TRANSLATIONS = {
     "all_delivery_guys_rejected": {
         "en": "All delivery drivers rejected the request.",
@@ -95,6 +150,10 @@ ERROR_CODE_TRANSLATIONS = {
     "db_failed_to_get_route": {
         "en": "Failed to fetch route from the database.",
         "el": "Αποτυχία ανάκτησης διαδρομής από τη βάση δεδομένων.",
+    },
+    "db_failed_to_get_route_path": {
+        "en": "Failed to get route path from the database.",
+        "el": "Αποτυχία λήψης route path από τη βάση δεδομένων.",
     },
     "db_failed_to_get_route_paths": {
         "en": "Failed to fetch route paths from the database.",
@@ -171,6 +230,10 @@ ERROR_CODE_TRANSLATIONS = {
     "dynamo_error": {
         "en": "DynamoDB error.",
         "el": "Σφάλμα DynamoDB.",
+    },
+    "failed_to_complete_return_to_base": {
+        "en": "Failed to complete return to base.",
+        "el": "Αποτυχία ολοκλήρωσης επιστροφής στη βάση.",
     },
     "get_current_route_error": {
         "en": "Failed to fetch current route.",
@@ -267,6 +330,10 @@ ERROR_CODE_TRANSLATIONS = {
     "request_not_found_in_route": {
         "en": "Request was not found in route.",
         "el": "Το αίτημα δεν βρέθηκε στη διαδρομή.",
+    },
+    "return_to_base_completion_timeout": {
+        "en": "Return-to-base completion timed out before the route path became ready.",
+        "el": "Η ολοκλήρωση επιστροφής στη βάση έληξε πριν γίνει έτοιμη η διαδρομή.",
     },
     "route_not_found": {
         "en": "Route was not found.",
@@ -701,16 +768,16 @@ def main():
     parser.add_argument("--mode", choices=["audit", "autofix"], default="autofix")
     parser.add_argument("--languages", default="el,en", help="comma-separated list, supported only: el,en")
     parser.add_argument("--depth", type=int, default=1)
-    parser.add_argument("--projects-root", default="/home/dm-soft-1/Downloads/projects")
-    parser.add_argument("--lambdas-root", default="/home/dm-soft-1/Downloads/lambdas")
-    parser.add_argument("--refs-dir", default="/home/dm-soft-1/.codex/refs")
+    parser.add_argument("--projects-root", default=str(default_projects_root()))
+    parser.add_argument("--lambdas-root", default=str(default_lambdas_root()))
+    parser.add_argument("--refs-dir", default=str(default_refs_dir()))
     parser.add_argument(
         "--report-json",
-        default="/home/dm-soft-1/.codex/tmp/frontend-lambda-errors-i18n-report.json",
+        default=str(default_tmp_dir() / "frontend-lambda-errors-i18n-report.json"),
     )
     parser.add_argument(
         "--report-md",
-        default="/home/dm-soft-1/.codex/tmp/frontend-lambda-errors-i18n-report.md",
+        default=str(default_tmp_dir() / "frontend-lambda-errors-i18n-report.md"),
     )
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()

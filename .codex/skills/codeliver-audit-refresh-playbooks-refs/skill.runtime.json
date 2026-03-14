@@ -15,9 +15,9 @@
         "type": "tool",
         "name": "python",
         "install_hint": {
-          "macos": "Install Python 3 and ensure python3 is in PATH.",
-          "linux": "Install python3 and ensure it is in PATH.",
-          "windows": "Install Python 3 or the py launcher and ensure it is in PATH."
+          "macos": "Install Python 3 and ensure python3 is in PATH. Do not rely on bare python.",
+          "linux": "Install Python 3 and ensure python3 is in PATH. Do not rely on bare python.",
+          "windows": "Install Python 3 and ensure the py -3 launcher is in PATH."
         }
       }
     ]
@@ -40,8 +40,15 @@
       ]
     }
   },
-  "default_command": "collect-doc-inventory",
+  "default_command": "audit-fast",
   "commands": [
+    {
+      "name": "audit-fast",
+      "description": "Run the compact macOS-first audit fast path",
+      "kind": "python",
+      "path": "scripts/audit_fast.py",
+      "args": []
+    },
     {
       "name": "collect-doc-inventory",
       "description": "Run collect_doc_inventory.py",
@@ -61,6 +68,13 @@
       "description": "Run scan_infra_keywords.py",
       "kind": "python",
       "path": "scripts/scan_infra_keywords.py",
+      "args": []
+    },
+    {
+      "name": "audit-dynamodb-indexes",
+      "description": "Run audit_dynamodb_indexes.py",
+      "kind": "python",
+      "path": "scripts/audit_dynamodb_indexes.py",
       "args": []
     }
   ]

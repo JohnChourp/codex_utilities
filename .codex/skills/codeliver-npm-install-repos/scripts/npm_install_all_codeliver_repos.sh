@@ -132,7 +132,10 @@ export -f record_result
 export -f install_repo
 export RESULTS_FILE RESULTS_LOCK_FILE DRY_RUN
 
-mapfile -t ALL_REPO_DIRS < <(find "$ROOT" -mindepth 1 -maxdepth 1 -type d | sort)
+ALL_REPO_DIRS=()
+while IFS= read -r repo_dir; do
+  ALL_REPO_DIRS+=("$repo_dir")
+done < <(find "$ROOT" -mindepth 1 -maxdepth 1 -type d | sort)
 
 TARGET_REPOS=()
 skipped=0

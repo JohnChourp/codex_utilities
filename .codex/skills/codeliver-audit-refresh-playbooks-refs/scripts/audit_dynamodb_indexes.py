@@ -12,9 +12,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Tuple
 
+from path_resolution import resolve_paths
 
-DEFAULT_ROOT = "/home/dm-soft-1/Downloads/lambdas/codeliver_all"
-DEFAULT_OUT = "/home/dm-soft-1/.codex/refs/codeliver-dynamodb-index-audit.md"
+
+DEFAULT_OUT_NAME = "codeliver-dynamodb-index-audit.md"
 
 STRING_LITERAL_RE = re.compile(r"""^(['"])(.*)\1$""", re.S)
 IDENTIFIER_RE = re.compile(r"^[A-Za-z_$][A-Za-z0-9_$]*$")
@@ -50,13 +51,33 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--root",
-        default=DEFAULT_ROOT,
-        help=f"Lambdas root (default: {DEFAULT_ROOT})",
+        default=None,
+        help="Backward-compatible lambdas root override.",
+    )
+    parser.add_argument(
+        "--lambdas-root",
+        default=None,
+        help="Lambdas root override.",
+    )
+    parser.add_argument(
+        "--codex-root",
+        default=None,
+        help="Canonical .codex root override.",
+    )
+    parser.add_argument(
+        "--projects-root",
+        default=None,
+        help="Projects root override.",
+    )
+    parser.add_argument(
+        "--os",
+        default=None,
+        help="Optional OS hint: macos, ubuntu, linux, windows.",
     )
     parser.add_argument(
         "--mode",
         choices=["code-only", "live"],
-        default="live",
+        default="code-only",
         help="Audit mode: code-only extracts usage, live also verifies DynamoDB tables/indexes.",
     )
     parser.add_argument(
@@ -68,9 +89,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--out",
         nargs="?",
-        const=DEFAULT_OUT,
+        const="__DEFAULT__",
         default=None,
-        help=f"Write output to file (default path when flag is present without value: {DEFAULT_OUT})",
+        help="Write output to file. Default path is <codex-root>/refs/codeliver-dynamodb-index-audit.md.",
     )
     parser.add_argument(
         "--profile",
@@ -604,9 +625,13 @@ def main() -> int:
     parser = build_parser()
     args = parser.parse_args()
 
-    root = Path(args.root)
-    if not root.exists():
-        raise SystemExit(f"Root not found: {root}")
+    resolved = resolve_paths(
+        os_hint=args.os,
+        codex_root=Path(args.codex_root) if args.codex_root else None,
+        projects_root=Path(args.projects_root) if args.projects_root else None,
+        lambdas_root=Path(args.lambdas_root or args.root) if (args.lambdas_root or args.root) else None,
+    )
+    root = resolved.lambdas_root
 
     usages, lambda_count, file_count = extract_usages(root)
     report = build_report(
@@ -626,7 +651,11 @@ def main() -> int:
         output = render_text(report)
 
     if args.out:
-        out_path = Path(args.out)
+        out_path = (
+            resolved.codex_root / "refs" / DEFAULT_OUT_NAME
+            if args.out == "__DEFAULT__"
+            else Path(args.out)
+        )
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(output, encoding="utf-8")
     else:

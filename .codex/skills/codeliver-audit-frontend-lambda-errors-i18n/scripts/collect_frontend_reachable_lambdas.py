@@ -15,6 +15,37 @@ IGNORED_SECTIONS = {
 }
 
 
+def first_existing_path(candidates, fallback: Path):
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return fallback
+
+
+def default_refs_dir():
+    home = Path.home()
+    return first_existing_path(
+        [
+            home / ".codex" / "refs",
+            Path("/Users/john/.codex/refs"),
+            Path("/home/dm-soft-1/.codex/refs"),
+        ],
+        home / ".codex" / "refs",
+    )
+
+
+def default_lambdas_root():
+    home = Path.home()
+    return first_existing_path(
+        [
+            home / "Downloads" / "lambdas",
+            Path("/Users/john/Downloads/lambdas"),
+            Path("/home/dm-soft-1/Downloads/lambdas"),
+        ],
+        home / "Downloads" / "lambdas",
+    )
+
+
 def parse_ref_file(path: Path):
     project = path.name.replace("-lambdas.md", "")
     lambdas = []
@@ -125,8 +156,8 @@ def collect_entries(refs_dir: Path, lambdas_root: Path):
 
 def main():
     parser = argparse.ArgumentParser(description="Collect frontend-reachable lambdas from CodeDeliver refs.")
-    parser.add_argument("--refs-dir", default="/home/dm-soft-1/.codex/refs")
-    parser.add_argument("--lambdas-root", default="/home/dm-soft-1/Downloads/lambdas")
+    parser.add_argument("--refs-dir", default=str(default_refs_dir()))
+    parser.add_argument("--lambdas-root", default=str(default_lambdas_root()))
     parser.add_argument("--output", default="")
     args = parser.parse_args()
 
