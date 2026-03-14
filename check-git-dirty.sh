@@ -4,6 +4,31 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPORT_FILE_DEFAULT="$SCRIPT_DIR/dirty-repos.txt"
 REPORT_FILE="$REPORT_FILE_DEFAULT"
+QUIET_TERMINAL="${CHECK_GIT_DIRTY_QUIET_TERMINAL:-1}"
+AUTO_CLOSE_TERMINAL="${CHECK_GIT_DIRTY_AUTO_CLOSE_TERMINAL:-1}"
+
+if [[ "$QUIET_TERMINAL" == "1" ]]; then
+  exec >/dev/null 2>&1
+fi
+
+close_terminal_window_if_requested() {
+  if [[ "$AUTO_CLOSE_TERMINAL" != "1" ]]; then
+    return
+  fi
+  if [[ "${TERM_PROGRAM:-}" != "Apple_Terminal" ]]; then
+    return
+  fi
+
+  (sleep 0.2
+   osascript -e 'tell application "Terminal" to if (count windows) > 0 then close front window' >/dev/null 2>&1 || true
+  ) &
+}
+
+finish_and_exit() {
+  local code="$1"
+  close_terminal_window_if_requested
+  exit "$code"
+}
 
 resolve_downloads_root() {
   local dir="$SCRIPT_DIR"
@@ -19,8 +44,7 @@ resolve_downloads_root() {
 
 DOWNLOADS_ROOT="$(resolve_downloads_root || true)"
 if [[ -z "$DOWNLOADS_ROOT" ]]; then
-  echo "Could not resolve Downloads root from: $SCRIPT_DIR" >&2
-  exit 2
+  finish_and_exit 2
 fi
 
 TARGET_ROOTS_DEFAULT=(
@@ -51,6 +75,8 @@ if [[ "$REPORT_FILE" != /* ]]; then
   REPORT_FILE="$PWD/$REPORT_FILE"
 fi
 mkdir -p "$(dirname "$REPORT_FILE")"
+# Always recreate the report from scratch for each run.
+rm -f "$REPORT_FILE"
 
 REPOS=()
 SCAN_ROOTS=()
@@ -62,8 +88,7 @@ for root in "${TARGET_ROOTS[@]}"; do
 done
 
 if [[ ${#SCAN_ROOTS[@]} -eq 0 ]]; then
-  echo "None of the scan roots exist under: $DOWNLOADS_ROOT" >&2
-  exit 2
+  finish_and_exit 2
 fi
 
 while IFS= read -r repo; do
@@ -78,24 +103,26 @@ done < <(
   done | sort -u
 )
 
-{
-  echo "Git dirty repo scan report"
-  echo "Downloads root: $DOWNLOADS_ROOT"
-  echo "Scan roots:"
-  for root in "${SCAN_ROOTS[@]}"; do
-    echo "- $root"
-  done
-  echo "Generated: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-  echo "Repos detected: ${#REPOS[@]}"
-  echo
-} > "$REPORT_FILE"
-
 if [[ ${#REPOS[@]} -eq 0 ]]; then
-  echo "No Git repositories found under scan roots." | tee -a "$REPORT_FILE"
-  exit 0
+  {
+    echo "Git dirty repo scan report"
+    echo "Downloads root: $DOWNLOADS_ROOT"
+    echo "Scan roots:"
+    for root in "${SCAN_ROOTS[@]}"; do
+      echo "- $root"
+    done
+    echo "Generated: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+    echo "Repos detected: 0"
+    echo "Dirty repos detected: 0"
+    echo
+    echo "No Git repositories found under scan roots."
+  } > "$REPORT_FILE"
+  finish_and_exit 0
 fi
 
 DIRTY_COUNT=0
+DIRTY_DETAILS_FILE="$(mktemp)"
+trap 'rm -f "$DIRTY_DETAILS_FILE"' EXIT
 
 for repo in "${REPOS[@]}"; do
   if ! git -C "$repo" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
@@ -109,15 +136,28 @@ for repo in "${REPOS[@]}"; do
       echo "- $repo"
       echo "$STATUS" | sed 's/^/  /'
       echo
-    } >> "$REPORT_FILE"
+    } >> "$DIRTY_DETAILS_FILE"
   fi
 done
 
+{
+  echo "Git dirty repo scan report"
+  echo "Downloads root: $DOWNLOADS_ROOT"
+  echo "Scan roots:"
+  for root in "${SCAN_ROOTS[@]}"; do
+    echo "- $root"
+  done
+  echo "Generated: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+  echo "Repos detected: ${#REPOS[@]}"
+  echo "Dirty repos detected: $DIRTY_COUNT"
+  echo
+} > "$REPORT_FILE"
+
 if [[ $DIRTY_COUNT -eq 0 ]]; then
-  echo "All clean. Checked ${#REPOS[@]} repo(s). Report: $REPORT_FILE"
   echo "All repositories are clean." >> "$REPORT_FILE"
-  exit 0
+  finish_and_exit 0
 fi
 
-echo "Found $DIRTY_COUNT dirty repo(s). Report: $REPORT_FILE"
-exit 1
+cat "$DIRTY_DETAILS_FILE" >> "$REPORT_FILE"
+echo "Dirty repos total: $DIRTY_COUNT" >> "$REPORT_FILE"
+finish_and_exit 1
