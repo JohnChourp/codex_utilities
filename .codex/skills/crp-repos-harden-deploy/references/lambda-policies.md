@@ -74,6 +74,7 @@ Only emit it when the handled-error policy says to suppress legacy Slack alertin
 If you log invocation events for debugging/replay:
 - keep full schema (same keys/arrays)
 - deep-redact secrets/PII (`authorization`, cookies, tokens, passwords, etc.)
+- Authorizer guardrail: do not redact/drop `requestContext.authorizer` wholesale; keep store/user-relevant authorizer claims and redact only nested sensitive keys
 - avoid duplicate event logs (one per catch)
 
 ### Non-literal error codes

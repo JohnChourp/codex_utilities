@@ -1,6 +1,12 @@
 ---
-name: "CRP Repos Harden PR"
-description: Run or explain the PR-only CRP hardening flow without merge or deploy.
+name: crp-repos-harden-pr
+description: >-
+  Runbook + agent-mode execution workflow for `crp repos harden-pr` (PR-only
+  hardening in Lambda repos: `la run harden` + `la run handled-errors-policy` +
+  open PR; no merge, no deploy, no AWS mutations). Use when you want to
+  harden/upgrade a Lambda repo safely via PR review, avoid nested `codex exec`
+  terminals, or when a legacy runtime/arch/SDK migration is needed but
+  merge+deploy must stay out of scope.
 ---
 
 # CRP repos harden-pr
@@ -61,6 +67,13 @@ In the cloned repo directory:
 - Implement the changes yourself (minimal diffs, behavior-preserving).
 - Use `dmngr/lambda-policies` as source of truth for phases/checkpoints and handled-errors wiring (see `references/lambda-policies.md`).
 
+Authorizer-redaction sweep rule:
+- If the user asks for a multi-repo sweep, run `python3 scripts/scan_authorizer_redaction_regressions.py --org dmngr --json-out /tmp/authorizer-redaction-audit.json --md-out skills/crp-repos-harden-pr/references/authorizer-redaction-audit.md` from the source repo root before opening PRs.
+- Keep two buckets:
+  - `exact`: confirmed regressions such as `SENSITIVE_KEY_RE` including `authorizer`, or container-redaction helpers that include `authorizer|claims` and propagate `redactAllLeaves`
+  - `review-needed`: repos that log a redacted `event` and also depend on authorizer context, but need manual inspection to confirm
+- Do not report the review-needed bucket as already broken; only the exact bucket is a confirmed regression.
+
 Important constraints:
 - Do not “upgrade/deploy ad-hoc”. If a fix requires runtime/arch/deploy wiring changes, express it by updating the repo’s `package.json` scripts (the harden policy expects “run the scripts”, not random commands).
 - Do not merge or deploy in this flow.
@@ -87,3 +100,4 @@ If CRP refuses to continue due to missing checkpoint artifacts:
 
 - `references/workflow.md` for a compact PR-only checklist.
 - `references/lambda-policies.md` for source-of-truth pointers + common mistakes.
+- `references/authorizer-redaction-audit.md` for the current authorizer-redaction sweep inventory.

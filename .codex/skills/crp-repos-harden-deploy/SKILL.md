@@ -1,6 +1,12 @@
 ---
-name: "CRP Repos Harden Deploy"
-description: Explain or run the CRP harden-deploy flow with safe flags and verification.
+name: crp-repos-harden-deploy
+description: >-
+  Runbook + execution workflow for CRP hardening flows that auto-merge + deploy
+  (`crp repos harden-deploy`). Use when you need to explain what the deploy flow
+  does, choose safe flags (debug, handoff), infer deploy target (`AWS_PROFILE`),
+  or execute the flow with post-deploy verification (CloudWatch scan + smoke
+  invoke), including preflight (npm auth, `whc` updates before `la`) and
+  troubleshooting. For PR-only, use `crp-repos-harden-pr`.
 ---
 
 # CRP repos harden-deploy

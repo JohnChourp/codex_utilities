@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "skill_name": "codeliver-upgrade-deliverymanager-lambda-deps",
+  "execution_mode": "python_launcher",
+  "supported_os": [
+    "macos",
+    "linux",
+    "windows"
+  ],
+  "unsupported_behavior": "fail_fast",
+  "preflight": {
+    "cache_ttl_seconds": 600,
+    "checks": [
+      {
+        "type": "tool",
+        "name": "python3",
+        "install_hint": {
+          "default": "Install Python 3 and ensure python3 is in PATH."
+        }
+      },
+      {
+        "type": "tool",
+        "name": "node",
+        "install_hint": {
+          "default": "Install Node.js and ensure node is in PATH."
+        }
+      },
+      {
+        "type": "tool",
+        "name": "npm",
+        "install_hint": {
+          "default": "Install npm and ensure npm is in PATH."
+        }
+      }
+    ]
+  },
+  "entrypoint": {
+    "kind": "python",
+    "path": "scripts/run.py"
+  },
+  "tooling": {
+    "python3": {
+      "macos": [
+        "python3"
+      ],
+      "linux": [
+        "python3"
+      ],
+      "windows": [
+        "python3"
+      ]
+    },
+    "node": {
+      "macos": [
+        "node"
+      ],
+      "linux": [
+        "node"
+      ],
+      "windows": [
+        "node"
+      ]
+    },
+    "npm": {
+      "macos": [
+        "npm"
+      ],
+      "linux": [
+        "npm"
+      ],
+      "windows": [
+        "npm"
+      ]
+    }
+  },
+  "default_command": "codeliver-upgrade-deliverymanager-lambda-deps",
+  "commands": [
+    {
+      "name": "codeliver-upgrade-deliverymanager-lambda-deps",
+      "description": "Run the one-lambda @deliverymanager dependency upgrader",
+      "kind": "shell",
+      "path": "scripts/main.py",
+      "args": []
+    }
+  ]
+}

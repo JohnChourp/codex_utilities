@@ -27,6 +27,10 @@ Load this policy when a task needs non-MCP, non-ClickUp, non-lambda-hardening be
 
 - Logging: when dumping events for troubleshooting, do not redact `event.body`; keep it intact while still redacting auth tokens, cookies, and passwords.
 - **Clarity over efficiency:** if there is a trade-off between performance and readability/maintainability, prefer the simplest correct implementation (even if it is less efficient).
+- **Angular time-binding safety (mandatory):** never call `Date.now()`, `moment().fromNow()`, or any other current-time calculation from a template-bound method/getter/binding. This includes `[max]`/`[min]`, ETA badges, "ready in", and "x minutes ago" labels.
+- **Angular time-binding pattern (mandatory):** when the UI depends on "now", keep a stable component field such as `nowMs` or a cached derived label, update it from a controlled timer/signal, and have template-bound helpers read only that stable state.
+- **Angular repeated time-label rule (mandatory):** if the same relative-time/ETA label is rendered multiple times in one template, precompute/cache it in component state or a view-model instead of recalculating it from the template.
+- Reference pattern: `projects/codeliver/codeliver-panel/src/app/shared/common/request-item/request-item.component.ts` and `projects/codeliver/codeliver-pos/src/app/shared/common/request-item/request-item.component.ts` keep a stable `dateNow` that template-bound helpers consume.
 - Avoid `ng-template`/`ngTemplateOutlet`; keep the full markup inline inside each `@for` loop, even if it duplicates markup.
 - In Angular templates, prefer the new control flow blocks; use `@if`/`@for` and avoid `*ngIf`/`*ngFor`.
 - Ionic modal safety rule (componentProps vs signals): values passed through `modalController.create({ componentProps: ... })` are assigned directly on the component instance. Do **not** model those props as callable signal inputs (`input()` / `InputSignal`) unless callers pass signals explicitly. For primitive/array/object props (e.g. `mode`, `title`, `items`), use plain `@Input()` properties; otherwise runtime errors like `TypeError: this.<prop> is not a function` can occur.

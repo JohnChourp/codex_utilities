@@ -74,7 +74,15 @@ Only emit it when the handled-error policy says to suppress legacy Slack alertin
 If you log invocation events for debugging/replay:
 - keep full schema (same keys/arrays)
 - deep-redact secrets/PII (`authorization`, cookies, tokens, passwords, etc.)
+- Authorizer guardrail: do not redact/drop `requestContext.authorizer` wholesale; keep store/user-relevant authorizer claims and redact only nested sensitive keys
 - avoid duplicate event logs (one per catch)
+- Exact regression signatures to sweep for:
+  - `SENSITIVE_KEY_RE` (or equivalent) includes `authorizer` / `claims`
+  - container-redaction regex includes `authorizer` / `claims` and the helper propagates `redactAllLeaves`
+  - explicit `delete ...authorizer` or `authorizer: REDACT_VALUE/{}/null/undefined` in the redaction helper
+- Current sweep notes:
+  - canonical policy summary: `lambda-policies/harden/authorizer-redaction-audit.md`
+  - operational full inventory in this skill repo: `references/authorizer-redaction-audit.md`
 
 ### Non-literal error codes
 
