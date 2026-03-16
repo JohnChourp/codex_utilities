@@ -1,0 +1,4 @@
+interface:
+  display_name: "CRP Find Outdated Lambda Deps"
+  short_description: "Report newer npm dependency versions across crp_all lambdas"
+  default_prompt: "Scan /Users/john/Downloads/lambdas/crp_all for direct child repos with package.json, compare dependencies and devDependencies against the latest stable npm versions, and overwrite /Users/john/Downloads/lambdas/crp_all/outdated-dependencies-report.txt with the report."

@@ -18,6 +18,7 @@ DEFAULT_ROOT = Path("/Users/john/Downloads/lambdas/codeliver_all")
 PACKAGE_JSON = "package.json"
 LOCKFILES = ("package-lock.json", "npm-shrinkwrap.json")
 SEMVER_RE = re.compile(r"^(\d+)\.(\d+)\.(\d+)$")
+NON_REGISTRY_SPEC_PREFIXES = ("file:", "git+", "git://", "http://", "https://", "workspace:", "link:")
 PLACEHOLDER_TEST_PATTERNS = (
     "no test specified",
     "console.log('no tests')",
@@ -62,7 +63,7 @@ class AttemptRecord:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Upgrade one lambda repo's @deliverymanager/* packages to the newest compatible versions."
+        description="Upgrade one lambda repo's npm dependencies to the newest compatible versions."
     )
     parser.add_argument("--lambda", dest="lambda_name", required=True, help="Exact lambda repo folder name.")
     parser.add_argument("--root", default=str(DEFAULT_ROOT), help=f"Lambda root path. Default: {DEFAULT_ROOT}")
@@ -163,25 +164,64 @@ def save_package_json(repo_path: Path, payload: dict[str, Any]) -> None:
         handle.write("\n")
 
 
-def collect_dm_dependencies(package_json: dict[str, Any]) -> list[tuple[str, str, str]]:
+def is_supported_registry_spec(version_spec: str) -> bool:
+    stripped = version_spec.strip()
+    if not stripped:
+        return False
+    if stripped.startswith(NON_REGISTRY_SPEC_PREFIXES):
+        return False
+
+    normalized = stripped.lstrip("^~")
+    return SEMVER_RE.match(normalized) is not None
+
+
+def collect_upgradeable_dependencies(
+    package_json: dict[str, Any],
+) -> tuple[list[tuple[str, str, str]], list[dict[str, str]]]:
     found: list[tuple[str, str, str]] = []
+    skipped: list[dict[str, str]] = []
     for section in ("dependencies", "devDependencies"):
         dependencies = package_json.get(section) or {}
         if not isinstance(dependencies, dict):
             continue
         for name in sorted(dependencies):
             version = dependencies[name]
-            if isinstance(version, str) and name.startswith("@deliverymanager/"):
+            if not isinstance(version, str):
+                skipped.append(
+                    {
+                        "package": name,
+                        "section": section,
+                        "spec": repr(version),
+                        "reason": "Dependency spec is not a string.",
+                    }
+                )
+                continue
+
+            if is_supported_registry_spec(version):
                 found.append((section, name, version))
-    return found
+                continue
+
+            skipped.append(
+                {
+                    "package": name,
+                    "section": section,
+                    "spec": version,
+                    "reason": "Unsupported dependency spec for npm registry version fallback.",
+                }
+            )
+    return found, skipped
 
 
-def has_caret(version_spec: str) -> bool:
-    return version_spec.startswith("^")
+def spec_prefix(version_spec: str) -> str:
+    if version_spec.startswith("^"):
+        return "^"
+    if version_spec.startswith("~"):
+        return "~"
+    return ""
 
 
 def format_spec(original_spec: str, version: str) -> str:
-    return f"^{version}" if has_caret(original_spec) else version
+    return f"{spec_prefix(original_spec)}{version}"
 
 
 def capture_repo_state(repo_path: Path) -> dict[str, bytes | None]:
@@ -373,7 +413,8 @@ def build_human_summary(report: dict[str, Any]) -> str:
         f"Worktree: {report['worktree']}",
         f"Dry run: {'yes' if report['dry_run'] else 'no'}",
         f"Status: {report['status']}",
-        f"Packages scanned: {report.get('packages_discovered', len(report['packages']))}",
+        f"Packages eligible: {report.get('packages_discovered', len(report['packages']))}",
+        f"Packages skipped: {report.get('packages_skipped', 0)}",
     ]
     if report.get("error"):
         lines.append(f"Error: {report['error']}")
@@ -388,6 +429,10 @@ def build_human_summary(report: dict[str, Any]) -> str:
                 f"{attempt['spec_written']} ({'ok' if attempt['validation_ok'] else 'fail'})" for attempt in attempts
             )
             lines.append(f"  attempts: {tried}")
+    for skipped in report.get("skipped_packages", []):
+        lines.append(
+            f"- {skipped['package']}: {skipped['spec']} [skipped: {skipped['reason']}]"
+        )
     return "\n".join(lines)
 
 
@@ -402,14 +447,18 @@ def execute_upgrade(lambda_name: str, root: Path, dry_run: bool) -> dict[str, An
         "dry_run": dry_run,
         "status": "success",
         "packages_discovered": 0,
+        "packages_skipped": 0,
+        "skipped_packages": [],
         "packages": [],
     }
 
     try:
         package_json = load_package_json(worktree)
-        dm_dependencies = collect_dm_dependencies(package_json)
-        report["packages_discovered"] = len(dm_dependencies)
-        for section, package_name, version_spec in dm_dependencies:
+        dependencies, skipped_packages = collect_upgradeable_dependencies(package_json)
+        report["packages_discovered"] = len(dependencies)
+        report["packages_skipped"] = len(skipped_packages)
+        report["skipped_packages"] = skipped_packages
+        for section, package_name, version_spec in dependencies:
             package_report = upgrade_one_dependency(worktree, section, package_name, version_spec)
             report["packages"].append(package_report)
     except DependencyUpgradeError as exc:

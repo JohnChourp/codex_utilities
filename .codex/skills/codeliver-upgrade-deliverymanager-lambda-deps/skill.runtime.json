@@ -77,7 +77,7 @@
   "commands": [
     {
       "name": "codeliver-upgrade-deliverymanager-lambda-deps",
-      "description": "Run the one-lambda @deliverymanager dependency upgrader",
+      "description": "Run the one-lambda npm dependency upgrader with latest-to-older compatibility fallback",
       "kind": "shell",
       "path": "scripts/main.py",
       "args": []
