@@ -80,6 +80,7 @@ rm -f "$REPORT_FILE"
 
 REPOS=()
 SCAN_ROOTS=()
+NON_REPO_DIRS=()
 
 for root in "${TARGET_ROOTS[@]}"; do
   if [[ -d "$root" ]]; then
@@ -90,6 +91,31 @@ done
 if [[ ${#SCAN_ROOTS[@]} -eq 0 ]]; then
   finish_and_exit 2
 fi
+
+while IFS= read -r candidate_dir; do
+  [[ -n "$candidate_dir" ]] || continue
+
+  if git -C "$candidate_dir" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    continue
+  fi
+
+  NON_REPO_DIRS+=("$candidate_dir")
+done < <(
+  for root in "${SCAN_ROOTS[@]}"; do
+    find "$root" \
+      -mindepth 1 -maxdepth 1 \
+      -type d \
+      ! -name node_modules \
+      ! -name dist \
+      ! -name build \
+      ! -name out \
+      ! -name .next \
+      ! -name .cache \
+      ! -name .venv \
+      ! -name venv \
+      2>/dev/null
+  done | sort -u
+)
 
 while IFS= read -r repo; do
   REPOS+=("$repo")
@@ -114,8 +140,16 @@ if [[ ${#REPOS[@]} -eq 0 ]]; then
     echo "Generated: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
     echo "Repos detected: 0"
     echo "Dirty repos detected: 0"
+    echo "Non-repo folders detected: ${#NON_REPO_DIRS[@]}"
     echo
     echo "No Git repositories found under scan roots."
+    if [[ ${#NON_REPO_DIRS[@]} -gt 0 ]]; then
+      echo
+      echo "Non-repo folders:"
+      for dir in "${NON_REPO_DIRS[@]}"; do
+        echo "- $dir"
+      done
+    fi
   } > "$REPORT_FILE"
   finish_and_exit 0
 fi
@@ -150,8 +184,19 @@ done
   echo "Generated: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
   echo "Repos detected: ${#REPOS[@]}"
   echo "Dirty repos detected: $DIRTY_COUNT"
+  echo "Non-repo folders detected: ${#NON_REPO_DIRS[@]}"
   echo
 } > "$REPORT_FILE"
+
+if [[ ${#NON_REPO_DIRS[@]} -gt 0 ]]; then
+  {
+    echo "Non-repo folders:"
+    for dir in "${NON_REPO_DIRS[@]}"; do
+      echo "- $dir"
+    done
+    echo
+  } >> "$REPORT_FILE"
+fi
 
 if [[ $DIRTY_COUNT -eq 0 ]]; then
   echo "All repositories are clean." >> "$REPORT_FILE"
