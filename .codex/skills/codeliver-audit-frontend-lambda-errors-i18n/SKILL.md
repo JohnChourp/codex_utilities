@@ -13,14 +13,10 @@ The skill scans frontend->lambda refs, resolves local lambdas, expands one-hop d
 ## Fast path
 - Default to the main script only. Do not run helper scripts unless there is a blocker, mismatch, or the user explicitly asks for debug detail.
 - If the user provides an OS hint such as `macos`, `ubuntu`, or `windows`, trust it and skip extra environment probing.
-- On macOS prefer:
-  - refs: `/Users/john/.codex/refs`
-  - projects: `/Users/john/Downloads/projects`
-  - lambdas: `/Users/john/Downloads/lambdas`
-- On Ubuntu/Linux prefer:
-  - refs: `/home/dm-soft-1/.codex/refs`
-  - projects: `/home/dm-soft-1/Downloads/projects`
-  - lambdas: `/home/dm-soft-1/Downloads/lambdas`
+- Prefer runtime-detected user roots:
+  - refs: `~/.codex/refs`
+  - projects: `~/Downloads/projects`
+  - lambdas: `~/Downloads/lambdas`
 - On Windows prefer the same relative layout under the user profile and use the runtime launcher from `skill.runtime.json`.
 - Keep chat output minimal:
   - one short start update
@@ -52,7 +48,7 @@ Use only for debugging, path validation, or when the main audit result looks inc
 
 Usage:
 - `python scripts/collect_frontend_reachable_lambdas.py`
-- `python scripts/collect_frontend_reachable_lambdas.py --output /home/dm-soft-1/.codex/tmp/frontend-reachable-lambdas.json`
+- `python scripts/collect_frontend_reachable_lambdas.py --output ~/.codex/tmp/frontend-reachable-lambdas.json`
 
 ### scripts/audit_frontend_lambda_errors_i18n.py
 Main analyzer and autofix engine.
@@ -69,7 +65,7 @@ Use only as a post-run spot check when the user explicitly asks for extra verifi
 
 Usage:
 - `python scripts/check_frontend_lambda_errors_el_en.py`
-- `python scripts/check_frontend_lambda_errors_el_en.py --report-json /home/dm-soft-1/.codex/tmp/frontend-lambda-errors-i18n-report.json`
+- `python scripts/check_frontend_lambda_errors_el_en.py --report-json ~/.codex/tmp/frontend-lambda-errors-i18n-report.json`
 
 ## Guardrails
 - Use refs as source-of-truth for frontend-called entry lambdas.

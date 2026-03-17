@@ -10,7 +10,7 @@ Run complete Lambda error investigation for CodeDeliver as an agent, without man
 
 The skill supports:
 - Single incident mode (one function/request id)
-- Batch mode (all local CodeDeliver lambda repos under `/home/dm-soft-1/Downloads/lambdas/codeliver_all`)
+- Batch mode (all local CodeDeliver lambda repos under `~/Downloads/lambdas/codeliver_all`)
 - Cross-product auth-drift audit mode (`codeliver-pos`, `codeliver-panel`, `codeliver-sap`, `codeliver-app`)
 
 ## Required Input
@@ -39,8 +39,8 @@ Run and record these checks before doing analysis:
 
 ```bash
 aws sts get-caller-identity > /tmp/aws.sts.json
-test -d /home/dm-soft-1/Downloads/lambdas/codeliver_all
-test -d /home/dm-soft-1/Downloads/projects/codeliver
+test -d ~/Downloads/lambdas/codeliver_all
+test -d ~/Downloads/projects/codeliver
 ```
 
 When function and region are known, also capture runtime/arch:
@@ -59,7 +59,7 @@ Preflight result must be explicit:
 Failure actions:
 - If AWS auth fails, stop and ask user to authenticate AWS CLI before continuing.
 - If `codeliver_all` path is missing, stop and ask user to sync repos first.
-- If `/home/dm-soft-1/Downloads/projects/codeliver` is missing, continue with lambda-only analysis and mark completeness as partial.
+- If `~/Downloads/projects/codeliver` is missing, continue with lambda-only analysis and mark completeness as partial.
 
 ### 2. Choose the right execution command
 Prefer request-id-based collection when function and request id are known:
@@ -81,7 +81,7 @@ If only CloudWatch URL is available and parser tooling exists, use it to resolve
 When the user asks to run for all downloaded CodeDeliver lambdas, discover function candidates from local repo folders and inspect recent failing request ids.
 
 ```bash
-find /home/dm-soft-1/Downloads/lambdas/codeliver_all -mindepth 1 -maxdepth 1 -type d | sort > /tmp/codeliver_all.repos.txt
+find ~/Downloads/lambdas/codeliver_all -mindepth 1 -maxdepth 1 -type d | sort > /tmp/codeliver_all.repos.txt
 awk -F/ '{print $NF}' /tmp/codeliver_all.repos.txt > /tmp/codeliver_all.lambda_candidates.txt
 ```
 
@@ -140,8 +140,8 @@ Static inventory commands:
 
 ```bash
 rg -n "authorizer|renew-token|login|jwt.verify|expiresIn|users\\[0\\]|no_user_found|user_does_not_exist|delivery_guy_does_not_exist|device_does_not_exist|login_completed" \
-  /home/dm-soft-1/Downloads/lambdas/codeliver_all \
-  /home/dm-soft-1/Downloads/projects/codeliver
+  ~/Downloads/lambdas/codeliver_all \
+  ~/Downloads/projects/codeliver
 ```
 
 Per-product inventory requirements:
@@ -210,8 +210,8 @@ Preferred `store_name` extraction order from the item:
 Build context from local repos:
 
 ```bash
-rg -n "<function_name>|<api_path>|<event_name>|<table_name>|<queue_name>" /home/dm-soft-1/Downloads/lambdas/codeliver_all
-rg -n "<function_name>|<api_path>" /home/dm-soft-1/Downloads/projects/codeliver
+rg -n "<function_name>|<api_path>|<event_name>|<table_name>|<queue_name>" ~/Downloads/lambdas/codeliver_all
+rg -n "<function_name>|<api_path>" ~/Downloads/projects/codeliver
 ```
 
 Mandatory context mapping:
@@ -245,7 +245,7 @@ If any required item is missing:
 Search across local CodeDeliver lambdas and projects using extracted ids/resources:
 
 ```bash
-rg -n "<resource-or-id>" /home/dm-soft-1/Downloads/lambdas/codeliver_all /home/dm-soft-1/Downloads/projects/codeliver
+rg -n "<resource-or-id>" ~/Downloads/lambdas/codeliver_all ~/Downloads/projects/codeliver
 ```
 
 Prioritize paths that:

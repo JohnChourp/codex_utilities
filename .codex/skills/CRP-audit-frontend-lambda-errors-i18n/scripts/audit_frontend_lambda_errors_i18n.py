@@ -9,6 +9,11 @@ from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
+DEFAULT_PROJECTS_ROOT = str(Path.home() / "Downloads" / "projects")
+DEFAULT_LAMBDAS_ROOT = str(Path.home() / "Downloads" / "lambdas" / "crp_all")
+DEFAULT_REPORT_JSON = str(Path.home() / ".codex" / "tmp" / "crp-frontend-lambda-errors-i18n-report.json")
+DEFAULT_REPORT_MD = str(Path.home() / ".codex" / "tmp" / "crp-frontend-lambda-errors-i18n-report.md")
+
 API_LAMBDA_RE = re.compile(r"/prod/(crp-[a-z0-9-]+)")
 LOG_NAME_RE = re.compile(r'logName\s*:\s*["\'](crp-[a-z0-9-]+)["\']')
 
@@ -487,20 +492,20 @@ def main():
     )
     parser.add_argument("--mode", choices=["audit", "autofix"], default="autofix")
     parser.add_argument("--depth", type=int, default=1)
-    parser.add_argument("--projects-root", default="/Users/john/Downloads/projects")
+    parser.add_argument("--projects-root", default=DEFAULT_PROJECTS_ROOT)
     parser.add_argument("--frontend-project", default="cloud-repos-panel")
-    parser.add_argument("--lambdas-root", default="/Users/john/Downloads/lambdas/crp_all")
+    parser.add_argument("--lambdas-root", default=DEFAULT_LAMBDAS_ROOT)
     parser.add_argument("--languages", default="el,en", help="comma-separated list, supported only: el,en")
     parser.add_argument("--translation-provider", choices=["openai", "none"], default="openai")
     parser.add_argument("--translation-model", default="gpt-4.1-mini")
     parser.add_argument("--translation-source-locale-priority", default="en,el")
     parser.add_argument(
         "--report-json",
-        default="/Users/john/.codex/tmp/crp-frontend-lambda-errors-i18n-report.json",
+        default=DEFAULT_REPORT_JSON,
     )
     parser.add_argument(
         "--report-md",
-        default="/Users/john/.codex/tmp/crp-frontend-lambda-errors-i18n-report.md",
+        default=DEFAULT_REPORT_MD,
     )
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()

@@ -44,8 +44,9 @@ DEFAULT_NAME_CONTAINS = "codeliver-"
 DEFAULT_SPECIAL_REPOS = ["codeliver-sap", "codeliver-panel", "codeliver-pos", "codeliver-app", "codeliver-cost-wizard-react", "codeliver-website", "codeliver-integration-partners", "codeliver-partners-panel", "codeliver-io"]
 DEFAULT_AUTO_SUBPROJECT = "cloud-repos-auto-linking"
 DEFAULT_AUTO_FEATURE = "auto-linked-codeliver-repos"
-DEFAULT_CLONE_ROOT = Path("/Users/john/Downloads/lambdas/codeliver_all")
-DEFAULT_PROJECTS_ROOT = Path("/Users/john/Downloads/projects")
+DEFAULT_DOWNLOADS_ROOT = Path.home() / "Downloads"
+DEFAULT_CLONE_ROOT = DEFAULT_DOWNLOADS_ROOT / "lambdas" / "codeliver_all"
+DEFAULT_PROJECTS_ROOT = DEFAULT_DOWNLOADS_ROOT / "projects"
 DEFAULT_REPOS_LIST_OUT = DEFAULT_CLONE_ROOT / "current-codeliver-target-repos.txt"
 DEFAULT_REPORT_OUT = DEFAULT_CLONE_ROOT / "codeliver-cloud-repos-sync-report.json"
 DEFAULT_ALL_CLOUD_REPOS_OUT = DEFAULT_CLONE_ROOT / "current-codeliver-project-repos-full-list.json"
@@ -90,6 +91,28 @@ def _run(cmd: list[str], cwd: Path | None = None) -> subprocess.CompletedProcess
         capture_output=True,
         cwd=str(cwd) if cwd else None,
     )
+
+
+def _get_upstream_divergence(repo_dir: Path, upstream_ref: str) -> tuple[int, int] | None:
+    run = _run(["git", "-C", str(repo_dir), "rev-list", "--left-right", "--count", f"HEAD...{upstream_ref}"])
+    if run.returncode != 0:
+        return None
+
+    raw = (run.stdout or "").strip()
+    if not raw:
+        return None
+
+    parts = raw.split()
+    if len(parts) != 2:
+        return None
+
+    try:
+        ahead = int(parts[0])
+        behind = int(parts[1])
+    except ValueError:
+        return None
+
+    return ahead, behind
 
 
 def _compact_err(run: subprocess.CompletedProcess[str], fallback: str) -> str:
@@ -452,38 +475,46 @@ def _pick_clone_url(repo_id: str, repo_urls: dict[str, dict[str, str]], github_o
     return f"git@github.com:{github_org}/{repo_id}.git", "generated_ssh"
 
 
-def _sync_existing_repo(repo_dir: Path) -> tuple[str, str]:
+def _sync_existing_repo(repo_dir: Path) -> tuple[str, str, int]:
     if not repo_dir.exists():
-        return "missing", "Local path does not exist"
+        return "missing", "Local path does not exist", 0
 
     if repo_dir.is_file():
-        return "path_conflict", "Target path exists as file"
+        return "path_conflict", "Target path exists as file", 0
 
     if not (repo_dir / ".git").exists():
-        return "skipped_not_git_toplevel", "Directory is not a git repository"
+        return "skipped_not_git_toplevel", "Directory is not a git repository", 0
 
     fetch = _run(["git", "-C", str(repo_dir), "fetch", "--all", "--prune", "--quiet"])
     if fetch.returncode != 0:
-        return "fetch_failed", _compact_err(fetch, "git fetch failed")
+        return "fetch_failed", _compact_err(fetch, "git fetch failed"), 0
 
     dirty = _run(["git", "-C", str(repo_dir), "status", "--porcelain"])
     if dirty.returncode == 0 and (dirty.stdout or "").strip():
-        return "skipped_dirty", "Skipped pull due to local changes"
+        return "skipped_dirty", "Skipped pull due to local changes", 0
 
     branch = _run(["git", "-C", str(repo_dir), "symbolic-ref", "--short", "-q", "HEAD"])
     current_branch = (branch.stdout or "").strip()
     if branch.returncode != 0 or not current_branch:
-        return "skipped_no_upstream", "Skipped pull because branch is detached or unknown"
+        return "skipped_no_upstream", "Skipped pull because branch is detached or unknown", 0
 
     upstream = _run(["git", "-C", str(repo_dir), "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"])
-    if upstream.returncode != 0 or not (upstream.stdout or "").strip():
-        return "skipped_no_upstream", "Skipped pull because upstream is missing"
+    upstream_ref = (upstream.stdout or "").strip()
+    if upstream.returncode != 0 or not upstream_ref:
+        return "skipped_no_upstream", "Skipped pull because upstream is missing", 0
+
+    divergence = _get_upstream_divergence(repo_dir, upstream_ref)
+    behind_before_pull = divergence[1] if divergence else 0
 
     pull = _run(["git", "-C", str(repo_dir), "pull", "--ff-only", "--quiet"])
     if pull.returncode != 0:
-        return "pull_failed", _compact_err(pull, "git pull failed")
+        return "pull_failed", _compact_err(pull, "git pull failed"), 0
 
-    return "synced", "Fetch and pull completed"
+    detail = "Fetch and pull completed"
+    if behind_before_pull > 0:
+        detail = f"{detail}; updated_from_behind_commits={behind_before_pull}"
+
+    return "synced", detail, behind_before_pull
 
 
 def _clone_repo(repo_id: str, repo_dir: Path, url: str) -> tuple[str, str]:
@@ -708,6 +739,7 @@ def main() -> int:
     local_sync_summary = {
         "total": len(target_repos),
         "synced": 0,
+        "updated_from_behind": 0,
         "cloned": 0,
         "exists": 0,
         "skipped_dirty": 0,
@@ -770,7 +802,7 @@ def main() -> int:
                 local_sync_summary[status] += 1
                 continue
 
-            sync_status, sync_details = _sync_existing_repo(repo_path)
+            sync_status, sync_details, behind_before_pull = _sync_existing_repo(repo_path)
             if sync_status == "missing":
                 clone_url, _source = _pick_clone_url(repo_id, repo_urls, github_org, args.clone_prefer)
                 if not clone_url:
@@ -794,7 +826,7 @@ def main() -> int:
 
                 if status == "cloned":
                     # Ensure cloned repositories immediately receive latest upstream head state.
-                    sync_after_clone, sync_after_clone_details = _sync_existing_repo(repo_path)
+                    sync_after_clone, sync_after_clone_details, _ = _sync_existing_repo(repo_path)
                     if sync_after_clone in {"synced", "skipped_dirty", "skipped_no_upstream", "skipped_not_git_toplevel"}:
                         if sync_after_clone == "synced":
                             details = "Clone completed + synced"
@@ -847,6 +879,9 @@ def main() -> int:
                 local_sync_summary[local_status] += 1
             else:
                 local_sync_summary["missing"] += 1
+
+            if local_status == "synced" and behind_before_pull > 0:
+                local_sync_summary["updated_from_behind"] += 1
 
     else:
         local_sync_summary = {"disabled": True}
@@ -917,6 +952,7 @@ def main() -> int:
         print(
             "Local sync summary:"
             f" synced={summary.get('synced', 0)}"
+            f", updated_from_behind={summary.get('updated_from_behind', 0)}"
             f", cloned={summary.get('cloned', 0)}"
             f", exists={summary.get('exists', 0)}"
             f", skipped_dirty={summary.get('skipped_dirty', 0)}"
@@ -924,6 +960,7 @@ def main() -> int:
             f", fetch_failed={summary.get('fetch_failed', 0)}"
             f", pull_failed={summary.get('pull_failed', 0)}"
         )
+        print(f"Repos updated from behind: {summary.get('updated_from_behind', 0)}")
     print(f"Target list: {repos_list_out}")
     print(f"All cloud repos from features: {all_cloud_repos_out}")
     print(f"Report: {out_path}")

@@ -7,7 +7,7 @@ description: Audit and iteratively improve OPTC Box Exporter matching from a cas
 
 ## Overview
 
-Use this skill for `/Users/john/Downloads/projects/optc-box-exporter` when the user wants a repeatable audit/fix loop from a saved case folder.
+Use this skill for `~/Downloads/projects/optc-box-exporter` when the user wants a repeatable audit/fix loop from a saved case folder.
 
 ## Case folder contract
 
@@ -23,7 +23,7 @@ The provided folder must contain:
 
 1. Confirm the repo exists at:
 ```text
-/Users/john/Downloads/projects/optc-box-exporter
+~/Downloads/projects/optc-box-exporter
 ```
 
 2. Confirm the user gave a case folder path. If `notes.txt` is missing and the user did not describe the failure in the prompt, ask for a short failure note.

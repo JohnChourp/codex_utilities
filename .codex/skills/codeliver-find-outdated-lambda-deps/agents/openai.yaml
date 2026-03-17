@@ -1,4 +1,4 @@
 interface:
   display_name: "Codeliver Find Outdated Lambda Deps"
   short_description: "Report newer npm dependency versions across codeliver_all lambdas"
-  default_prompt: "Scan /Users/john/Downloads/lambdas/codeliver_all for direct child repos with package.json, compare dependencies and devDependencies against the latest stable npm versions, and overwrite /Users/john/Downloads/lambdas/codeliver_all/outdated-dependencies-report.txt with the report."
+  default_prompt: "Scan ~/Downloads/lambdas/codeliver_all for direct child repos with package.json, compare dependencies and devDependencies against the latest stable npm versions, and overwrite ~/Downloads/lambdas/codeliver_all/outdated-dependencies-report.txt with the report."

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import json
+import os
 import re
 from collections import defaultdict
 from datetime import datetime, timezone
@@ -23,27 +24,13 @@ def first_existing_path(candidates, fallback: Path):
 
 
 def default_refs_dir():
-    home = Path.home()
-    return first_existing_path(
-        [
-            home / ".codex" / "refs",
-            Path("/Users/john/.codex/refs"),
-            Path("/home/dm-soft-1/.codex/refs"),
-        ],
-        home / ".codex" / "refs",
-    )
+    codex_home = Path(os.getenv("CODEX_HOME", str(Path.home() / ".codex")))
+    return first_existing_path([codex_home / "refs"], codex_home / "refs")
 
 
 def default_lambdas_root():
     home = Path.home()
-    return first_existing_path(
-        [
-            home / "Downloads" / "lambdas",
-            Path("/Users/john/Downloads/lambdas"),
-            Path("/home/dm-soft-1/Downloads/lambdas"),
-        ],
-        home / "Downloads" / "lambdas",
-    )
+    return first_existing_path([home / "Downloads" / "lambdas"], home / "Downloads" / "lambdas")
 
 
 def parse_ref_file(path: Path):

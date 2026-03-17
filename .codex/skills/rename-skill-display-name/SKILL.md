@@ -21,7 +21,7 @@ Collect:
 - the target skill, as one of:
   - full path to the skill folder
   - full path to the skill `SKILL.md`
-  - known skill folder name under `/Users/john/.codex/skills`
+  - known skill folder name under `~/.codex/skills`
 - the exact new display name
 
 ## Workflow
@@ -37,12 +37,12 @@ Collect:
 
 Use the bundled script for deterministic edits:
 
-- `python /Users/john/.codex/skills/rename-skill-display-name/scripts/set_skill_display_name.py --skill <path-or-name> --display-name "<new name>"`
+- `python ~/.codex/skills/rename-skill-display-name/scripts/set_skill_display_name.py --skill <path-or-name> --display-name "<new name>"`
 
 Examples:
 
-- `python /Users/john/.codex/skills/rename-skill-display-name/scripts/set_skill_display_name.py --skill /Users/john/.codex/skills/crp-repos-harden-pr --display-name "Repo Harden PR"`
-- `python /Users/john/.codex/skills/rename-skill-display-name/scripts/set_skill_display_name.py --skill crp-repos-harden-deploy --display-name "Repo Harden Deploy"`
+- `python ~/.codex/skills/rename-skill-display-name/scripts/set_skill_display_name.py --skill ~/.codex/skills/crp-repos-harden-pr --display-name "Repo Harden PR"`
+- `python ~/.codex/skills/rename-skill-display-name/scripts/set_skill_display_name.py --skill crp-repos-harden-deploy --display-name "Repo Harden Deploy"`
 
 ## Guardrails
 

@@ -167,7 +167,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--no-include-utilities", dest="include_utilities", action="store_false")
     p.set_defaults(include_utilities=True)
     p.add_argument("--report", default="./modal-sync-report.json")
-    p.add_argument("--codeliver-root", default="/home/dm-soft-1/Downloads/projects/codeliver")
+    p.add_argument("--codeliver-root", default=str(Path.home() / "Downloads" / "projects" / "codeliver"))
     p.add_argument(
         "--config",
         default=str(Path.home() / ".codex/skills/codeliver-sync-global-modal-styles/references/modal_sync_config.json"),

@@ -4,10 +4,13 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SYNC_SCRIPT="${SCRIPT_DIR}/sync_crp_all.sh"
 CRP_CLOUD_SCRIPT="${SCRIPT_DIR}/sync_crp_cloud_repos.py"
-DEFAULT_TARGET_REPOS_FILE="/Users/john/Downloads/lambdas/crp_all/current-crp-target-repos.txt"
-DEFAULT_CLOUD_REPORT_FILE="/Users/john/Downloads/lambdas/crp_all/crp-cloud-repos-sync-report.json"
-DEFAULT_PROJECT_REPOS_LIST_TXT="/Users/john/Downloads/lambdas/crp_all/current-crp-project-repos-full-list.txt"
-DEFAULT_PROJECT_REPOS_LIST_JSON="/Users/john/Downloads/lambdas/crp_all/current-crp-project-repos-full-list.json"
+DOWNLOADS_DIR="${DOWNLOADS_DIR:-${HOME}/Downloads}"
+DEFAULT_CLONE_ROOT="${DOWNLOADS_DIR}/lambdas/crp_all"
+DEFAULT_TARGET_REPOS_FILE="${DEFAULT_CLONE_ROOT}/current-crp-target-repos.txt"
+DEFAULT_CLOUD_REPORT_FILE="${DEFAULT_CLONE_ROOT}/crp-cloud-repos-sync-report.json"
+DEFAULT_PROJECT_REPOS_LIST_TXT="${DEFAULT_CLONE_ROOT}/current-crp-project-repos-full-list.txt"
+DEFAULT_PROJECT_REPOS_LIST_JSON="${DEFAULT_CLONE_ROOT}/current-crp-project-repos-full-list.json"
+DEFAULT_SYNC_REPORT_DIR="${DOWNLOADS_DIR}/lambdas/_sync_reports"
 
 temp_files=()
 temp_dirs=()
@@ -26,8 +29,8 @@ cleanup_temp_artifacts() {
 
 cleanup_legacy_outputs() {
   rm -f "$DEFAULT_TARGET_REPOS_FILE" "$DEFAULT_CLOUD_REPORT_FILE" "$DEFAULT_PROJECT_REPOS_LIST_TXT" 2>/dev/null || true
-  rm -f /Users/john/Downloads/lambdas/_sync_reports/crp_all_sync_report_*.txt 2>/dev/null || true
-  rm -f /Users/john/Downloads/lambdas/_sync_reports/crp_all_sync_failures_*.txt 2>/dev/null || true
+  rm -f "${DEFAULT_SYNC_REPORT_DIR}"/crp_all_sync_report_*.txt 2>/dev/null || true
+  rm -f "${DEFAULT_SYNC_REPORT_DIR}"/crp_all_sync_failures_*.txt 2>/dev/null || true
 }
 
 trap 'cleanup_temp_artifacts' EXIT

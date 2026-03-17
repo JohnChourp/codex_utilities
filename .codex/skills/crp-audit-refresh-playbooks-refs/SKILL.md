@@ -43,13 +43,13 @@ Write playbook/ref content in English.
 
 4. Scan infra and contracts.
 - Lambdas/IaC:
-  - `rg -n "httpApi|httpApiEvent|events:|path:|method:|handler:" /home/dm-soft-1/Downloads/lambdas/crp_all`
-  - `rg -n "SQS|SNS|EventBridge|DynamoDB|S3|CloudFront|API Gateway" /home/dm-soft-1/Downloads/lambdas/crp_all`
+  - `rg -n "httpApi|httpApiEvent|events:|path:|method:|handler:" ~/Downloads/lambdas/crp_all`
+  - `rg -n "SQS|SNS|EventBridge|DynamoDB|S3|CloudFront|API Gateway" ~/Downloads/lambdas/crp_all`
 - Frontend services only:
-  - `rg -n "HttpClient|fetch\\(|/api/|/v1/" /home/dm-soft-1/Downloads/projects/cloud-repos-panel -g "*.service.ts"`
+  - `rg -n "HttpClient|fetch\\(|/api/|/v1/" ~/Downloads/projects/cloud-repos-panel -g "*.service.ts"`
 
 5. Audit DynamoDB table/index usage (when requested).
-- Scan all lambdas under `/home/dm-soft-1/Downloads/lambdas/crp_all`.
+- Scan all lambdas under `~/Downloads/lambdas/crp_all`.
 - Extract DynamoDB `TableName` + `IndexName` pairs from JS lambda files.
 - Resolve literal values and simple same-file constant indirection.
 - Treat unresolved dynamic expressions such as `params.IndexName` as manual-review evidence, never as missing indexes.
@@ -86,7 +86,7 @@ List current CRP playbooks/refs.
 
 Usage:
 - `python scripts/collect_doc_inventory.py`
-- `python scripts/collect_doc_inventory.py --root /home/dm-soft-1`
+- `python scripts/collect_doc_inventory.py --root ~`
 
 ### scripts/extract_frontend_http_calls.py
 Extract frontend HTTP calls from `cloud-repos-panel` and optionally generate reviewable ref markdown.
@@ -108,8 +108,8 @@ Usage:
 Audit DynamoDB `TableName` + `IndexName` usage across `crp_all` lambdas.
 
 Usage:
-- `python scripts/audit_dynamodb_indexes.py --root /home/dm-soft-1/Downloads/lambdas/crp_all --mode code-only`
-- `python scripts/audit_dynamodb_indexes.py --root /home/dm-soft-1/Downloads/lambdas/crp_all --mode live`
+- `python scripts/audit_dynamodb_indexes.py --root ~/Downloads/lambdas/crp_all --mode code-only`
+- `python scripts/audit_dynamodb_indexes.py --root ~/Downloads/lambdas/crp_all --mode live`
 - `python scripts/audit_dynamodb_indexes.py --mode live --format md --out`
 - `python scripts/audit_dynamodb_indexes.py --mode live --profile <aws-profile> --region eu-west-1`
 

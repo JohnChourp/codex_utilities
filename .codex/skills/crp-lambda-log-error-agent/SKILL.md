@@ -223,7 +223,7 @@ If confidence is low, state the exact missing evidence that would raise confiden
 
 ### 8. Run safe smoke verification profile (only when needed)
 Use smoke invoke only when it adds evidence and the event shape is known.
-Pick profile by trigger type using `/Users/adomvris/.codex/skills/crp-lambda-log-error-agent/references/smoke-profiles.md`.
+Pick profile by trigger type using `~/.codex/skills/crp-lambda-log-error-agent/references/smoke-profiles.md`.
 
 Rules:
 - prefer replaying a sanitized real event shape from recent logs over invented payloads
@@ -232,7 +232,7 @@ Rules:
 - never treat malformed smoke payload failures as production regressions
 
 ### 9. Compute health verdict with noise filters
-Use `/Users/adomvris/.codex/skills/crp-lambda-log-error-agent/references/health-verdict-filters.md` to classify results:
+Use `~/.codex/skills/crp-lambda-log-error-agent/references/health-verdict-filters.md` to classify results:
 - `production_failures`
 - `smoke_or_test_failures`
 - `critical_signatures`
@@ -244,7 +244,7 @@ Health verdict must:
 - mark status `healthy_after_fix` only when production failures and critical signatures are both zero in the checked window
 
 ### 10. Return a structured report
-Use `/Users/adomvris/.codex/skills/crp-lambda-log-error-agent/references/report-template.md` for the response layout.
+Use `~/.codex/skills/crp-lambda-log-error-agent/references/report-template.md` for the response layout.
 Keep the report concise but complete enough to execute the fix.
 Always include:
 - data completeness status (`complete` / `partial`)
@@ -276,7 +276,7 @@ Always include:
 
 ## References
 Load these only when needed:
-- `/Users/adomvris/.codex/skills/crp-lambda-log-error-agent/references/report-template.md`
-- `/Users/adomvris/.codex/skills/crp-lambda-log-error-agent/references/search-patterns.md`
-- `/Users/adomvris/.codex/skills/crp-lambda-log-error-agent/references/smoke-profiles.md`
-- `/Users/adomvris/.codex/skills/crp-lambda-log-error-agent/references/health-verdict-filters.md`
+- `~/.codex/skills/crp-lambda-log-error-agent/references/report-template.md`
+- `~/.codex/skills/crp-lambda-log-error-agent/references/search-patterns.md`
+- `~/.codex/skills/crp-lambda-log-error-agent/references/smoke-profiles.md`
+- `~/.codex/skills/crp-lambda-log-error-agent/references/health-verdict-filters.md`

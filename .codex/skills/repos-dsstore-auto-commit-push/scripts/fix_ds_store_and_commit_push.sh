@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-TARGET_ROOTS="${TARGET_ROOTS:-/Users/john/Downloads/lambdas,/Users/john/Downloads/projects}"
+TARGET_ROOTS="${TARGET_ROOTS:-${HOME}/Downloads/lambdas,${HOME}/Downloads/projects}"
 CONCURRENCY="${CONCURRENCY:-8}"
-REPORT_DIR="${REPORT_DIR:-/Users/john/Downloads/_dsstore_skill_reports}"
+REPORT_DIR="${REPORT_DIR:-${HOME}/Downloads/_dsstore_skill_reports}"
 COMMIT_MESSAGE="${COMMIT_MESSAGE:-chore(gitignore): ignore .DS_Store}"
 DRY_RUN="${DRY_RUN:-0}"
 

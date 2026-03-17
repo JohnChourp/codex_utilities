@@ -8,7 +8,7 @@ from pathlib import Path
 import sys
 
 
-SKILLS_ROOT = Path("/Users/john/.codex/skills")
+SKILLS_ROOT = Path.home() / ".codex" / "skills"
 
 
 def yaml_quote(value: str) -> str:

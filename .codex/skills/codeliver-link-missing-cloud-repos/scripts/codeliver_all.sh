@@ -4,13 +4,15 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SYNC_SCRIPT="${SCRIPT_DIR}/sync_codeliver_all.sh"
 CODELIVER_CLOUD_SCRIPT="${SCRIPT_DIR}/sync_codeliver_cloud_repos.py"
-DEFAULT_TARGET_REPOS_FILE="/Users/john/Downloads/lambdas/codeliver_all/current-codeliver-target-repos.txt"
-DEFAULT_CLOUD_REPORT_FILE="/Users/john/Downloads/lambdas/codeliver_all/codeliver-cloud-repos-sync-report.json"
-DEFAULT_PROJECT_REPOS_LIST_TXT="/Users/john/Downloads/lambdas/codeliver_all/current-codeliver-project-repos-full-list.txt"
-DEFAULT_PROJECT_REPOS_LIST_JSON="/Users/john/Downloads/lambdas/codeliver_all/current-codeliver-project-repos-full-list.json"
-DEFAULT_CLONE_ROOT="/Users/john/Downloads/lambdas/codeliver_all"
-DEFAULT_PROJECTS_ROOT="/Users/john/Downloads/projects"
-DEFAULT_PROJECTS_CODELIVER_ROOT="/Users/john/Downloads/projects/codeliver"
+DOWNLOADS_DIR="${DOWNLOADS_DIR:-${HOME}/Downloads}"
+DEFAULT_CLONE_ROOT="${DOWNLOADS_DIR}/lambdas/codeliver_all"
+DEFAULT_TARGET_REPOS_FILE="${DEFAULT_CLONE_ROOT}/current-codeliver-target-repos.txt"
+DEFAULT_CLOUD_REPORT_FILE="${DEFAULT_CLONE_ROOT}/codeliver-cloud-repos-sync-report.json"
+DEFAULT_PROJECT_REPOS_LIST_TXT="${DEFAULT_CLONE_ROOT}/current-codeliver-project-repos-full-list.txt"
+DEFAULT_PROJECT_REPOS_LIST_JSON="${DEFAULT_CLONE_ROOT}/current-codeliver-project-repos-full-list.json"
+DEFAULT_PROJECTS_ROOT="${DOWNLOADS_DIR}/projects"
+DEFAULT_PROJECTS_CODELIVER_ROOT="${DEFAULT_PROJECTS_ROOT}/codeliver"
+DEFAULT_SYNC_REPORT_DIR="${DOWNLOADS_DIR}/lambdas/_sync_reports"
 
 temp_files=()
 temp_dirs=()
@@ -29,8 +31,8 @@ cleanup_temp_artifacts() {
 
 cleanup_legacy_outputs() {
   rm -f "$DEFAULT_TARGET_REPOS_FILE" "$DEFAULT_CLOUD_REPORT_FILE" "$DEFAULT_PROJECT_REPOS_LIST_TXT" 2>/dev/null || true
-  rm -f /Users/john/Downloads/lambdas/_sync_reports/codeliver_all_sync_report_*.txt 2>/dev/null || true
-  rm -f /Users/john/Downloads/lambdas/_sync_reports/codeliver_all_sync_failures_*.txt 2>/dev/null || true
+  rm -f "${DEFAULT_SYNC_REPORT_DIR}"/codeliver_all_sync_report_*.txt 2>/dev/null || true
+  rm -f "${DEFAULT_SYNC_REPORT_DIR}"/codeliver_all_sync_failures_*.txt 2>/dev/null || true
 }
 
 trap 'cleanup_temp_artifacts' EXIT
@@ -170,6 +172,20 @@ build_local_target_repo_list() {
     find "$DEFAULT_PROJECTS_ROOT" -mindepth 1 -maxdepth 1 -type d -name 'codeliver-*' -exec basename {} \; 2>/dev/null || true
     find "$DEFAULT_PROJECTS_CODELIVER_ROOT" -mindepth 1 -maxdepth 1 -type d -name 'codeliver-*' -exec basename {} \; 2>/dev/null || true
   } | sort -u > "$out_file"
+}
+
+restore_cached_target_repo_list() {
+  local out_file="$1"
+
+  if [[ -s "$DEFAULT_TARGET_REPOS_FILE" ]]; then
+    if [[ "$out_file" == "$DEFAULT_TARGET_REPOS_FILE" ]]; then
+      return 0
+    fi
+    cp "$DEFAULT_TARGET_REPOS_FILE" "$out_file"
+    return 0
+  fi
+
+  return 1
 }
 
 python_tls_probe() {
@@ -451,10 +467,19 @@ if [[ ${mode_cloud_link_clone} -eq 1 ]]; then
     if [[ ${#cloud_args[@]} -gt 0 ]]; then
       cloud_cmd+=("${cloud_args[@]}")
     fi
-    "${cloud_cmd[@]}"
-    feature_cloud_out="$(get_cloud_arg_value "--all-cloud-repos-out" "$DEFAULT_PROJECT_REPOS_LIST_JSON")"
-    if [[ -s "$feature_cloud_out" ]]; then
-      generated_feature_cloud_repos_file=1
+    if "${cloud_cmd[@]}"; then
+      feature_cloud_out="$(get_cloud_arg_value "--all-cloud-repos-out" "$DEFAULT_PROJECT_REPOS_LIST_JSON")"
+      if [[ -s "$feature_cloud_out" ]]; then
+        generated_feature_cloud_repos_file=1
+      fi
+    else
+      if [[ ${seen_only_cloud_link_clone} -eq 1 ]]; then
+        exit 1
+      fi
+      echo "WARN: Cloud-link stage failed. Falling back to local-only sync using cached/local target repos." >&2
+      if ! restore_cached_target_repo_list "$target_repos_file"; then
+        build_local_target_repo_list "$target_repos_file"
+      fi
     fi
   else
     if [[ ${seen_only_cloud_link_clone} -eq 1 ]]; then

@@ -18,7 +18,7 @@ The skill discovers frontend entry lambdas from `cloud-repos-panel` service file
 - `cloud-repos-panel/src/app/shared/data-storage.service.ts`
 - `cloud-repos-panel/src/app/shared/auth/auth.service.ts`
 
-2. Resolve entry lambda names to local lambda folders in `/Users/john/Downloads/lambdas/crp_all`.
+2. Resolve entry lambda names to local lambda folders in `~/Downloads/lambdas/crp_all`.
 3. Analyze entry lambdas (+ one-hop downstream) for error codes and frontend-visible response fields (`comment_id`, `comments`).
 4. Detect translation path policy per project:
 
@@ -43,7 +43,7 @@ Collects CRP frontend entry lambdas from code and resolves local lambda paths.
 Usage:
 
 - `python scripts/collect_frontend_reachable_lambdas.py`
-- `python scripts/collect_frontend_reachable_lambdas.py --output /Users/john/.codex/tmp/crp-frontend-reachable-lambdas.json`
+- `python scripts/collect_frontend_reachable_lambdas.py --output ~/.codex/tmp/crp-frontend-reachable-lambdas.json`
 
 ### scripts/audit_frontend_lambda_errors_i18n.py
 
@@ -70,12 +70,12 @@ Fast report validator for missing/created/found/skipped coverage status.
 Usage:
 
 - `python scripts/check_frontend_lambda_errors_locales.py`
-- `python scripts/check_frontend_lambda_errors_locales.py --report-json /Users/john/.codex/tmp/crp-frontend-lambda-errors-i18n-report.json`
+- `python scripts/check_frontend_lambda_errors_locales.py --report-json ~/.codex/tmp/crp-frontend-lambda-errors-i18n-report.json`
 
 ## Guardrails
 
 - Frontend scope is `cloud-repos-panel` only.
-- Lambda scope is `/Users/john/Downloads/lambdas/crp_all`.
+- Lambda scope is `~/Downloads/lambdas/crp_all`.
 - One-hop downstream only.
 - Locale scope is strict: only `el.json` and `en.json`.
 - Never create/update any other i18n locale file (for example `ej.json`).

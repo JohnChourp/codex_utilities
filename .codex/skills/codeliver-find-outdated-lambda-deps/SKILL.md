@@ -7,7 +7,7 @@ description: Scan all local lambda repos under codeliver_all and write a text re
 
 ## Overview
 
-Scan every direct child repo under `/Users/john/Downloads/lambdas/codeliver_all` that contains a `package.json`.
+Scan every direct child repo under `~/Downloads/lambdas/codeliver_all` that contains a `package.json`.
 Compare `dependencies` and `devDependencies` against the latest stable npm registry version and overwrite a text report with the results.
 
 ## Run

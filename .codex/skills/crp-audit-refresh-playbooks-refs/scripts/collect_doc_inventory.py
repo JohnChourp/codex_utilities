@@ -25,7 +25,8 @@ def list_matching(path: Path, patterns: list[str]):
 
 def main():
     parser = argparse.ArgumentParser(description="List CRP playbooks/refs inventory.")
-    parser.add_argument("--root", default="/home/dm-soft-1", help="Workspace root (default: /home/dm-soft-1)")
+    default_root = str(Path.home())
+    parser.add_argument("--root", default=default_root, help=f"Workspace root (default: {default_root})")
     args = parser.parse_args()
 
     root = Path(args.root)

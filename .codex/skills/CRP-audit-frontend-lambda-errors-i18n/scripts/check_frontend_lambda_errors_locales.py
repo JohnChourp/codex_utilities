@@ -4,6 +4,8 @@ import json
 from collections import Counter
 from pathlib import Path
 
+DEFAULT_REPORT_JSON = str(Path.home() / ".codex" / "tmp" / "crp-frontend-lambda-errors-i18n-report.json")
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -11,7 +13,7 @@ def main():
     )
     parser.add_argument(
         "--report-json",
-        default="/Users/john/.codex/tmp/crp-frontend-lambda-errors-i18n-report.json",
+        default=DEFAULT_REPORT_JSON,
     )
     parser.add_argument("--fail-on-missing", action="store_true", default=True)
     parser.add_argument("--no-fail-on-missing", action="store_false", dest="fail_on_missing")

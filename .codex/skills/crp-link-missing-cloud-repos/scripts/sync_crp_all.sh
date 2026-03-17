@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="/Users/john/Downloads/lambdas/crp_all"
+DOWNLOADS_DIR="${DOWNLOADS_DIR:-${HOME}/Downloads}"
+ROOT_DIR="${ROOT_DIR:-${DOWNLOADS_DIR}/lambdas/crp_all}"
 ROOT_LABEL="crp_all"
-PROJECTS_DIR="/Users/john/Downloads/projects"
-DEFAULT_TARGET_REPOS_FILE="/Users/john/Downloads/lambdas/crp_all/current-crp-target-repos.txt"
+PROJECTS_DIR="${PROJECTS_DIR:-${DOWNLOADS_DIR}/projects}"
+DEFAULT_TARGET_REPOS_FILE="${ROOT_DIR}/current-crp-target-repos.txt"
 SPECIAL_REPOS_CSV="cloud-repos-panel,crp-cli"
 
 CONCURRENCY="${CONCURRENCY:-20}"
-REPORT_DIR="${REPORT_DIR:-/Users/john/Downloads/lambdas/_sync_reports}"
+REPORT_DIR="${REPORT_DIR:-${DOWNLOADS_DIR}/lambdas/_sync_reports}"
 RUN_TS="$(date +%Y%m%d_%H%M%S)"
 TARGET_REPOS_FILE="$DEFAULT_TARGET_REPOS_FILE"
 
@@ -19,7 +20,7 @@ Usage:
 
 Options:
   --repos-file <path>   Text file with target repos (one repo_id per line).
-                        Default: /Users/john/Downloads/lambdas/crp_all/current-crp-target-repos.txt
+                        Default: ~/Downloads/lambdas/crp_all/current-crp-target-repos.txt
 USAGE
 }
 

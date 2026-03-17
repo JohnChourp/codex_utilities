@@ -53,7 +53,7 @@ python3 "$HOME/.codex/skills/codeliver-sync-global-modal-styles/scripts/sync_glo
 - `--selector-policy exact-names` (required value)
 - `--include-utilities` / `--no-include-utilities`
 - `--report <path>`
-- `--codeliver-root <path>` (default: `/home/dm-soft-1/Downloads/projects/codeliver`)
+- `--codeliver-root <path>` (default: `~/Downloads/projects/codeliver`)
 
 ## Resources
 - `references/modal_sync_config.json`: utility allowlist + deny rules + insertion policy

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
-ROOT="/Users/john/Downloads/lambdas/crp_all"
+ROOT="${HOME}/Downloads/lambdas/crp_all"
 DRY_RUN=0
 CONCURRENCY="${CONCURRENCY:-20}"
 temp_files=()
@@ -21,7 +21,7 @@ Usage:
   npm_install_all_crp_repos.sh [--root <path>] [--dry-run]
 
 Options:
-  --root <path>   Root folder with local repos (default: /Users/john/Downloads/lambdas/crp_all)
+  --root <path>   Root folder with local repos (default: ~/Downloads/lambdas/crp_all)
   --dry-run       Print planned npm installs without executing
   -h, --help      Show help
 

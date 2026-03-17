@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "skill_name": "codeliver-simulation-emergency-audit",
   "execution_mode": "python",
   "supported_os": [
@@ -78,6 +78,15 @@
         "test"
       ]
     }
-  ]
+  ],
+  "recording": {
+    "enabled_by_default": false,
+    "output_dir_template": "~/.codex/tmp/skill-runs/{skill}/{timestamp}",
+    "artifacts": [
+      "run.json",
+      "command.txt",
+      "stdout.log",
+      "stderr.log"
+    ]
+  }
 }
-

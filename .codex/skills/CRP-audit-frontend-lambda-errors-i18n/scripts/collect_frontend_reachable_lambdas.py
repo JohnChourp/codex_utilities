@@ -6,6 +6,9 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
+DEFAULT_PROJECTS_ROOT = str(Path.home() / "Downloads" / "projects")
+DEFAULT_LAMBDAS_ROOT = str(Path.home() / "Downloads" / "lambdas" / "crp_all")
+
 API_LAMBDA_RE = re.compile(r"/prod/(crp-[a-z0-9-]+)")
 LOG_NAME_RE = re.compile(r'logName\s*:\s*["\'](crp-[a-z0-9-]+)["\']')
 
@@ -123,9 +126,9 @@ def main():
     parser = argparse.ArgumentParser(
         description="Collect frontend-reachable CRP lambdas from cloud-repos-panel service files."
     )
-    parser.add_argument("--projects-root", default="/Users/john/Downloads/projects")
+    parser.add_argument("--projects-root", default=DEFAULT_PROJECTS_ROOT)
     parser.add_argument("--frontend-project", default="cloud-repos-panel")
-    parser.add_argument("--lambdas-root", default="/Users/john/Downloads/lambdas/crp_all")
+    parser.add_argument("--lambdas-root", default=DEFAULT_LAMBDAS_ROOT)
     parser.add_argument("--output", default="")
     args = parser.parse_args()
 

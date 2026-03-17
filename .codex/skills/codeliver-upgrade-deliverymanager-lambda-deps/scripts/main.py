@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any
 
 
-DEFAULT_ROOT = Path("/Users/john/Downloads/lambdas/codeliver_all")
+DEFAULT_ROOT = Path.home() / "Downloads" / "lambdas" / "codeliver_all"
 PACKAGE_JSON = "package.json"
 LOCKFILES = ("package-lock.json", "npm-shrinkwrap.json")
 SEMVER_RE = re.compile(r"^(\d+)\.(\d+)\.(\d+)$")

@@ -17,6 +17,9 @@ Global guidance for Codex assistance on CodeDeliver.
 - In default mode, act autonomously and avoid clarifying questions unless a missing answer would be risky.
 - For local skill execution, prefer an internal recovery loop before surfacing failure: inspect the blocker, try the narrowest safe fallback, verify the result, and only then report the outcome.
 - Keep skill-execution chat quiet during retries; avoid step-by-step retry narration unless the user explicitly asks for debugging detail.
+- Before trusting any path from a skill, policy, playbook, or prior run, verify it against the current machine and workspace.
+- Never hardcode user-specific absolute paths in reusable `.codex` assets. Prefer `$HOME`, `Path.home()`, `~`, environment-derived roots, or runtime path discovery.
+- If a path assumption fails because the current machine differs from the path embedded in a skill or doc, self-correct automatically, rerun with the detected real path, and persist the validated portability fix back into the relevant global `.codex` asset.
 - Write back skill/policy knowledge only after a fallback is confirmed by a successful end result. Do not persist failed or speculative recoveries.
 - When a local installed skill gains proven recovery knowledge, also protect it from future sync overwrite via the local preserve-skills mechanism.
 - Before any cross-project parity change, ask which targets must stay in lockstep. If the user asks for scoped work, keep that scope and state the parity exception.

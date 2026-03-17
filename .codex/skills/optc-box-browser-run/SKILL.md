@@ -7,13 +7,13 @@ description: Bootstrap the local OPTC Box Exporter browser UI, download portrait
 
 ## Overview
 
-Use this skill for `/Users/john/Downloads/projects/optc-box-exporter` when the goal is to make the local browser UI run end-to-end with minimal manual steps.
+Use this skill for `~/Downloads/projects/optc-box-exporter` when the goal is to make the local browser UI run end-to-end with minimal manual steps.
 
 ## Workflow
 
 1. Confirm the repo exists at:
 ```text
-/Users/john/Downloads/projects/optc-box-exporter
+~/Downloads/projects/optc-box-exporter
 ```
 
 2. Run:

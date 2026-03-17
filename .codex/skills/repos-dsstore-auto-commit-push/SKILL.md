@@ -8,8 +8,8 @@ description: Auto-fix DS_Store-only repo changes, then commit and push them safe
 ## Overview
 
 Scan all Git repos under:
-- `/Users/john/Downloads/lambdas`
-- `/Users/john/Downloads/projects`
+- `~/Downloads/lambdas`
+- `~/Downloads/projects`
 
 For each repo, act only when uncommitted changes are exclusively `.DS_Store` files:
 - Ensure `.DS_Store` exists in `.gitignore`.
@@ -28,9 +28,9 @@ For each repo, act only when uncommitted changes are exclusively `.DS_Store` fil
 
 ## Optional env vars
 
-- `TARGET_ROOTS` (default: `/Users/john/Downloads/lambdas,/Users/john/Downloads/projects`)
+- `TARGET_ROOTS` (default: `~/Downloads/lambdas,~/Downloads/projects`)
 - `CONCURRENCY` (default: `8`)
-- `REPORT_DIR` (default: `/Users/john/Downloads/_dsstore_skill_reports`)
+- `REPORT_DIR` (default: `~/Downloads/_dsstore_skill_reports`)
 - `COMMIT_MESSAGE` (default: `chore(gitignore): ignore .DS_Store`)
 - `DRY_RUN` (default: `0`)
 

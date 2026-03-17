@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "skill_name": "ios-simulator-open",
   "execution_mode": "python_launcher",
   "supported_os": [
@@ -52,5 +52,15 @@
       "path": "scripts/ios_simulator_open.sh",
       "args": []
     }
-  ]
+  ],
+  "recording": {
+    "enabled_by_default": false,
+    "output_dir_template": "~/.codex/tmp/skill-runs/{skill}/{timestamp}",
+    "artifacts": [
+      "run.json",
+      "command.txt",
+      "stdout.log",
+      "stderr.log"
+    ]
+  }
 }

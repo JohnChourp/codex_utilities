@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_DIR="/Users/john/Downloads/projects/optc-box-exporter"
+REPO_DIR="${REPO_DIR:-${HOME}/Downloads/projects/optc-box-exporter}"
 
 if [[ $# -lt 1 ]]; then
   echo "Usage: $0 <case-folder> [image-size]" >&2

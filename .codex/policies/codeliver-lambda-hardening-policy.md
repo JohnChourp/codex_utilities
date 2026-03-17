@@ -15,7 +15,8 @@ Load this policy when a task changes lambda code, lambda contracts, or lambda de
 ## Node.js Lambda rules (always)
 
 - **Null-safe optional fields:** when reading fields from DynamoDB/API results that may be missing, always use optional chaining or explicit guards (e.g. `request?.readyToPickUp`, `request?.status`) to prevent runtime `TypeError` from `undefined` values.
-- **AWS SDK v3 deps in Lambdas**: remove `@aws-sdk/*` from Lambda `package.json` (and update `package-lock.json`) even if imported, because the execution environment guarantees AWS SDK v3 availability at runtime.
+- **AWS SDK v3 deps in Lambdas**: never add `@aws-sdk/*` to a Node.js Lambda `package.json`. If they already exist, remove them from `package.json` and update `package-lock.json`, even when the code imports them, because the Lambda execution environment provides AWS SDK v3 at runtime.
+  - This rule also applies to local compile/test convenience: do **not** add `@aws-sdk/*` just to satisfy editor or local `npm install` resolution in Lambda repos.
   - If a repo still contains `@aws-sdk/*` for non-Lambda reasons, do **not** version-pin them in `package.json` (prefer semver ranges like `^`) and remove any unused ones.
 - **Deploy scripts must be canonical**: ensure scripts exist (rewrite legacy `zsh -ic 'lu'` wrappers to these):
   - `deploy:prod`: `lambda-upload deploy-prod df`

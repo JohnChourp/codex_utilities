@@ -5,8 +5,8 @@ import sys
 from pathlib import Path
 
 
-DEFAULT_ROOT = "/Users/john/Downloads/lambdas/codeliver_all"
-DEFAULT_OUTPUT = "/Users/john/Downloads/lambdas/codeliver_all/outdated-dependencies-report.txt"
+DEFAULT_ROOT = str(Path.home() / "Downloads" / "lambdas" / "codeliver_all")
+DEFAULT_OUTPUT = str(Path.home() / "Downloads" / "lambdas" / "codeliver_all" / "outdated-dependencies-report.txt")
 
 
 def _shared_scripts_dir() -> Path:

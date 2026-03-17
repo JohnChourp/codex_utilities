@@ -7,7 +7,7 @@ description: Scan all local lambda repos under crp_all and write a text report w
 
 ## Overview
 
-Scan every direct child repo under `/Users/john/Downloads/lambdas/crp_all` that contains a `package.json`.
+Scan every direct child repo under `~/Downloads/lambdas/crp_all` that contains a `package.json`.
 Compare `dependencies` and `devDependencies` against the latest stable npm registry version and overwrite a text report with the results.
 
 ## Run

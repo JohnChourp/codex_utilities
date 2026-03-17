@@ -8,8 +8,8 @@ from pathlib import Path
 TARGET_PROJECT = "cloud-repos-panel"
 METHODS = ["get", "post", "put", "delete", "patch"]
 
-API_GATEWAYS_DEFAULT = "/home/dm-soft-1/.codex/playbooks/crp-api-gateways.md"
-REFS_DIR_DEFAULT = "/home/dm-soft-1/.codex/refs"
+API_GATEWAYS_DEFAULT = str(Path.home() / ".codex" / "playbooks" / "crp-api-gateways.md")
+REFS_DIR_DEFAULT = str(Path.home() / ".codex" / "refs")
 INDEX_FILENAME_DEFAULT = "crp-refs-frontend-index.generated.md"
 
 EXECUTE_API_RE = re.compile(
@@ -310,7 +310,7 @@ def main():
     parser = argparse.ArgumentParser(
         description="Extract HttpClient calls from cloud-repos-panel services."
     )
-    parser.add_argument("--root", default="/Users/john/Downloads/projects", help="Projects root")
+    parser.add_argument("--root", default=str(Path.home() / "Downloads" / "projects"), help="Projects root")
     parser.add_argument("--format", choices=["json", "md"], default="json")
     parser.add_argument("--api-gateways", default=API_GATEWAYS_DEFAULT, help="API gateways playbook path")
     parser.add_argument("--write", action="store_true", help="Write markdown refs into .codex/refs")

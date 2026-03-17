@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "skill_name": "ionic-ios-codex-deploy",
   "execution_mode": "python_launcher",
   "supported_os": [
@@ -100,5 +100,15 @@
       "path": "scripts/ionic_ios_codex_deploy.sh",
       "args": []
     }
-  ]
+  ],
+  "recording": {
+    "enabled_by_default": false,
+    "output_dir_template": "~/.codex/tmp/skill-runs/{skill}/{timestamp}",
+    "artifacts": [
+      "run.json",
+      "command.txt",
+      "stdout.log",
+      "stderr.log"
+    ]
+  }
 }

@@ -8,7 +8,7 @@ Usage:
 USAGE
 }
 
-PROJECT_PATH="/Users/john/Downloads/projects/LearnByzantineMusic"
+PROJECT_PATH="${HOME}/Downloads/projects/LearnByzantineMusic"
 ARGS=()
 SKIP_GH_RELEASE=0
 
@@ -53,7 +53,7 @@ pick_release_bash() {
     local selected=""
     local candidate major
     local candidates=(
-        "/Users/john/.homebrew/bin/bash"
+        "${HOME}/.homebrew/bin/bash"
         "/opt/homebrew/bin/bash"
         "/usr/local/bin/bash"
         "$(command -v bash || true)"

@@ -29,7 +29,7 @@ description: Create a LearnByzantineMusic Android release with version bump, bui
 
 ## Preflight που κάνει πλέον το skill (για να μη σπάει σε macOS)
 
-- Επιλέγει αυτόματα GNU Bash `>=4` (π.χ. `/Users/john/.homebrew/bin/bash`) ώστε το `release-and-tag.sh` να υποστηρίζει `mapfile` και associative arrays.
+- Επιλέγει αυτόματα GNU Bash `>=4` (π.χ. `~/.homebrew/bin/bash`) ώστε το `release-and-tag.sh` να υποστηρίζει `mapfile` και associative arrays.
 - Ελέγχει/φορτώνει local release signing env από:
   - `~/.android/learnbyzantine/release-signing.env`
 - Αν λείπουν signing vars, τρέχει:
@@ -42,7 +42,7 @@ description: Create a LearnByzantineMusic Android release with version bump, bui
 
 ## Options
 
-- `--project <path>`: path του Android project (default: `/Users/john/Downloads/projects/LearnByzantineMusic`)
+- `--project <path>`: path του Android project (default: `~/Downloads/projects/LearnByzantineMusic`)
 - `--bump patch|minor|major`: semantic bump (default: `patch`)
 - `--version X.Y.Z`: explicit version (αντί για bump)
 - `--code N`: explicit versionCode

@@ -1,4 +1,4 @@
 interface:
   display_name: "CRP Audit Frontend Lambda Errors i18n"
   short_description: "Audit frontend-visible CRP lambda error i18n coverage for cloud-repos-panel"
-  default_prompt: "Audit and autofix frontend-visible CRP lambda error translation coverage for cloud-repos-panel. Discover entry lambdas from frontend service files, resolve local lambdas under /Users/john/Downloads/lambdas/crp_all, expand one-hop downstream invokes, extract frontend-visible error codes from comment_id/comments paths, validate strict coverage only in el.json and en.json, and autofix missing or placeholder translations with natural user-facing text."
+  default_prompt: "Audit and autofix frontend-visible CRP lambda error translation coverage for cloud-repos-panel. Discover entry lambdas from frontend service files, resolve local lambdas under ~/Downloads/lambdas/crp_all, expand one-hop downstream invokes, extract frontend-visible error codes from comment_id/comments paths, validate strict coverage only in el.json and en.json, and autofix missing or placeholder translations with natural user-facing text."

@@ -29,7 +29,7 @@ Use these patterns after extracting identifiers from logs.
 
 ## Useful command style
 ```bash
-rg -n "<pattern>" /home/dm-soft-1/Downloads/lambdas/codeliver_all /home/dm-soft-1/Downloads/projects/codeliver
+rg -n "<pattern>" ~/Downloads/lambdas/codeliver_all ~/Downloads/projects/codeliver
 rg -n "(schema|payload|version|transform|CustomError|comment_id)" <repo-path>
 git log --oneline -- <file>
 ```

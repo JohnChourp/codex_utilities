@@ -13,8 +13,8 @@ from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Tuple
 
 
-DEFAULT_ROOT = "/home/dm-soft-1/Downloads/lambdas/crp_all"
-DEFAULT_OUT = "/home/dm-soft-1/.codex/refs/crp-dynamodb-index-audit.md"
+DEFAULT_ROOT = str(Path.home() / "Downloads" / "lambdas" / "crp_all")
+DEFAULT_OUT = str(Path.home() / ".codex" / "refs" / "crp-dynamodb-index-audit.md")
 
 STRING_LITERAL_RE = re.compile(r"""^(['"])(.*)\1$""", re.S)
 IDENTIFIER_RE = re.compile(r"^[A-Za-z_$][A-Za-z0-9_$]*$")

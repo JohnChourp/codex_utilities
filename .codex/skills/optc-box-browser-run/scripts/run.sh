@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-REPO_DIR="/Users/john/Downloads/projects/optc-box-exporter"
+REPO_DIR="${REPO_DIR:-${HOME}/Downloads/projects/optc-box-exporter}"
 
 if [ ! -d "$REPO_DIR" ]; then
     echo "Repo not found: $REPO_DIR" >&2

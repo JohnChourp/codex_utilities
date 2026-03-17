@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "skill_name": "CRP Audit Frontend Lambda Errors i18n",
   "execution_mode": "python_launcher",
   "supported_os": [
@@ -63,5 +63,15 @@
       "path": "scripts/collect_frontend_reachable_lambdas.py",
       "args": []
     }
-  ]
+  ],
+  "recording": {
+    "enabled_by_default": false,
+    "output_dir_template": "~/.codex/tmp/skill-runs/{skill}/{timestamp}",
+    "artifacts": [
+      "run.json",
+      "command.txt",
+      "stdout.log",
+      "stderr.log"
+    ]
+  }
 }

@@ -1,0 +1,26 @@
+{
+  "schema_version": 2,
+  "skill_name": "crp-repos-harden-deploy",
+  "execution_mode": "guidance",
+  "supported_os": [
+    "macos",
+    "linux"
+  ],
+  "unsupported_behavior": "fail_fast",
+  "preflight": {
+    "cache_ttl_seconds": 600,
+    "checks": []
+  },
+  "entrypoint": null,
+  "tooling": {},
+  "recording": {
+    "enabled_by_default": false,
+    "output_dir_template": "~/.codex/tmp/skill-runs/{skill}/{timestamp}",
+    "artifacts": [
+      "run.json",
+      "command.txt",
+      "stdout.log",
+      "stderr.log"
+    ]
+  }
+}

@@ -1,4 +1,4 @@
 interface:
   display_name: "Codeliver npm install Repos"
   short_description: "Install dependencies in local Codeliver lambdas"
-  default_prompt: "Run npm i in every direct child repo under /Users/john/Downloads/lambdas/codeliver_all that includes package.json, using default CONCURRENCY=20 unless overridden via env."
+  default_prompt: "Run npm i in every direct child repo under ~/Downloads/lambdas/codeliver_all that includes package.json, using default CONCURRENCY=20 unless overridden via env."

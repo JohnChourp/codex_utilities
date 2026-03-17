@@ -20,13 +20,13 @@ Default behavior:
    - in subproject `cloud-repos-auto-linking` (created if missing)
    - in feature `auto-linked-crp-repos` (created if missing)
 4. Local sync/clone:
-   - `cloud-repos-panel`, `crp-cli` -> `/Users/john/Downloads/projects/<repo>`
-   - all other target repos -> `/Users/john/Downloads/lambdas/crp_all/<repo>`
+   - `cloud-repos-panel`, `crp-cli` -> `~/Downloads/projects/<repo>`
+   - all other target repos -> `~/Downloads/lambdas/crp_all/<repo>`
    - existing repos: `fetch --all --prune` + `pull --ff-only`
    - missing repos: clone with preferred protocol; auto-fallback from SSH to HTTPS on publickey failures
 5. Refresh project repo artifacts:
-  - `/Users/john/Downloads/lambdas/crp_all/current-crp-project-repos-full-list.json`
-  - `/Users/john/Downloads/lambdas/crp_all/current-crp-cloud-repos-from-all-features.txt` (single file with all unique cloud repos found by scanning all features in project `crp`)
+  - `~/Downloads/lambdas/crp_all/current-crp-project-repos-full-list.json`
+  - `~/Downloads/lambdas/crp_all/current-crp-cloud-repos-from-all-features.txt` (single file with all unique cloud repos found by scanning all features in project `crp`)
   - cleanup of legacy sync artifacts while keeping the canonical JSON list and the feature-based cloud-repos list persisted
 
 ## Run
@@ -71,22 +71,22 @@ Force HTTPS clone preference:
 - `--auto-feature-name` (default: `auto-linked-crp-repos`)
 - `--clone-prefer` (`ssh` or `https`, default: `ssh`)
 - `--github-org` (optional override)
-- `--repos-list-out` (default: `/Users/john/Downloads/lambdas/crp_all/current-crp-target-repos.txt`)
-- `--features-cloud-repos-out` (default: `/Users/john/Downloads/lambdas/crp_all/current-crp-cloud-repos-from-all-features.txt`)
-- `--out` (default: `/Users/john/Downloads/lambdas/crp_all/crp-cloud-repos-sync-report.json`)
+- `--repos-list-out` (default: `~/Downloads/lambdas/crp_all/current-crp-target-repos.txt`)
+- `--features-cloud-repos-out` (default: `~/Downloads/lambdas/crp_all/current-crp-cloud-repos-from-all-features.txt`)
+- `--out` (default: `~/Downloads/lambdas/crp_all/crp-cloud-repos-sync-report.json`)
 - `--dry-run`
 - `--no-local-sync`
 
 ## Optional env vars
 
 - `CONCURRENCY` (default: `20`) for sync stage parallel workers
-- `REPORT_DIR` (default: `/Users/john/Downloads/lambdas/_sync_reports`) for sync stage text reports
+- `REPORT_DIR` (default: `~/Downloads/lambdas/_sync_reports`) for sync stage text reports
 
 ## Output files
 
 - Persisted output:
-  - `/Users/john/Downloads/lambdas/crp_all/current-crp-project-repos-full-list.json`
-  - `/Users/john/Downloads/lambdas/crp_all/current-crp-cloud-repos-from-all-features.txt`
+  - `~/Downloads/lambdas/crp_all/current-crp-project-repos-full-list.json`
+  - `~/Downloads/lambdas/crp_all/current-crp-cloud-repos-from-all-features.txt`
 - Non-persisted (temporary during run):
   - cloud stage report
   - target repos list

@@ -1,4 +1,4 @@
 interface:
   display_name: "PanelDF Find Outdated Lambda Deps"
   short_description: "Report newer npm dependency versions across paneldf_all lambdas"
-  default_prompt: "Scan /Users/john/Downloads/lambdas/paneldf_all for direct child repos with package.json, compare dependencies and devDependencies against the latest stable npm versions, and overwrite /Users/john/Downloads/lambdas/paneldf_all/outdated-dependencies-report.txt with the report."
+  default_prompt: "Scan ~/Downloads/lambdas/paneldf_all for direct child repos with package.json, compare dependencies and devDependencies against the latest stable npm versions, and overwrite ~/Downloads/lambdas/paneldf_all/outdated-dependencies-report.txt with the report."

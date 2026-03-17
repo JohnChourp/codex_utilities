@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="${ROOT_DIR:-/Users/john/Downloads/lambdas/codeliver_all}"
+DOWNLOADS_DIR="${DOWNLOADS_DIR:-${HOME}/Downloads}"
+ROOT_DIR="${ROOT_DIR:-${DOWNLOADS_DIR}/lambdas/codeliver_all}"
 ROOT_LABEL="codeliver_all"
-PROJECTS_DIR="${PROJECTS_DIR:-/Users/john/Downloads/projects}"
+PROJECTS_DIR="${PROJECTS_DIR:-${DOWNLOADS_DIR}/projects}"
 PROJECTS_CODELIVER_DIR="${PROJECTS_CODELIVER_DIR:-${PROJECTS_DIR}/codeliver}"
-DEFAULT_TARGET_REPOS_FILE="/Users/john/Downloads/lambdas/codeliver_all/current-codeliver-target-repos.txt"
+DEFAULT_TARGET_REPOS_FILE="${ROOT_DIR}/current-codeliver-target-repos.txt"
 SPECIAL_REPOS_CSV="codeliver-sap,codeliver-panel,codeliver-pos,codeliver-app,codeliver-cost-wizard-react,codeliver-website,codeliver-integration-partners,codeliver-partners-panel,codeliver-io"
 
 CONCURRENCY="${CONCURRENCY:-20}"
-REPORT_DIR="${REPORT_DIR:-/Users/john/Downloads/lambdas/_sync_reports}"
+REPORT_DIR="${REPORT_DIR:-${DOWNLOADS_DIR}/lambdas/_sync_reports}"
 RUN_TS="$(date +%Y%m%d_%H%M%S)"
 TARGET_REPOS_FILE="$DEFAULT_TARGET_REPOS_FILE"
 
@@ -20,7 +21,7 @@ Usage:
 
 Options:
   --repos-file <path>   Text file with target repos (one repo_id per line).
-                        Default: /Users/john/Downloads/lambdas/codeliver_all/current-codeliver-target-repos.txt
+                        Default: ~/Downloads/lambdas/codeliver_all/current-codeliver-target-repos.txt
 USAGE
 }
 
@@ -206,6 +207,7 @@ sync_repo() {
   local fetch_err_file pull_err_file fetch_err pull_err
   local divergence_counts ahead_count behind_count dirty_detail dirty_status
   local worktree_status sync_detail package_lock_reverted=0
+  local behind_before_pull=0
 
   timestamp="$(date -Iseconds)"
   repo_name="$(basename "$repo_dir")"
@@ -278,6 +280,17 @@ sync_repo() {
     upstream_ref="$(git -C "$repo_dir" rev-parse --abbrev-ref --symbolic-full-name "@{u}" 2>/dev/null || true)"
   fi
 
+  if [[ -n "$current_branch" && -n "$upstream_ref" ]]; then
+    divergence_counts="$(get_upstream_divergence "$repo_dir" "$upstream_ref" || true)"
+    if [[ -n "$divergence_counts" ]]; then
+      ahead_count="${divergence_counts%%$'\t'*}"
+      behind_count="${divergence_counts##*$'\t'}"
+      if [[ "$behind_count" =~ ^[0-9]+$ ]]; then
+        behind_before_pull="$behind_count"
+      fi
+    fi
+  fi
+
   worktree_status="$(git -C "$repo_dir" status --porcelain 2>/dev/null || true)"
   if [[ -n "$worktree_status" ]]; then
     if has_only_package_lock_changes "$worktree_status"; then
@@ -296,7 +309,6 @@ sync_repo() {
     dirty_detail="Skipped pull because local uncommitted changes exist"
 
     if [[ -n "$current_branch" && -n "$upstream_ref" ]]; then
-      divergence_counts="$(get_upstream_divergence "$repo_dir" "$upstream_ref" || true)"
       if [[ -n "$divergence_counts" ]]; then
         ahead_count="${divergence_counts%%$'\t'*}"
         behind_count="${divergence_counts##*$'\t'}"
@@ -338,6 +350,9 @@ sync_repo() {
   sync_detail="Fetch and pull completed"
   if [[ "$package_lock_reverted" -eq 1 ]]; then
     sync_detail="Reverted package-lock.json-only local changes; fetch and pull completed"
+  fi
+  if [[ "$behind_before_pull" -gt 0 ]]; then
+    sync_detail="${sync_detail}; updated_from_behind_commits=${behind_before_pull}"
   fi
 
   log_repo_status "$timestamp" "$repo_name" "SYNCED" "$repo_dir" "$sync_detail"
@@ -446,17 +461,21 @@ fi
 
 status_counts="$(awk -F "\t" 'NF>=3 {c[$3]++} END{for (k in c) printf "%s=%d ", k, c[k]}' "$REPORT_FILE")"
 fail_count="$(awk -F "\t" 'NF>=3 {c++} END{print c+0}' "$FAILURES_FILE")"
+updated_from_behind_count="$(awk -F "\t" 'NF>=5 && $3=="SYNCED" && $5 ~ /updated_from_behind_commits=[0-9]+/ {c++} END{print c+0}' "$REPORT_FILE")"
 
 printf -v summary_counts_line "%s\t%s\t%s\t%s\t%s" "SUMMARY" "$ROOT_LABEL" "COUNTS" "$ROOT_DIR" "${status_counts:-none}"
 printf -v summary_fail_line "%s\t%s\t%s\t%s\t%s" "SUMMARY" "$ROOT_LABEL" "FAILED_OR_SKIPPED_PULL" "$ROOT_DIR" "${fail_count}"
+printf -v summary_updated_line "%s\t%s\t%s\t%s\t%s" "SUMMARY" "$ROOT_LABEL" "UPDATED_FROM_BEHIND_REPOS" "$ROOT_DIR" "${updated_from_behind_count}"
 
 append_report "------------------------------------------------------------------"
 append_report "$summary_counts_line"
 append_report "$summary_fail_line"
+append_report "$summary_updated_line"
 
 append_failure "------------------------------------------------------------------"
 append_failure "$summary_fail_line"
 
 echo "Report: $REPORT_FILE"
 echo "Failures: $FAILURES_FILE"
+echo "Repos updated from behind: $updated_from_behind_count"
 exit "$overall_exit"
