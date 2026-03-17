@@ -151,6 +151,9 @@ if [[ ${#REPOS[@]} -eq 0 ]]; then
       done
     fi
   } > "$REPORT_FILE"
+  if [[ ${#NON_REPO_DIRS[@]} -gt 0 ]]; then
+    finish_and_exit 1
+  fi
   finish_and_exit 0
 fi
 
@@ -198,11 +201,13 @@ if [[ ${#NON_REPO_DIRS[@]} -gt 0 ]]; then
   } >> "$REPORT_FILE"
 fi
 
-if [[ $DIRTY_COUNT -eq 0 ]]; then
+if [[ $DIRTY_COUNT -eq 0 && ${#NON_REPO_DIRS[@]} -eq 0 ]]; then
   echo "All repositories are clean." >> "$REPORT_FILE"
   finish_and_exit 0
 fi
 
-cat "$DIRTY_DETAILS_FILE" >> "$REPORT_FILE"
-echo "Dirty repos total: $DIRTY_COUNT" >> "$REPORT_FILE"
+if [[ $DIRTY_COUNT -gt 0 ]]; then
+  cat "$DIRTY_DETAILS_FILE" >> "$REPORT_FILE"
+  echo "Dirty repos total: $DIRTY_COUNT" >> "$REPORT_FILE"
+fi
 finish_and_exit 1
