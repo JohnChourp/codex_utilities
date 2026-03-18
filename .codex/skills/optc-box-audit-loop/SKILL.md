@@ -1,6 +1,6 @@
 ---
 name: optc-box-audit-loop
-description: Audit and iteratively improve OPTC Box Exporter matching from a case folder that contains one screenshot plus expected.json. Use when the user wants to rerun a saved OPTC case, inspect mismatches, write audit artifacts next to the input image, and keep improving the repo until the ordered character output is correct.
+description: Audit and iteratively improve OPTC Box Exporter matching from a strict case folder with input screenshot, provided output images, and corrected/favorites metadata.
 ---
 
 # OPTC Box Audit Loop
@@ -9,15 +9,50 @@ description: Audit and iteratively improve OPTC Box Exporter matching from a cas
 
 Use this skill for `~/Downloads/projects/optc-box-exporter` when the user wants a repeatable audit/fix loop from a saved case folder.
 
-## Case folder contract
+Default local case-folder location is the skill directory itself:
 
-The provided folder must contain:
+```text
+~/.codex/skills/optc-box-audit-loop
+```
 
-- exactly one screenshot image (`.png`, `.jpg`, `.jpeg`, or `.webp`)
-- `expected.json`
-- optional `notes.txt`
+So by default the skill reads images and JSON from:
 
-`expected.json` is the canonical expected-output source. It should contain ordered `characters` entries in row-major order, left-to-right and top-to-bottom.
+- `~/.codex/skills/optc-box-audit-loop/input`
+- `~/.codex/skills/optc-box-audit-loop/output`
+- `~/.codex/skills/optc-box-audit-loop/meta`
+
+## Case folder contract (strict)
+
+The provided folder must contain this exact structure:
+
+```text
+<case-folder>/
+  input/
+    <exactly-one-screenshot>.png|jpg|jpeg|webp
+  output/
+    <one-or-more-output-character-images>.png|jpg|jpeg|webp
+  meta/
+    corrected.json
+    optcbx-favorites-*.json or favorites*.json (optional; newest file auto-detected)
+    notes.txt (optional)
+```
+
+Rules:
+
+- `input/` must have exactly one image.
+- `output/` must have at least one image.
+- `meta/corrected.json` is the canonical expected source.
+- `output/` image order is natural filename sort (`1,2,10` not `1,10,2`).
+- Keep `output/` clean between runs to avoid stale artifacts.
+
+## Chat-to-case staging rule
+
+When the user sends assets progressively:
+
+- first image -> place into `input/`
+- second and all following images -> place into `output/`
+- downloaded favorites JSON -> place into `meta/`
+- corrected canonical JSON -> place into `meta/corrected.json`
 
 ## Workflow
 
@@ -26,25 +61,26 @@ The provided folder must contain:
 ~/Downloads/projects/optc-box-exporter
 ```
 
-2. Confirm the user gave a case folder path. If `notes.txt` is missing and the user did not describe the failure in the prompt, ask for a short failure note.
+2. If the user did not provide a case-folder path, use the default skill directory case folder (`~/.codex/skills/optc-box-audit-loop`).
+If `meta/notes.txt` is missing and the prompt has no failure context, ask for a short failure note.
 
 3. Run:
 ```bash
-~/.codex/skills/optc-box-audit-loop/scripts/run.sh "<case-folder>"
+~/.codex/skills/optc-box-audit-loop/scripts/run.sh [case-folder]
 ```
 
-4. Inspect the generated files in the same case folder:
+4. Inspect generated files in the same case folder:
 - `actual-export.json`
-- `audit-report.json`
 - `actual-grid.html`
+- `provided-export.json`
+- `provided-grid.html`
+- `audit-report.json`
 
-5. If the report shows a clear matcher or crop problem, patch the repo, rerun the same command, and iterate until:
-- `summary.status` becomes `exact_match`, or
-- the report shows a hard blocker such as `expected_id_missing_from_local_units` or `missing_portrait_asset`
+5. If report shows a clear matcher or crop problem, patch the repo, rerun the same command, and iterate until `summary.status` becomes `exact_match`.
 
 ## Execution rules
 
 - Keep changes scoped to `optc-box-exporter` and this skill.
-- Treat the case folder contents as canonical input, not chat attachments.
-- Prefer the `python -m optcbx audit-case` command over re-implementing the audit logic by hand.
-- Keep the browser export JSON compatible with the existing `optc-team-builder` import flow.
+- Treat case-folder files as canonical inputs, not ad-hoc chat parsing.
+- Prefer `python -m optcbx audit-case` over hand-rolled audit logic.
+- Keep browser export JSON compatible with the existing `optc-team-builder` import flow.

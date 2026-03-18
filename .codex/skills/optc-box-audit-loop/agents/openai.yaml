@@ -1,4 +1,4 @@
 interface:
   display_name: "OPTC Box Audit Loop"
-  short_description: "Run a saved OPTC case folder, inspect mismatches, and improve matching iteratively"
-  default_prompt: "Audit an OPTC Box Exporter case folder that contains one screenshot and expected.json, write artifacts next to the case, and improve the repo until the ordered output is correct."
+  short_description: "Audit strict input/output/meta cases and improve matching iteratively"
+  default_prompt: "Audit an OPTC Box Exporter case folder with input screenshot, provided output images, and meta/corrected.json (plus optional favorites JSON). If no case-folder path is provided, use ~/.codex/skills/optc-box-audit-loop. Write artifacts next to the case and improve the repo until current_vs_expected is exact_match."
