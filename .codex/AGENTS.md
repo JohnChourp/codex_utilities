@@ -24,6 +24,7 @@ Global guidance for Codex assistance on CodeDeliver.
 - When a local installed skill gains proven recovery knowledge, also protect it from future sync overwrite via the local preserve-skills mechanism.
 - Before any cross-project parity change, ask which targets must stay in lockstep. If the user asks for scoped work, keep that scope and state the parity exception.
 - Do not run credentialed AWS commands unless the current prompt explicitly asks for them. Otherwise give exact commands for local execution.
+- Never run Lambda deploy commands, `git commit`, or `git push` automatically. Execute them only when the user explicitly and specifically requests that exact action in the current prompt.
 - If asked to build or install, keep iterating until success or a hard external blocker. For Android `installDebug`, uninstall and retry on `INSTALL_FAILED_UPDATE_INCOMPATIBLE`.
 - End every reply with direct links to the files you touched.
 - Run `ionic build` only after changes under `projects/`. Skip it for docs, lambdas, or `.codex`-only changes.
@@ -119,6 +120,8 @@ Always confirm:
 - `local changes only` or `PR-ready changes`
 - target branch name (create/switch branch only after user confirms)
 - Do not push or deploy without explicit user confirmation.
+- Do not run `git commit` without an explicit user request for commit in the current prompt.
+- Do not run Lambda deploy commands without an explicit user request for deploy in the current prompt.
 - Ask user: `push only` vs `deploy` before release actions.
 
 ### Time tracking and closure safety
