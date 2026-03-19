@@ -25,6 +25,7 @@ Global guidance for Codex assistance on CodeDeliver.
 - Before any cross-project parity change, ask which targets must stay in lockstep. If the user asks for scoped work, keep that scope and state the parity exception.
 - Do not run credentialed AWS commands unless the current prompt explicitly asks for them. Otherwise give exact commands for local execution.
 - Never run Lambda deploy commands, `git commit`, or `git push` automatically. Execute them only when the user explicitly and specifically requests that exact action in the current prompt.
+- For lambda repos in `codeliver-sap`, `codeliver-panel`, `codeliver-pos`, `codeliver-app`, and `cloud-repos-panel`, treat deploy as a single production rollout: a `deploy:prod` action is considered to affect the shared production footprint used by both `cap8` and `cap8-dev`. Do not propose split per-environment rollout stages (`cap8-dev` first, then `cap8`) unless the user explicitly asks for environment-separated rollout.
 - If asked to build or install, keep iterating until success or a hard external blocker. For Android `installDebug`, uninstall and retry on `INSTALL_FAILED_UPDATE_INCOMPATIBLE`.
 - End every reply with direct links to the files you touched.
 - Run `ionic build` only after changes under `projects/`. Skip it for docs, lambdas, or `.codex`-only changes.
@@ -75,6 +76,7 @@ Always confirm:
 - current repository/folder
 - scope: `frontend`, `backend`, or `end-to-end`
 - environments involved (`dev`/`stage`/`prod`) when relevant
+- exception: for lambda repos in `codeliver-sap`, `codeliver-panel`, `codeliver-pos`, `codeliver-app`, and `cloud-repos-panel`, assume unified production deploy semantics (`deploy:prod` impacts shared `cap8` + `cap8-dev`) unless the user explicitly asks for environment-separated planning
 
 ## 2) Non-negotiable rules
 

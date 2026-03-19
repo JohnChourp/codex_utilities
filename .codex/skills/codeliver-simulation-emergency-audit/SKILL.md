@@ -37,7 +37,9 @@ python3 ~/.codex/skills/codeliver-simulation-emergency-audit/scripts/run.py audi
 Useful variants:
 
 ```bash
+python3 ~/.codex/skills/codeliver-simulation-emergency-audit/scripts/run.py audit nikitas --date 2026-03-12 --mode auto
 python3 ~/.codex/skills/codeliver-simulation-emergency-audit/scripts/run.py audit nikitas --date 2026-03-12 --mode quick
+python3 ~/.codex/skills/codeliver-simulation-emergency-audit/scripts/run.py audit nikitas --date 2026-03-12 --mode exact --load-policy balanced
 python3 ~/.codex/skills/codeliver-simulation-emergency-audit/scripts/run.py audit nikitas --from 2026-03-12T00:00:00 --to 2026-03-12T23:59:59 --timezone Europe/Athens
 python3 ~/.codex/skills/codeliver-simulation-emergency-audit/scripts/run.py audit nikitas --date 2026-03-12 --deep-lookback-hours 24 --json
 python3 ~/.codex/skills/codeliver-simulation-emergency-audit/scripts/run.py test
@@ -45,18 +47,36 @@ python3 ~/.codex/skills/codeliver-simulation-emergency-audit/scripts/run.py test
 
 ## Modes
 
+- `auto` (default)
+  - Stage A fast diagnosis first:
+    - reads group settings
+    - reads current `pending` snapshot and reports compact counters:
+      - `pending_count`
+      - `unassigned_count`
+      - `ready_unassigned_count`
+      - `ready_unassigned_aged_threshold_count`
+    - reads CloudWatch emergency evidence
+  - Runs exact reconstruction only if Stage A signals are ambiguous
 - `quick`
-  - Reads `codeliver-groups`
-  - Checks current simulation/off-duty snapshot
-  - Queries CloudWatch logs in `codeliver-group-data-simulation` and `codeliver-app-sync-actions`
+  - Runs Stage A only (no exact reconstruction)
   - Fast verdict only
 - `exact`
-  - Adds `codeliver-requests` + per-request `codeliver-requests-actions` reconstruction
+  - Always runs full reconstruction:
+    - `codeliver-requests` + per-request `codeliver-requests-actions`
   - Computes peak ready-unassigned backlog and breach windows
   - Correlates backlog with current eligible emergency-driver snapshot and emergency logs/actions
+
+## Load policy
+
+- `--load-policy conservative` (default)
+  - Lower worker caps + stronger AWS CLI retry/backoff.
+  - Preferred when system pressure is high.
+- `--load-policy balanced`
+  - Moderate concurrency/retry profile.
+- `--load-policy aggressive`
+  - Higher concurrency and lower delays; use only when infra headroom is known.
 
 ## References
 
 - Method details and evidence mapping: `references/analysis-method.md`
 - The executable logic lives in `scripts/simulation_emergency_audit.py`
-

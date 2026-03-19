@@ -11,9 +11,12 @@ from simulation_emergency_audit import (
     REASON_ATTEMPTED_NOT_PERSISTED,
     REASON_NO_ELIGIBLE,
     REASON_THRESHOLD_NOT_REACHED,
+    _should_retry_aws_error,
+    build_current_snapshot_counters,
     build_backlog_intervals_for_request,
     choose_reason_bucket,
     compute_peak,
+    evaluate_stage_a_decision,
 )
 
 
@@ -26,6 +29,42 @@ def load_fixtures() -> dict:
 
 class SimulationEmergencyAuditTests(unittest.TestCase):
     maxDiff = None
+
+    def test_snapshot_counters_respect_ready_and_wait_gate(self) -> None:
+        fixtures = load_fixtures()["snapshot_counters"]
+        counters = build_current_snapshot_counters(
+            fixtures["pending_requests"],
+            threshold_wait_minutes=fixtures["threshold_wait_minutes"],
+            now_ms=fixtures["now_ms"],
+        )
+        self.assertEqual(counters["pending_count"], 4)
+        self.assertEqual(counters["unassigned_count"], 4)
+        self.assertEqual(counters["ready_unassigned_count"], 2)
+        self.assertEqual(counters["ready_unassigned_aged_threshold_count"], 1)
+
+    def test_stage_a_short_circuit_threshold_not_reached_with_zero_ready_aged(self) -> None:
+        fixtures = load_fixtures()["stage_a_short_circuit_threshold_not_reached"]
+        decision = evaluate_stage_a_decision(
+            group_summary=fixtures["group_summary"],
+            snapshot=fixtures["snapshot"],
+            log_counts=fixtures["log_counts"],
+        )
+        self.assertEqual(decision.reason_bucket, REASON_THRESHOLD_NOT_REACHED)
+        self.assertEqual(decision.confidence, "medium")
+        self.assertFalse(decision.is_ambiguous)
+        self.assertEqual(decision.short_circuit_reason, "snapshot_aged_ready_unassigned_is_zero")
+
+    def test_stage_a_ambiguous_when_snapshot_or_logs_conflict(self) -> None:
+        fixtures = load_fixtures()["stage_a_ambiguous"]
+        decision = evaluate_stage_a_decision(
+            group_summary=fixtures["group_summary"],
+            snapshot=fixtures["snapshot"],
+            log_counts=fixtures["log_counts"],
+        )
+        self.assertEqual(decision.reason_bucket, REASON_ATTEMPTED_NOT_PERSISTED)
+        self.assertEqual(decision.confidence, "low")
+        self.assertTrue(decision.is_ambiguous)
+        self.assertEqual(decision.short_circuit_reason, "stage_a_signals_ambiguous")
 
     def test_backlog_below_threshold(self) -> None:
         fixtures = load_fixtures()["below_threshold"]
@@ -83,6 +122,11 @@ class SimulationEmergencyAuditTests(unittest.TestCase):
         self.assertEqual(reason, REASON_ACTIVATION_DONE)
         self.assertEqual(confidence, "high")
 
+    def test_retry_detection_for_transient_aws_errors(self) -> None:
+        self.assertTrue(_should_retry_aws_error("ThrottlingException: rate exceeded"))
+        self.assertTrue(_should_retry_aws_error("ServiceUnavailable: try again"))
+        self.assertFalse(_should_retry_aws_error("ValidationException: bad expression"))
+
 
 def main(_argv: list[str] | None = None) -> int:
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(SimulationEmergencyAuditTests)
@@ -92,4 +136,3 @@ def main(_argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main(sys.argv[1:]))
-

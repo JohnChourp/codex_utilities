@@ -1,4 +1,77 @@
 {
+  "snapshot_counters": {
+    "now_ms": 1800000,
+    "threshold_wait_minutes": 15,
+    "pending_requests": [
+      {
+        "request_id": "s1",
+        "status": "pending",
+        "readyToPickUp": true,
+        "readyToPickUp_timestamp": "600000",
+        "route_id": "",
+        "delivery_guy_id": ""
+      },
+      {
+        "request_id": "s2",
+        "status": "pending",
+        "readyToPickUp": true,
+        "readyToPickUp_timestamp": "1200000",
+        "route_id": "",
+        "delivery_guy_id": ""
+      },
+      {
+        "request_id": "s3",
+        "status": "pending",
+        "readyToPickUp": false,
+        "route_id": "",
+        "delivery_guy_id": ""
+      },
+      {
+        "request_id": "s4",
+        "status": "pending",
+        "route_id": "",
+        "delivery_guy_id": ""
+      }
+    ]
+  },
+  "stage_a_short_circuit_threshold_not_reached": {
+    "group_summary": {
+      "simulation": true,
+      "emergency_threshold_count": 10
+    },
+    "snapshot": {
+      "pending_count": 24,
+      "unassigned_count": 24,
+      "ready_unassigned_count": 0,
+      "ready_unassigned_aged_threshold_count": 0
+    },
+    "log_counts": {
+      "activation_done": 0,
+      "app_sync_activation_logs": 0,
+      "backlog_detected": 0,
+      "activation_attempted": 0,
+      "activation_skipped_no_eligible": 0
+    }
+  },
+  "stage_a_ambiguous": {
+    "group_summary": {
+      "simulation": true,
+      "emergency_threshold_count": 10
+    },
+    "snapshot": {
+      "pending_count": 30,
+      "unassigned_count": 28,
+      "ready_unassigned_count": 13,
+      "ready_unassigned_aged_threshold_count": 11
+    },
+    "log_counts": {
+      "activation_done": 0,
+      "app_sync_activation_logs": 0,
+      "backlog_detected": 1,
+      "activation_attempted": 1,
+      "activation_skipped_no_eligible": 0
+    }
+  },
   "below_threshold": {
     "analysis_start_ms": 1000,
     "analysis_end_ms": 9000000,

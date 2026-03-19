@@ -10,8 +10,7 @@ import subprocess
 import sys
 import time
 from dataclasses import dataclass
-from datetime import datetime, timedelta
-from pathlib import Path
+from datetime import datetime
 from typing import Any
 from zoneinfo import ZoneInfo
 
@@ -22,6 +21,21 @@ DEFAULT_REGION = "eu-west-1"
 DEFAULT_TIMEZONE = "Europe/Athens"
 DEFAULT_DEEP_LOOKBACK_HOURS = 0
 LOGS_QUERY_LIMIT = 1000
+DEFAULT_MODE = "auto"
+DEFAULT_LOAD_POLICY = "conservative"
+LOAD_POLICIES = ("conservative", "balanced", "aggressive")
+
+TRANSIENT_AWS_ERROR_TOKENS = (
+    "throttling",
+    "too many requests",
+    "requestlimitexceeded",
+    "provisionedthroughputexceeded",
+    "internalfailure",
+    "service unavailable",
+    "serviceunavailable",
+    "priorrequestnotcomplete",
+    "timeout",
+)
 
 REASON_FEATURE_NOT_APPLICABLE = "feature_not_applicable"
 REASON_THRESHOLD_NOT_REACHED = "threshold_not_reached"
@@ -46,24 +60,98 @@ class AnalysisWindow:
     timezone: str
 
 
-def _run_command(command: list[str]) -> str:
-    try:
-        completed = subprocess.run(command, check=True, capture_output=True, text=True)
-    except subprocess.CalledProcessError as exc:
-        stderr = exc.stderr.strip()
-        stdout = exc.stdout.strip()
-        detail = stderr or stdout or f"exit code {exc.returncode}"
-        raise RuntimeError(f"Command failed: {' '.join(command)}\n{detail}") from exc
-    return completed.stdout
+@dataclass(frozen=True)
+class LoadPolicyConfig:
+    name: str
+    default_request_workers: int
+    max_request_workers: int
+    soft_exact_request_limit: int
+    aws_retry_max_attempts: int
+    aws_retry_base_delay_ms: int
 
 
-def _aws_json(command: list[str]) -> Any:
-    output = _run_command(command + ["--output", "json"])
+@dataclass(frozen=True)
+class StageADecision:
+    reason_bucket: str
+    confidence: str
+    is_ambiguous: bool
+    short_circuit_reason: str
+
+
+def _load_policy_config(name: str) -> LoadPolicyConfig:
+    normalized = str(name or DEFAULT_LOAD_POLICY).strip().lower()
+    if normalized == "aggressive":
+        return LoadPolicyConfig(
+            name="aggressive",
+            default_request_workers=12,
+            max_request_workers=24,
+            soft_exact_request_limit=1200,
+            aws_retry_max_attempts=4,
+            aws_retry_base_delay_ms=200,
+        )
+    if normalized == "balanced":
+        return LoadPolicyConfig(
+            name="balanced",
+            default_request_workers=8,
+            max_request_workers=12,
+            soft_exact_request_limit=700,
+            aws_retry_max_attempts=4,
+            aws_retry_base_delay_ms=300,
+        )
+    return LoadPolicyConfig(
+        name="conservative",
+        default_request_workers=4,
+        max_request_workers=6,
+        soft_exact_request_limit=300,
+        aws_retry_max_attempts=5,
+        aws_retry_base_delay_ms=450,
+    )
+
+
+def _should_retry_aws_error(detail: str) -> bool:
+    normalized = str(detail or "").strip().lower()
+    if not normalized:
+        return False
+    return any(token in normalized for token in TRANSIENT_AWS_ERROR_TOKENS)
+
+
+def _run_command(command: list[str], *, retry_max_attempts: int, retry_base_delay_ms: int) -> str:
+    attempts = max(1, int(retry_max_attempts))
+    delay_base_s = max(0.05, float(retry_base_delay_ms) / 1000)
+    last_exception: subprocess.CalledProcessError | None = None
+    for attempt in range(1, attempts + 1):
+        try:
+            completed = subprocess.run(command, check=True, capture_output=True, text=True)
+            return completed.stdout
+        except subprocess.CalledProcessError as exc:
+            stderr = exc.stderr.strip()
+            stdout = exc.stdout.strip()
+            detail = stderr or stdout or f"exit code {exc.returncode}"
+            last_exception = exc
+            if attempt >= attempts or not _should_retry_aws_error(detail):
+                raise RuntimeError(f"Command failed: {' '.join(command)}\n{detail}") from exc
+            sleep_s = delay_base_s * (2 ** (attempt - 1))
+            time.sleep(sleep_s)
+    if last_exception:
+        raise RuntimeError(f"Command failed: {' '.join(command)}\nexit code {last_exception.returncode}") from last_exception
+    raise RuntimeError(f"Command failed: {' '.join(command)}")
+
+
+def _aws_json(command: list[str], *, load_policy: LoadPolicyConfig) -> Any:
+    output = _run_command(
+        command + ["--output", "json"],
+        retry_max_attempts=load_policy.aws_retry_max_attempts,
+        retry_base_delay_ms=load_policy.aws_retry_base_delay_ms,
+    )
     return json.loads(output)
 
 
-def _aws_text(command: list[str]) -> str:
-    return _run_command(command + ["--output", "text"]).strip()
+def _aws_text(command: list[str], *, load_policy: LoadPolicyConfig) -> str:
+    return _run_command(
+        command + ["--output", "text"],
+        retry_max_attempts=load_policy.aws_retry_max_attempts,
+        retry_base_delay_ms=load_policy.aws_retry_base_delay_ms,
+    ).strip()
 
 
 def _attr_value(value: Any) -> dict[str, Any]:
@@ -157,7 +245,7 @@ def build_analysis_window(args: argparse.Namespace) -> AnalysisWindow:
     )
 
 
-def get_group_settings(group: str, region: str) -> dict[str, Any] | None:
+def get_group_settings(group: str, region: str, *, load_policy: LoadPolicyConfig) -> dict[str, Any] | None:
     payload = _aws_json(
         [
             "aws",
@@ -169,7 +257,8 @@ def get_group_settings(group: str, region: str) -> dict[str, Any] | None:
             "codeliver-groups",
             "--key",
             json.dumps({"group": {"S": group}}, separators=(",", ":")),
-        ]
+        ],
+        load_policy=load_policy,
     )
     return unmarshal_item(payload.get("Item"))
 
@@ -185,6 +274,7 @@ def query_all(
     projection_expression: str | None = None,
     consistent_read: bool = False,
     scan_index_forward: bool = True,
+    load_policy: LoadPolicyConfig,
 ) -> list[dict[str, Any]]:
     items: list[dict[str, Any]] = []
     exclusive_start_key: dict[str, Any] | None = None
@@ -215,7 +305,7 @@ def query_all(
             command.extend(["--no-scan-index-forward"])
         if exclusive_start_key:
             command.extend(["--exclusive-start-key", json.dumps(exclusive_start_key, separators=(",", ":"))])
-        payload = _aws_json(command)
+        payload = _aws_json(command, load_policy=load_policy)
         items.extend(unmarshal_item(item) or {} for item in payload.get("Items", []))
         exclusive_start_key = payload.get("LastEvaluatedKey")
         if not exclusive_start_key:
@@ -223,7 +313,7 @@ def query_all(
     return items
 
 
-def get_requests_for_window(group: str, window: AnalysisWindow, region: str) -> list[dict[str, Any]]:
+def get_requests_for_window(group: str, window: AnalysisWindow, region: str, *, load_policy: LoadPolicyConfig) -> list[dict[str, Any]]:
     return query_all(
         table_name="codeliver-requests",
         region=region,
@@ -237,10 +327,11 @@ def get_requests_for_window(group: str, window: AnalysisWindow, region: str) -> 
         ),
         consistent_read=False,
         scan_index_forward=True,
+        load_policy=load_policy,
     )
 
 
-def get_request_actions(group: str, request_id: str, region: str) -> list[dict[str, Any]]:
+def get_request_actions(group: str, request_id: str, region: str, *, load_policy: LoadPolicyConfig) -> list[dict[str, Any]]:
     items = query_all(
         table_name="codeliver-requests-actions",
         region=region,
@@ -248,12 +339,13 @@ def get_request_actions(group: str, request_id: str, region: str) -> list[dict[s
         expression_attribute_names={"#gr": "group_request_id"},
         expression_attribute_values={":group_request_id": f"{group}_{request_id}"},
         scan_index_forward=True,
+        load_policy=load_policy,
     )
     items.sort(key=lambda item: safe_timestamp_ms(item.get("timestamp")))
     return items
 
 
-def get_simulation_delivery_guys(group: str, region: str) -> list[dict[str, Any]]:
+def get_simulation_delivery_guys(group: str, region: str, *, load_policy: LoadPolicyConfig) -> list[dict[str, Any]]:
     items = query_all(
         table_name="codeliver-delivery-guys",
         region=region,
@@ -261,22 +353,128 @@ def get_simulation_delivery_guys(group: str, region: str) -> list[dict[str, Any]
         expression_attribute_names={"#g": "group"},
         expression_attribute_values={":group": group},
         consistent_read=True,
+        load_policy=load_policy,
     )
     return [item for item in items if item.get("simulation") is True and item.get("delivery_guy_deleted") is not True]
 
 
+def get_pending_requests_snapshot(group: str, region: str, *, load_policy: LoadPolicyConfig) -> list[dict[str, Any]]:
+    items = query_all(
+        table_name="codeliver-requests",
+        region=region,
+        index_name="group-status-index",
+        key_condition_expression="#g = :group AND #st = :status",
+        expression_attribute_names={"#g": "group", "#st": "status", "#ts": "timestamp"},
+        expression_attribute_values={":group": group, ":status": "pending"},
+        projection_expression="request_id, #st, readyToPickUp, readyToPickUp_timestamp, route_id, delivery_guy_id, updated_timestamp, #ts",
+        consistent_read=False,
+        scan_index_forward=True,
+        load_policy=load_policy,
+    )
+    return items
+
+
 def safe_timestamp_ms(value: Any) -> int:
+    def _normalize_epoch(numeric: int) -> int:
+        if 1_000_000_000 <= numeric < 1_000_000_000_000:
+            return numeric * 1000
+        return numeric
+
     if value is None:
         return 0
     if isinstance(value, (int, float)):
-        return int(value)
+        return _normalize_epoch(int(value))
     raw = str(value).strip()
     if not raw:
         return 0
     try:
-        return int(float(raw))
+        numeric = int(float(raw))
+        return _normalize_epoch(numeric)
     except ValueError:
-        return 0
+        try:
+            parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+        except ValueError:
+            return 0
+        return _dt_to_ms(parsed)
+
+
+def parse_boolean_token(value: Any) -> bool | None:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, int):
+        if value == 1:
+            return True
+        if value == 0:
+            return False
+        return None
+    raw = str(value).strip().lower() if value is not None else ""
+    if not raw:
+        return None
+    if raw in {"true", "1", "yes", "y"}:
+        return True
+    if raw in {"false", "0", "no", "n"}:
+        return False
+    return None
+
+
+def resolve_ready_unassigned_reference_ts_ms(request_item: dict[str, Any]) -> int:
+    for candidate in (
+        request_item.get("readyToPickUp_timestamp"),
+        request_item.get("updated_timestamp"),
+        request_item.get("timestamp"),
+    ):
+        ts = safe_timestamp_ms(candidate)
+        if ts > 0:
+            return ts
+    return 0
+
+
+def is_pending_ready_unassigned_request(request_item: dict[str, Any]) -> bool:
+    status = str(request_item.get("status") or "").strip().lower()
+    if status != "pending":
+        return False
+    if parse_boolean_token(request_item.get("readyToPickUp")) is not True:
+        return False
+    if str(request_item.get("route_id") or "").strip():
+        return False
+    if str(request_item.get("delivery_guy_id") or "").strip():
+        return False
+    return True
+
+
+def build_current_snapshot_counters(
+    pending_requests: list[dict[str, Any]],
+    *,
+    threshold_wait_minutes: int,
+    now_ms: int | None = None,
+) -> dict[str, int]:
+    safe_now_ms = safe_timestamp_ms(now_ms if now_ms is not None else int(time.time() * 1000))
+    wait_ms = max(1, int(threshold_wait_minutes)) * 60 * 1000
+    counters = {
+        "pending_count": 0,
+        "unassigned_count": 0,
+        "ready_unassigned_count": 0,
+        "ready_unassigned_aged_threshold_count": 0,
+    }
+    for request_item in pending_requests:
+        status = str(request_item.get("status") or "").strip().lower()
+        if status != "pending":
+            continue
+        counters["pending_count"] += 1
+        is_unassigned = (
+            not str(request_item.get("route_id") or "").strip()
+            and not str(request_item.get("delivery_guy_id") or "").strip()
+        )
+        if not is_unassigned:
+            continue
+        counters["unassigned_count"] += 1
+        if parse_boolean_token(request_item.get("readyToPickUp")) is not True:
+            continue
+        counters["ready_unassigned_count"] += 1
+        reference_ts = resolve_ready_unassigned_reference_ts_ms(request_item)
+        if reference_ts > 0 and safe_now_ms - reference_ts >= wait_ms:
+            counters["ready_unassigned_aged_threshold_count"] += 1
+    return counters
 
 
 def build_effective_group_summary(group_settings: dict[str, Any] | None) -> dict[str, Any]:
@@ -294,7 +492,15 @@ def build_effective_group_summary(group_settings: dict[str, Any] | None) -> dict
     }
 
 
-def start_logs_query(log_group: str, query_string: str, start_s: int, end_s: int, region: str) -> str:
+def start_logs_query(
+    log_group: str,
+    query_string: str,
+    start_s: int,
+    end_s: int,
+    region: str,
+    *,
+    load_policy: LoadPolicyConfig,
+) -> str:
     payload = _aws_json(
         [
             "aws",
@@ -310,7 +516,8 @@ def start_logs_query(log_group: str, query_string: str, start_s: int, end_s: int
             str(end_s),
             "--query-string",
             query_string,
-        ]
+        ],
+        load_policy=load_policy,
     )
     query_id = payload.get("queryId")
     if not query_id:
@@ -318,10 +525,19 @@ def start_logs_query(log_group: str, query_string: str, start_s: int, end_s: int
     return str(query_id)
 
 
-def poll_logs_query(query_id: str, region: str, timeout_seconds: int = 30) -> dict[str, Any]:
+def poll_logs_query(
+    query_id: str,
+    region: str,
+    *,
+    load_policy: LoadPolicyConfig,
+    timeout_seconds: int = 30,
+) -> dict[str, Any]:
     deadline = time.time() + timeout_seconds
     while True:
-        payload = _aws_json(["aws", "logs", "get-query-results", "--region", region, "--query-id", query_id])
+        payload = _aws_json(
+            ["aws", "logs", "get-query-results", "--region", region, "--query-id", query_id],
+            load_policy=load_policy,
+        )
         status = str(payload.get("status", "")).lower()
         if status == "complete":
             return payload
@@ -332,9 +548,23 @@ def poll_logs_query(query_id: str, region: str, timeout_seconds: int = 30) -> di
         time.sleep(1)
 
 
-def query_logs(log_group: str, query_string: str, window: AnalysisWindow, region: str) -> list[dict[str, str]]:
-    query_id = start_logs_query(log_group, query_string, window.fetch_start_ms // 1000, window.end_ms // 1000, region)
-    payload = poll_logs_query(query_id, region)
+def query_logs(
+    log_group: str,
+    query_string: str,
+    window: AnalysisWindow,
+    region: str,
+    *,
+    load_policy: LoadPolicyConfig,
+) -> list[dict[str, str]]:
+    query_id = start_logs_query(
+        log_group,
+        query_string,
+        window.fetch_start_ms // 1000,
+        window.end_ms // 1000,
+        region,
+        load_policy=load_policy,
+    )
+    payload = poll_logs_query(query_id, region, load_policy=load_policy)
     results: list[dict[str, str]] = []
     for row in payload.get("results", []):
         mapped = {field["field"]: field.get("value", "") for field in row}
@@ -346,7 +576,7 @@ def _escape_regex_token(token: str) -> str:
     return re.escape(token)
 
 
-def collect_log_evidence(group: str, window: AnalysisWindow, region: str) -> dict[str, Any]:
+def collect_log_evidence(group: str, window: AnalysisWindow, region: str, *, load_policy: LoadPolicyConfig) -> dict[str, Any]:
     group_token = _escape_regex_token(group)
     simulation_query = (
         "fields @timestamp, @message "
@@ -371,9 +601,9 @@ def collect_log_evidence(group: str, window: AnalysisWindow, region: str) -> dic
         "| sort @timestamp asc "
         "| limit 50"
     )
-    simulation_rows = query_logs(SIMULATION_LOG_GROUP, simulation_query, window, region)
-    app_sync_rows = query_logs(APP_SYNC_LOG_GROUP, app_sync_query, window, region)
-    activity_rows = query_logs(SIMULATION_LOG_GROUP, activity_query, window, region)
+    simulation_rows = query_logs(SIMULATION_LOG_GROUP, simulation_query, window, region, load_policy=load_policy)
+    app_sync_rows = query_logs(APP_SYNC_LOG_GROUP, app_sync_query, window, region, load_policy=load_policy)
+    activity_rows = query_logs(SIMULATION_LOG_GROUP, activity_query, window, region, load_policy=load_policy)
 
     def _count(marker: str) -> int:
         return sum(1 for row in simulation_rows if marker in row.get("@message", ""))
@@ -433,7 +663,7 @@ def build_backlog_intervals_for_request(
     if ready_start_ms is not None:
         is_still_pending_ready_unassigned = (
             str(request_item.get("status") or "").strip().lower() == "pending"
-            and request_item.get("readyToPickUp") is True
+            and parse_boolean_token(request_item.get("readyToPickUp")) is True
             and not str(request_item.get("route_id") or "").strip()
             and not str(request_item.get("delivery_guy_id") or "").strip()
         )
@@ -478,6 +708,64 @@ def compute_peak(intervals: list[tuple[int, int, str]], analysis_start_ms: int, 
     return {"peak_count": peak_count, "peak_windows": peak_windows, "segments": segments}
 
 
+def evaluate_stage_a_decision(
+    *,
+    group_summary: dict[str, Any],
+    snapshot: dict[str, int],
+    log_counts: dict[str, int],
+) -> StageADecision:
+    if not group_summary.get("simulation"):
+        return StageADecision(
+            reason_bucket=REASON_FEATURE_NOT_APPLICABLE,
+            confidence="high",
+            is_ambiguous=False,
+            short_circuit_reason="group_simulation_disabled",
+        )
+    if log_counts.get("activation_done", 0) > 0 or log_counts.get("app_sync_activation_logs", 0) > 0:
+        return StageADecision(
+            reason_bucket=REASON_ACTIVATION_DONE,
+            confidence="high",
+            is_ambiguous=False,
+            short_circuit_reason="activation_logs_present",
+        )
+    if log_counts.get("activation_skipped_no_eligible", 0) > 0:
+        return StageADecision(
+            reason_bucket=REASON_NO_ELIGIBLE,
+            confidence="high",
+            is_ambiguous=False,
+            short_circuit_reason="explicit_no_eligible_log",
+        )
+
+    threshold = int(group_summary.get("emergency_threshold_count") or 0)
+    aged_count = int(snapshot.get("ready_unassigned_aged_threshold_count") or 0)
+    has_attempt_logs = (
+        int(log_counts.get("backlog_detected", 0)) > 0
+        or int(log_counts.get("activation_attempted", 0)) > 0
+    )
+
+    if aged_count == 0 and not has_attempt_logs:
+        return StageADecision(
+            reason_bucket=REASON_THRESHOLD_NOT_REACHED,
+            confidence="medium",
+            is_ambiguous=False,
+            short_circuit_reason="snapshot_aged_ready_unassigned_is_zero",
+        )
+    if aged_count < threshold and not has_attempt_logs:
+        return StageADecision(
+            reason_bucket=REASON_THRESHOLD_NOT_REACHED,
+            confidence="medium",
+            is_ambiguous=False,
+            short_circuit_reason="snapshot_aged_ready_unassigned_below_threshold",
+        )
+
+    return StageADecision(
+        reason_bucket=REASON_ATTEMPTED_NOT_PERSISTED,
+        confidence="low",
+        is_ambiguous=True,
+        short_circuit_reason="stage_a_signals_ambiguous",
+    )
+
+
 def choose_reason_bucket(
     *,
     group_summary: dict[str, Any],
@@ -506,6 +794,15 @@ def choose_reason_bucket(
     return REASON_ATTEMPTED_NOT_PERSISTED, "low"
 
 
+def resolve_request_workers(args: argparse.Namespace, *, load_policy: LoadPolicyConfig, request_count: int) -> int:
+    if args.request_workers is not None:
+        desired = max(1, int(args.request_workers))
+    else:
+        desired = load_policy.default_request_workers
+    capped = min(desired, load_policy.max_request_workers)
+    return max(1, min(capped, max(1, int(request_count))))
+
+
 def render_text_report(report: dict[str, Any]) -> str:
     lines: list[str] = []
     group = report["group"]
@@ -516,6 +813,7 @@ def render_text_report(report: dict[str, Any]) -> str:
     lines.append(f"Simulation emergency audit for group `{group}`")
     lines.append(f"Range: {window['start_local']} -> {window['end_local']} ({window['timezone']})")
     lines.append(f"Mode: {report['mode']}")
+    lines.append(f"Load policy: {report['load_policy']}")
     lines.append("")
     lines.append("Effective settings:")
     lines.append(f"- simulation: {summary['simulation']}")
@@ -527,17 +825,27 @@ def render_text_report(report: dict[str, Any]) -> str:
     lines.append(f"- default_alert_all_after_alerted_count: {summary.get('default_alert_all_after_alerted_count')}")
     lines.append(f"- notify_all_delivery_guys_in_routes: {summary.get('notify_all_delivery_guys_in_routes')}")
     lines.append("")
+    snapshot = report.get("current_snapshot", {})
+    lines.append("Current snapshot:")
+    lines.append(f"- pending_count: {snapshot.get('pending_count', 0)}")
+    lines.append(f"- unassigned_count: {snapshot.get('unassigned_count', 0)}")
+    lines.append(f"- ready_unassigned_count: {snapshot.get('ready_unassigned_count', 0)}")
+    lines.append(f"- ready_unassigned_aged_threshold_count: {snapshot.get('ready_unassigned_aged_threshold_count', 0)}")
+    lines.append("")
     lines.append("Verdict:")
     lines.append(f"- reason_bucket: {report['reason_bucket']}")
     lines.append(f"- confidence: {report['reason_bucket_confidence']}")
+    lines.append(f"- exact_executed: {report.get('exact_executed', False)}")
+    lines.append(f"- short_circuit_reason: {report.get('short_circuit_reason') or 'none'}")
     lines.append(f"- activation_log_count: {counts.get('activation_done', 0)}")
     lines.append(f"- app_sync_activation_logs: {counts.get('app_sync_activation_logs', 0)}")
     lines.append(f"- simulation_activity_count: {report['log_evidence'].get('simulation_activity_count', 0)}")
 
-    if report["mode"] == "exact":
+    if report.get("exact_executed") and "exact" in report:
         exact = report["exact"]
         lines.append("")
         lines.append("Exact backlog analysis:")
+        lines.append(f"- request_workers: {exact.get('request_workers', 0)}")
         lines.append(f"- requests_loaded: {exact['requests_loaded']}")
         lines.append(f"- requests_with_actions: {exact['requests_with_actions']}")
         lines.append(f"- eligible_intervals: {exact['eligible_interval_count']}")
@@ -568,11 +876,16 @@ def render_text_report(report: dict[str, Any]) -> str:
 
 
 def build_report(args: argparse.Namespace) -> dict[str, Any]:
+    load_policy = _load_policy_config(args.load_policy)
     window = build_analysis_window(args)
-    group_settings = get_group_settings(args.group, args.region)
+    group_settings = get_group_settings(args.group, args.region, load_policy=load_policy)
     group_summary = build_effective_group_summary(group_settings)
-    log_evidence = collect_log_evidence(args.group, window, args.region)
-    simulation_delivery_guys = get_simulation_delivery_guys(args.group, args.region) if group_summary["simulation"] else []
+    log_evidence = collect_log_evidence(args.group, window, args.region, load_policy=load_policy)
+    simulation_delivery_guys = (
+        get_simulation_delivery_guys(args.group, args.region, load_policy=load_policy)
+        if group_summary["simulation"]
+        else []
+    )
     current_eligible_off_duty = [
         item for item in simulation_delivery_guys
         if str(item.get("status") or "").strip().lower() == "off_duty"
@@ -580,10 +893,25 @@ def build_report(args: argparse.Namespace) -> dict[str, Any]:
         and str(item.get("delivery_guy_id") or "").strip()
         and str(item.get("device_id") or "").strip()
     ]
+    pending_requests_snapshot = (
+        get_pending_requests_snapshot(args.group, args.region, load_policy=load_policy)
+        if group_summary["simulation"]
+        else []
+    )
+    current_snapshot = build_current_snapshot_counters(
+        pending_requests_snapshot,
+        threshold_wait_minutes=group_summary["emergency_threshold_wait_minutes"],
+    )
+    stage_a_decision = evaluate_stage_a_decision(
+        group_summary=group_summary,
+        snapshot=current_snapshot,
+        log_counts=log_evidence["counts"],
+    )
 
     report: dict[str, Any] = {
         "group": args.group,
         "mode": args.mode,
+        "load_policy": load_policy.name,
         "window": {
             "timezone": args.timezone,
             "start_ms": window.start_ms,
@@ -594,23 +922,37 @@ def build_report(args: argparse.Namespace) -> dict[str, Any]:
         },
         "group_summary": group_summary,
         "log_evidence": log_evidence,
+        "current_snapshot": current_snapshot,
+        "exact_executed": False,
+        "short_circuit_reason": None,
     }
 
+    should_run_exact = (
+        args.mode == "exact"
+        or (args.mode == "auto" and stage_a_decision.is_ambiguous and group_summary["simulation"])
+    )
     peak_count = 0
-    if args.mode == "exact" and group_summary["simulation"]:
-        requests = get_requests_for_window(args.group, window, args.region)
+    if should_run_exact and group_summary["simulation"]:
+        requests = get_requests_for_window(args.group, window, args.region, load_policy=load_policy)
         threshold_wait_minutes = group_summary["emergency_threshold_wait_minutes"]
         all_intervals: list[tuple[int, int, str]] = []
         requests_with_actions = 0
+        warnings: list[str] = []
         request_items_by_id = {
             str(request_item.get("request_id") or "").strip(): request_item
             for request_item in requests
             if str(request_item.get("request_id") or "").strip()
         }
+        request_workers = resolve_request_workers(args, load_policy=load_policy, request_count=len(request_items_by_id))
+        if len(request_items_by_id) > load_policy.soft_exact_request_limit:
+            warnings.append(
+                f"large_exact_workload_request_count={len(request_items_by_id)} exceeds soft_limit={load_policy.soft_exact_request_limit}; "
+                f"running with capped_workers={request_workers}"
+            )
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=max(1, int(args.request_workers))) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=request_workers) as executor:
             future_map = {
-                executor.submit(get_request_actions, args.group, request_id, args.region): request_id
+                executor.submit(get_request_actions, args.group, request_id, args.region, load_policy=load_policy): request_id
                 for request_id in request_items_by_id
             }
             for future in concurrent.futures.as_completed(future_map):
@@ -629,7 +971,12 @@ def build_report(args: argparse.Namespace) -> dict[str, Any]:
 
         peak = compute_peak(all_intervals, window.start_ms, window.end_ms)
         peak_count = int(peak["peak_count"])
+        if args.deep_lookback_hours == 0:
+            warnings.append("carry_over_backlog_before_range_not_fully_covered_without_deep_lookback")
+        report["exact_executed"] = True
+        report["short_circuit_reason"] = None
         report["exact"] = {
+            "request_workers": request_workers,
             "requests_loaded": len(requests),
             "requests_with_actions": requests_with_actions,
             "eligible_interval_count": len(all_intervals),
@@ -645,23 +992,23 @@ def build_report(args: argparse.Namespace) -> dict[str, Any]:
             ],
             "current_simulation_delivery_guys": len(simulation_delivery_guys),
             "current_eligible_off_duty_simulation_drivers": len(current_eligible_off_duty),
-            "warnings": (
-                ["carry_over_backlog_before_range_not_fully_covered_without_deep_lookback"]
-                if args.deep_lookback_hours == 0
-                else []
-            ),
+            "warnings": warnings,
         }
+        reason_bucket, confidence = choose_reason_bucket(
+            group_summary=group_summary,
+            peak_count=peak_count,
+            log_counts=log_evidence["counts"],
+            current_eligible_off_duty_count=len(current_eligible_off_duty),
+        )
+        report["reason_bucket"] = reason_bucket
+        report["reason_bucket_confidence"] = confidence
     else:
-        peak_count = 0
+        report["reason_bucket"] = stage_a_decision.reason_bucket
+        report["reason_bucket_confidence"] = stage_a_decision.confidence
+        report["short_circuit_reason"] = stage_a_decision.short_circuit_reason
+        if args.mode == "quick" and stage_a_decision.is_ambiguous:
+            report["short_circuit_reason"] = "quick_mode_stage_a_only_ambiguous"
 
-    reason_bucket, confidence = choose_reason_bucket(
-        group_summary=group_summary,
-        peak_count=peak_count,
-        log_counts=log_evidence["counts"],
-        current_eligible_off_duty_count=len(current_eligible_off_duty),
-    )
-    report["reason_bucket"] = reason_bucket
-    report["reason_bucket_confidence"] = confidence
     return report
 
 
@@ -673,9 +1020,20 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--to", dest="to_dt", help="Local or ISO datetime end")
     parser.add_argument("--timezone", default=DEFAULT_TIMEZONE, help="IANA timezone")
     parser.add_argument("--region", default=DEFAULT_REGION, help="AWS region")
-    parser.add_argument("--mode", choices=["quick", "exact"], default="exact", help="Analysis mode")
+    parser.add_argument("--mode", choices=["quick", "exact", "auto"], default=DEFAULT_MODE, help="Analysis mode")
+    parser.add_argument(
+        "--load-policy",
+        choices=list(LOAD_POLICIES),
+        default=DEFAULT_LOAD_POLICY,
+        help="Concurrency/retry profile used for AWS calls and exact reconstruction",
+    )
     parser.add_argument("--deep-lookback-hours", type=int, default=DEFAULT_DEEP_LOOKBACK_HOURS, help="Additional lookback hours for carry-over backlog")
-    parser.add_argument("--request-workers", type=int, default=8, help="Parallel workers for per-request action history queries in exact mode")
+    parser.add_argument(
+        "--request-workers",
+        type=int,
+        default=None,
+        help="Parallel workers for per-request action history queries in exact mode (default from load policy)",
+    )
     parser.add_argument("--json", action="store_true", help="Emit JSON only")
     return parser.parse_args(argv)
 
