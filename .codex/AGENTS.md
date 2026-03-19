@@ -87,12 +87,19 @@ Always confirm:
 - Compose the task title automatically from the request using a short, concrete implementation title.
 - Compose the task description automatically with the request context, current repo/folder, scope, and requested outcome.
 - Known routing is deterministic and must not trigger an extra List question:
-- `codeliver-panel` -> `codeliver-panel`
-- `codeliver-sap` -> `codeliver-sap`
-- `codeliver-pos` -> `codeliver-pos`
-- `codeliver-app` -> `codeliver-app`
-- generic or ambiguous `codeliver` work -> `codeliver-globals-tasks`
+- All routing rules in this section must be resolved in ClickUp organization workspace `DM` only.
+- Never search, route, or create these tasks under ClickUp workspace `IOANNIS CHOURPOULIADIS`.
+- `codeliver-panel` only -> `codeliver-panel`
+- `codeliver-sap` only -> `codeliver-sap`
+- `codeliver-pos` only -> `codeliver-pos`
+- `codeliver-app` only -> `codeliver-app`
+- changes spanning more than one of `codeliver-app`, `codeliver-sap`, `codeliver-pos`, `codeliver-panel` -> `codeliver-global-tasks`
+- generic or ambiguous `codeliver` work -> `codeliver-global-tasks`
 - `cloud-repos-panel` -> `cloud-repos-panel`
+- `Cloud Fleet` -> `Cloud Fleet`
+- `deliveryfleet-pos` only -> `deliveryfleet-pos`
+- `deliveryfleet-app` only -> `deliveryfleet-app`
+- changes spanning both `deliveryfleet-pos` and `deliveryfleet-app` -> `deliveryfleet-global-tasks`
 - For any other project or repo name, extract the likely project identifier from the request or current repo context and search ClickUp Lists for exact or close matches first.
 - If one plausible existing List is found, use it directly without asking.
 - If multiple plausible existing Lists are found, ask only which of those Lists should receive the task.
