@@ -12,19 +12,6 @@ import yaml
 MAX_SKILL_NAME_LENGTH = 64
 
 
-def _runtime_support_dir() -> Path | None:
-    script_path = Path(__file__).resolve()
-    candidates = [
-        script_path.parents[2] / "skill-runtime-lib" / "scripts",
-        script_path.parents[3] / ".system" / "skill-runtime-lib" / "scripts",
-        script_path.parents[4] / "skills" / ".system" / "skill-runtime-lib" / "scripts",
-    ]
-    for candidate in candidates:
-        if (candidate / "runtime_support.py").is_file():
-            return candidate
-    return None
-
-
 def validate_skill(skill_path):
     """Basic validation of a skill"""
     skill_path = Path(skill_path)
@@ -100,24 +87,6 @@ def validate_skill(skill_path):
                 False,
                 f"Description is too long ({len(description)} characters). Maximum is 1024 characters.",
             )
-
-    scripts_dir = skill_path / "scripts"
-    runtime_path = skill_path / "skill.runtime.json"
-    if scripts_dir.is_dir() and not runtime_path.exists():
-        return False, "skills with scripts/ must include skill.runtime.json"
-
-    if runtime_path.exists():
-        runtime_support_dir = _runtime_support_dir()
-        if runtime_support_dir is None:
-            return False, "Unable to locate shared runtime validator"
-        if str(runtime_support_dir) not in sys.path:
-            sys.path.insert(0, str(runtime_support_dir))
-        from runtime_support import RuntimeErrorMessage, load_runtime
-
-        try:
-            load_runtime(skill_path)
-        except RuntimeErrorMessage as exc:
-            return False, f"Invalid skill.runtime.json: {exc}"
 
     return True, "Skill is valid!"
 

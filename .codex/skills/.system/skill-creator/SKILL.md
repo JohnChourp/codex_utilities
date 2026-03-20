@@ -99,7 +99,6 @@ Executable code (Python/Bash/etc.) for tasks that require deterministic reliabil
 - **Example**: `scripts/rotate_pdf.py` for PDF rotation tasks
 - **Benefits**: Token efficient, deterministic, may be executed without loading into context
 - **Note**: Scripts may still need to be read by Codex for patching or environment-specific adjustments
-- **Executable contract**: If a skill is executable, its canonical flow must live in scripts plus `skill.runtime.json`. Do not leave runnable behavior only in prose. Use `scripts/run.py` as the stable launcher and keep the primary logic in a concrete script such as `scripts/main.py`.
 
 ##### References (`references/`)
 
@@ -254,6 +253,7 @@ For example, when building an image-editor skill, relevant questions include:
 - "Can you give some examples of how this skill would be used?"
 - "I can imagine users asking for things like 'Remove the red-eye from this image' or 'Rotate this image'. Are there other ways you imagine this skill being used?"
 - "What would a user say that should trigger this skill?"
+- "Where should I create this skill? If you do not have a preference, I will place it in `$CODEX_HOME/skills` (or `~/.codex/skills` when `CODEX_HOME` is unset) so Codex can discover it automatically."
 
 To avoid overwhelming users, avoid asking too many questions in a single message. Start with the most important questions and follow up as needed for better effectiveness.
 
@@ -289,21 +289,22 @@ At this point, it is time to actually create the skill.
 
 Skip this step only if the skill being developed already exists. In this case, continue to the next step.
 
+Before running `init_skill.py`, ask where the user wants the skill created. If they do not specify a location, default to `$CODEX_HOME/skills`; when `CODEX_HOME` is unset, fall back to `~/.codex/skills` so the skill is auto-discovered.
+
 When creating a new skill from scratch, always run the `init_skill.py` script. The script conveniently generates a new template skill directory that automatically includes everything a skill requires, making the skill creation process much more efficient and reliable.
 
 Usage:
 
 ```bash
-scripts/init_skill.py <skill-name> --path <output-directory> [--resources scripts,references,assets] [--examples] [--supported-os macos,linux,windows]
+scripts/init_skill.py <skill-name> --path <output-directory> [--resources scripts,references,assets] [--examples]
 ```
 
 Examples:
 
 ```bash
-scripts/init_skill.py my-skill --path skills/public
-scripts/init_skill.py my-skill --path skills/public --resources scripts,references
-scripts/init_skill.py my-skill --path skills/public --resources scripts --examples
-scripts/init_skill.py my-skill --path skills/public --resources scripts --supported-os macos,linux
+scripts/init_skill.py my-skill --path "${CODEX_HOME:-$HOME/.codex}/skills"
+scripts/init_skill.py my-skill --path "${CODEX_HOME:-$HOME/.codex}/skills" --resources scripts,references
+scripts/init_skill.py my-skill --path ~/work/skills --resources scripts --examples
 ```
 
 The script:
@@ -312,7 +313,6 @@ The script:
 - Generates a SKILL.md template with proper frontmatter and TODO placeholders
 - Creates `agents/openai.yaml` using agent-generated `display_name`, `short_description`, and `default_prompt` passed via `--interface key=value`
 - Optionally creates resource directories based on `--resources`
-- If `scripts` is requested, also creates `scripts/run.py`, `scripts/main.py`, and `skill.runtime.json`
 - Optionally adds example files when `--examples` is set
 
 After initialization, customize the SKILL.md and add resources as needed. If you used `--examples`, replace or delete placeholder files.
@@ -336,13 +336,6 @@ After substantial revisions, or if the skill is particularly tricky, you should 
 To begin implementation, start with the reusable resources identified above: `scripts/`, `references/`, and `assets/` files. Note that this step may require user input. For example, when implementing a `brand-guidelines` skill, the user may need to provide brand assets or templates to store in `assets/`, or documentation to store in `references/`.
 
 Added scripts must be tested by actually running them to ensure there are no bugs and that the output matches what is expected. If there are many similar scripts, only a representative sample needs to be tested to ensure confidence that they all work while balancing time to completion.
-
-If the skill is executable:
-
-- keep the canonical runnable flow in scripts, not only in SKILL prose
-- maintain `skill.runtime.json` as the single source of truth for supported OS, preflight checks, default command, and recording behavior
-- ensure `scripts/run.py` launches through the shared runtime support layer
-- verify the skill works through the central runner (`run-skill <skill> ...`) or the generated `scripts/run.py`
 
 If you used `--examples`, delete any placeholder files that are not needed for the skill. Only create resource directories that are actually required.
 
@@ -375,7 +368,6 @@ scripts/quick_validate.py <path/to/skill-folder>
 ```
 
 The validation script checks YAML frontmatter format, required fields, and naming rules. If validation fails, fix the reported issues and run the command again.
-For executable skills it also validates `skill.runtime.json` and rejects skills that contain `scripts/` without a runtime contract.
 
 ### Step 6: Iterate
 

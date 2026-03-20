@@ -1,10 +1,19 @@
 #!/usr/bin/env python3
 """
-Skill Initializer - Creates a new skill from template.
+Skill Initializer - Creates a new skill from template
+
+Usage:
+    init_skill.py <skill-name> --path <path> [--resources scripts,references,assets] [--examples] [--interface key=value]
+
+Examples:
+    init_skill.py my-new-skill --path skills/public
+    init_skill.py my-new-skill --path skills/public --resources scripts,references
+    init_skill.py my-api-helper --path skills/private --resources scripts --examples
+    init_skill.py custom-skill --path /custom/location
+    init_skill.py my-skill --path skills/public --interface short_description="Short UI label"
 """
 
 import argparse
-import json
 import re
 import sys
 from pathlib import Path
@@ -68,10 +77,6 @@ Create only the resource directories this skill actually needs. Delete this sect
 ### scripts/
 Executable code (Python/Bash/etc.) that can be run directly to perform specific operations.
 
-If the skill is executable, the canonical flow must live in scripts plus `skill.runtime.json`.
-Do not leave the runnable behavior only in prose. Generate or update `scripts/run.py`,
-`scripts/main.py`, and `skill.runtime.json` so the skill can be executed via `run-skill`.
-
 **Examples from other skills:**
 - PDF skill: `fill_fillable_fields.py`, `extract_form_field_info.py` - utilities for PDF manipulation
 - DOCX skill: `document.py`, `utilities.py` - Python modules for document processing
@@ -105,49 +110,22 @@ Files not intended to be loaded into context, but rather used within the output 
 **Not every skill requires all three types of resources.**
 """
 
-RUNNER_TEMPLATE = """#!/usr/bin/env python3
-from __future__ import annotations
-
-import sys
-from pathlib import Path
-
-
-def _runtime_support_dir() -> Path:
-    script_path = Path(__file__).resolve()
-    candidates = [
-        script_path.parents[2] / '.system' / 'skill-runtime-lib' / 'scripts',
-        script_path.parents[2] / 'skill-runtime-lib' / 'scripts',
-        script_path.parents[3] / '.system' / 'skill-runtime-lib' / 'scripts',
-    ]
-    for candidate in candidates:
-        if (candidate / 'runtime_support.py').is_file():
-            return candidate
-    raise SystemExit('Unable to locate shared skill runtime support.')
-
-
-RUNTIME_SUPPORT_DIR = _runtime_support_dir()
-if str(RUNTIME_SUPPORT_DIR) not in sys.path:
-    sys.path.insert(0, str(RUNTIME_SUPPORT_DIR))
-
-from runtime_support import launch_current_skill
-
-
-if __name__ == '__main__':
-    raise SystemExit(launch_current_skill(Path(__file__).resolve(), sys.argv[1:]))
+EXAMPLE_SCRIPT = '''#!/usr/bin/env python3
 """
+Example helper script for {skill_name}
 
-EXAMPLE_MAIN_SCRIPT = '''#!/usr/bin/env python3
+This is a placeholder script that can be executed directly.
+Replace with actual implementation or delete if not needed.
+
+Example real scripts from other skills:
+- pdf/scripts/fill_fillable_fields.py - Fills PDF form fields
+- pdf/scripts/convert_pdf_to_images.py - Converts PDF pages to images
 """
-Canonical main command for {skill_name}
-
-Replace this placeholder with the real skill logic.
-"""
-
-from __future__ import annotations
-
 
 def main():
-    print("TODO: implement {skill_name}")
+    print("This is an example script for {skill_name}")
+    # TODO: Add actual script logic here
+    # This could be data processing, file conversion, API calls, etc.
 
 if __name__ == "__main__":
     main()
@@ -249,37 +227,18 @@ def parse_resources(raw_resources):
     return deduped
 
 
-def parse_supported_os(raw_supported_os):
-    values = [item.strip() for item in raw_supported_os.split(",") if item.strip()]
-    if not values:
-        values = ["macos", "linux", "windows"]
-    normalized = []
-    aliases = {
-        "mac": "macos",
-        "macos": "macos",
-        "darwin": "macos",
-        "linux": "linux",
-        "ubuntu": "linux",
-        "windows": "windows",
-        "win": "windows",
-        "win32": "windows",
-    }
-    for value in values:
-        key = aliases.get(value.lower())
-        if key is None:
-            print(f"[ERROR] Unsupported OS value: {value}")
-            sys.exit(1)
-        if key not in normalized:
-            normalized.append(key)
-    return normalized
-
-
 def create_resource_dirs(skill_dir, skill_name, skill_title, resources, include_examples):
     for resource in resources:
         resource_dir = skill_dir / resource
         resource_dir.mkdir(exist_ok=True)
         if resource == "scripts":
-            print("[OK] Created scripts/")
+            if include_examples:
+                example_script = resource_dir / "example.py"
+                example_script.write_text(EXAMPLE_SCRIPT.format(skill_name=skill_name))
+                example_script.chmod(0o755)
+                print("[OK] Created scripts/example.py")
+            else:
+                print("[OK] Created scripts/")
         elif resource == "references":
             if include_examples:
                 example_reference = resource_dir / "api_reference.md"
@@ -296,74 +255,7 @@ def create_resource_dirs(skill_dir, skill_name, skill_title, resources, include_
                 print("[OK] Created assets/")
 
 
-def create_runtime_files(skill_dir, skill_name, supported_os):
-    scripts_dir = skill_dir / "scripts"
-    scripts_dir.mkdir(exist_ok=True)
-
-    run_py = scripts_dir / "run.py"
-    run_py.write_text(RUNNER_TEMPLATE)
-    run_py.chmod(0o755)
-    print("[OK] Created scripts/run.py")
-
-    main_py = scripts_dir / "main.py"
-    if not main_py.exists():
-        main_py.write_text(EXAMPLE_MAIN_SCRIPT.format(skill_name=skill_name))
-        main_py.chmod(0o755)
-        print("[OK] Created scripts/main.py")
-
-    runtime_payload = {
-        "schema_version": 2,
-        "skill_name": skill_name,
-        "execution_mode": "python_launcher",
-        "supported_os": supported_os,
-        "unsupported_behavior": "fail_fast",
-        "preflight": {
-            "cache_ttl_seconds": 600,
-            "checks": [
-                {
-                    "type": "tool",
-                    "name": "python",
-                    "install_hint": {
-                        "macos": "Install Python 3 and ensure python3 is in PATH.",
-                        "linux": "Install python3 and ensure it is in PATH.",
-                        "windows": "Install Python 3 or the py launcher and ensure it is in PATH.",
-                    },
-                }
-            ],
-        },
-        "entrypoint": {
-            "kind": "python",
-            "path": "scripts/run.py",
-        },
-        "tooling": {
-            "python": {
-                "macos": ["python3"],
-                "linux": ["python3"],
-                "windows": ["py", "-3"],
-            }
-        },
-        "default_command": skill_name,
-        "commands": [
-            {
-                "name": skill_name,
-                "description": "Primary skill command",
-                "kind": "python",
-                "path": "scripts/main.py",
-                "args": [],
-            }
-        ],
-        "recording": {
-            "enabled_by_default": False,
-            "output_dir_template": "~/.codex/tmp/skill-runs/{skill}/{timestamp}",
-            "artifacts": ["run.json", "command.txt", "stdout.log", "stderr.log"],
-        },
-    }
-    runtime_path = skill_dir / "skill.runtime.json"
-    runtime_path.write_text(json.dumps(runtime_payload, indent=2) + "\n")
-    print("[OK] Created skill.runtime.json")
-
-
-def init_skill(skill_name, path, resources, include_examples, interface_overrides, supported_os):
+def init_skill(skill_name, path, resources, include_examples, interface_overrides):
     """
     Initialize a new skill directory with template SKILL.md.
 
@@ -421,13 +313,6 @@ def init_skill(skill_name, path, resources, include_examples, interface_override
             print(f"[ERROR] Error creating resource directories: {e}")
             return None
 
-    if "scripts" in resources:
-        try:
-            create_runtime_files(skill_dir, skill_name, supported_os)
-        except Exception as e:
-            print(f"[ERROR] Error creating runtime files: {e}")
-            return None
-
     # Print next steps
     print(f"\n[OK] Skill '{skill_name}' initialized successfully at {skill_dir}")
     print("\nNext steps:")
@@ -470,11 +355,6 @@ def main():
         default=[],
         help="Interface override in key=value format (repeatable)",
     )
-    parser.add_argument(
-        "--supported-os",
-        default="macos,linux,windows",
-        help="Comma-separated supported OS list for executable skills",
-    )
     args = parser.parse_args()
 
     raw_skill_name = args.skill_name
@@ -492,7 +372,6 @@ def main():
         print(f"Note: Normalized skill name from '{raw_skill_name}' to '{skill_name}'.")
 
     resources = parse_resources(args.resources)
-    supported_os = parse_supported_os(args.supported_os)
     if args.examples and not resources:
         print("[ERROR] --examples requires --resources to be set.")
         sys.exit(1)
@@ -505,13 +384,11 @@ def main():
         print(f"   Resources: {', '.join(resources)}")
         if args.examples:
             print("   Examples: enabled")
-        if "scripts" in resources:
-            print(f"   Supported OS: {', '.join(supported_os)}")
     else:
         print("   Resources: none (create as needed)")
     print()
 
-    result = init_skill(skill_name, path, resources, args.examples, args.interface, supported_os)
+    result = init_skill(skill_name, path, resources, args.examples, args.interface)
 
     if result:
         sys.exit(0)
