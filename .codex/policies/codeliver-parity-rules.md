@@ -1,5 +1,12 @@
 # CodeDeliver Cross-Project Parity Rules (On-Demand)
 
+## 0.0) Execution policy (all parity sets)
+
+- For every mapped parity set below, treat parity as proactive by default: when one mapped file changes, sweep the whole set before finishing.
+- Minimum sweep surface for frontend parity sets: entry-point `*.ts` plus sibling `*.html` + `*.scss` and co-located child components used by that entry-point.
+- When the user asks for scoped work, keep the scope but explicitly record the parity exception in the final response (and in task notes if applicable).
+- Do not assume TS-only parity; UI parity includes template structure, styling, runtime states, and i18n keys used by the updated view.
+
 ## 0.1) Cross-project parity rules (Admins panel)
 
 - Keep these components/lambdas in **lockstep**; when changing one side, **apply the same UI/logic changes to the other** (including HTML/SCSS/global classes and backend validation/behavior):
@@ -72,7 +79,11 @@
 
 - Keep these components/lambdas in **lockstep**; οποιαδήποτε μελλοντική αλλαγή στο `projects/codeliver/codeliver-panel` σχετικά με Devices πρέπει να μεταφέρεται ισοδύναμα στο `projects/codeliver/codeliver-sap` (UI/logic, HTML/SCSS/global classes και backend validation/behavior):
   - `projects/codeliver/codeliver-panel/src/app/delivery-guys-and-devices/devices/devices.page.ts` ↔ `projects/codeliver/codeliver-sap/src/app/shared/modals/show-group-devices-modal/show-group-devices-modal.component.ts` (parity entry-point)
+  - `projects/codeliver/codeliver-panel/src/app/delivery-guys-and-devices/devices/devices.page.html` ↔ `projects/codeliver/codeliver-sap/src/app/shared/modals/show-group-devices-modal/show-group-devices-modal.component.html`
+  - `projects/codeliver/codeliver-panel/src/app/delivery-guys-and-devices/devices/devices.page.scss` ↔ `projects/codeliver/codeliver-sap/src/app/shared/modals/show-group-devices-modal/show-group-devices-modal.component.scss`
   - `projects/codeliver/codeliver-panel/src/app/delivery-guys-and-devices/devices/devices-item/devices-item.component.ts` ↔ `projects/codeliver/codeliver-sap/src/app/shared/modals/show-group-devices-modal/devices-item/devices-item.component.ts`
+  - `projects/codeliver/codeliver-panel/src/app/delivery-guys-and-devices/devices/devices-item/devices-item.component.html` ↔ `projects/codeliver/codeliver-sap/src/app/shared/modals/show-group-devices-modal/devices-item/devices-item.component.html`
+  - `projects/codeliver/codeliver-panel/src/app/delivery-guys-and-devices/devices/devices-item/devices-item.component.scss` ↔ `projects/codeliver/codeliver-sap/src/app/shared/modals/show-group-devices-modal/devices-item/devices-item.component.scss`
   - `projects/codeliver/codeliver-panel/src/app/shared/modals/create-device-modal/create-device-modal.component.ts` ↔ `projects/codeliver/codeliver-sap/src/app/shared/modals/create-device-modal/create-device-modal.component.ts`
   - `lambdas/codeliver_all/codeliver-panel-fetch-delivery-guys` ↔ `lambdas/codeliver_all/codeliver-sap-fetch-delivery-guys`
   - `lambdas/codeliver_all/codeliver-panel-fetch-devices` ↔ `lambdas/codeliver_all/codeliver-sap-fetch-delivery-devices`
@@ -152,4 +163,3 @@
   - `lambdas/codeliver_all/codeliver-panel-fetch-routes-paths` ↔ `lambdas/codeliver_all/codeliver-sap-fetch-routes-paths`
   - `lambdas/codeliver_all/codeliver-panel-handle-route` ↔ `lambdas/codeliver_all/codeliver-sap-handle-route`
   - `lambdas/codeliver_all/codeliver-panel-fetch-delivery-requests` ↔ `lambdas/codeliver_all/codeliver-sap-fetch-delivery-requests` (route-id mode parity)
-

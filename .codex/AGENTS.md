@@ -23,6 +23,7 @@ Global guidance for Codex assistance on CodeDeliver.
 - Write back skill/policy knowledge only after a fallback is confirmed by a successful end result. Do not persist failed or speculative recoveries.
 - When a local installed skill gains proven recovery knowledge, also protect it from future sync overwrite via the local preserve-skills mechanism.
 - Before any cross-project parity change, ask which targets must stay in lockstep. If the user asks for scoped work, keep that scope and state the parity exception.
+- For any change that touches a path listed in `.codex/policies/codeliver-parity-rules.md`, run a proactive parity sweep before implementation: include mapped entry-point plus sibling HTML/SCSS and co-located child components by default, unless the user explicitly scopes out parity.
 - Do not run credentialed AWS commands unless the current prompt explicitly asks for them. Otherwise give exact commands for local execution.
 - Never run Lambda deploy commands, `git commit`, or `git push` automatically. Execute them only when the user explicitly and specifically requests that exact action in the current prompt.
 - For lambda repos in `codeliver-sap`, `codeliver-panel`, `codeliver-pos`, `codeliver-app`, and `cloud-repos-panel`, treat deploy as a single production rollout: a `deploy:prod` action is considered to affect the shared production footprint used by both `cap8` and `cap8-dev`. Do not propose split per-environment rollout stages (`cap8-dev` first, then `cap8`) unless the user explicitly asks for environment-separated rollout.
