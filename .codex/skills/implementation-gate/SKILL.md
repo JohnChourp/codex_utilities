@@ -34,14 +34,15 @@ Include all:
 1. Ask clarifying questions before implementation.
 2. Paste a short, scannable plan to user.
 3. Ask user to review ClickUp plan and explicitly confirm.
-4. Before any file edits, ask delivery mode (`local changes` vs `PR-ready`) and ask for target branch name.
-5. Do not implement before explicit go-ahead (`proceed` or equivalent).
+4. Assume delivery mode `local changes only` and the current checked-out branch unless the user explicitly overrides either one.
+5. Do not ask for delivery mode or target branch again when the user has not overridden those defaults.
+6. Do not implement before explicit go-ahead (`proceed` or equivalent).
 
 ## 4) Transition to implementation only after go-ahead
 
 1. Move task to in-progress equivalent.
 2. Start manual time tracking policy for the task timeline.
-3. Create/switch to the user-confirmed target branch when branch work is requested.
+3. Create or switch branches only when the user explicitly requests a different branch or `PR-ready` flow.
 4. Implement minimal, scoped changes only.
 5. Preserve existing coding patterns and compatibility.
 

@@ -32,7 +32,9 @@ Always confirm:
 
 - Every new discussion, actionable request, work item, bug, change, follow-up, or implementation discussion must be tracked in a ClickUp task, even if the user did not explicitly ask to create one.
 - Exception: the skill-only execution carve-out above bypasses ClickUp handling completely.
-- Before creating a task, search for an existing strongly matching task and reuse it instead of opening a duplicate.
+- Before creating a task, search for an existing strongly matching task first.
+- If the first or strongest strong match has `created_at` within the last 12 hours, reuse it.
+- If only strong matches older than 12 hours exist, do not write to those stale tasks; create a new task titled `[duplicate] {matched task title}` using the first or strongest stale match title.
 - If no relevant task exists, create one by default without asking whether a task should be created or asking the user to provide a title, description, or target List when routing can be inferred safely.
 - Compose the task title automatically from the request using a short, concrete implementation title.
 - Compose the task description automatically with the request context, current repo/folder, scope, and requested outcome.
@@ -46,7 +48,7 @@ Always confirm:
 - changes spanning more than one of `codeliver-app`, `codeliver-sap`, `codeliver-pos`, `codeliver-panel` -> `codeliver-global-tasks`
 - generic or ambiguous `codeliver` work -> `codeliver-global-tasks`
 - `cloud-repos-panel` -> `cloud-repos-panel`
-- `Cloud Fleet` -> `Cloud Fleet`
+- `cloud-fleet` or `Cloud Fleet` -> `cloud-fleet`
 - `deliveryfleet-pos` only -> `deliveryfleet-pos`
 - `deliveryfleet-app` only -> `deliveryfleet-app`
 - changes spanning both `deliveryfleet-pos` and `deliveryfleet-app` -> `deliveryfleet-global-tasks`
@@ -58,6 +60,10 @@ Always confirm:
 - CodeDeliver-family projects -> space `CoDeliver.io`
 - `cloud-repos-panel` family -> folder `DM / Projects`
 - all other projects -> folder `DM / Projects`
+- Before creating or writing any task in `codeliver-panel`, `codeliver-sap`, `codeliver-pos`, `codeliver-app`, `codeliver-global-tasks`, or `cloud-fleet`, verify that the list still uses this canonical status schema:
+- active: `to do`, `in progress`, `testing`, `update required`, `at risk`, `guidelines`
+- closed: `complete`
+- If any of those lists drift from the canonical schema, restore the canonical statuses before continuing with task writes in that list.
 - Write only on tasks assigned to the requesting user.
 - Treat tasks assigned to others as read-only.
 - Do not change due date, priority, assignees, or move to done/closed unless explicitly requested.
@@ -73,9 +79,9 @@ Always confirm:
 
 - Do not implement before explicit user go-ahead.
 - Exception: skill-only execution requests run directly and do not require delivery-mode, branch, `push only`, or `deploy` questions.
-- Before any code changes, ask delivery mode and branch:
-- `local changes only` or `PR-ready changes`
-- target branch name (create/switch branch only after user confirms)
+- Default to `local changes only` on the current checked-out branch unless the user explicitly says otherwise.
+- Do not ask for delivery mode or target branch again when the user has not overridden those defaults.
+- Create or switch branches only when the user explicitly requests a different branch or `PR-ready changes`.
 - Do not push or deploy without explicit user confirmation.
 - Ask user: `push only` vs `deploy` before release actions.
 
@@ -83,8 +89,9 @@ Always confirm:
 
 - Manual tracking policy applies (record discussion start/end in Europe/Athens, add elapsed entry when work completes).
 - When discussion on an existing task starts, move it to the list-specific `in progress` status (if available) at that time.
+- For the canonical lists above, treat `testing` as the preferred testing-equivalent status and keep `complete` as the only closed status.
 - Do not move task to done/complete/closed without a corresponding time entry.
-- Move completed implementation tasks to testing-equivalent status (often `ΕΛΕΓΧΟΣ` / `ελεγχος`, list-dependent).
+- Move completed implementation tasks in the canonical lists to `testing`; use `ΕΛΕΓΧΟΣ` / `ελεγχος` only for non-canonical lists that actually use that convention.
 - Before any status change, explicitly discover statuses for the task's List (do not assume from other Lists).
 - If the List has `in progress` and testing-equivalent statuses, use them (do not jump directly to `complete`).
 - If a List truly has only terminal flow (for example `to do` + `complete`), ask explicit user confirmation before setting `complete`, and note this limitation in a task comment.
@@ -134,7 +141,7 @@ Skill-only execution requests bypass this workflow and use the carve-out above.
 5. Write concrete implementation plan into ClickUp task description.
 6. At discussion start: set list-specific in-progress status (if available) and start manual timing timeline.
 7. Ask clarifying questions and request explicit go-ahead.
-8. Ask delivery mode (`local changes` vs `PR-ready`) and target branch before editing files.
+8. Assume `local changes only` and the current checked-out branch unless the user explicitly overrides either one.
 9. Implement minimal scoped changes, mirroring existing code style.
 10. Run targeted validation (tests/build/lint as practical).
 11. Ask `push only` vs `deploy`, then execute only what user confirms.

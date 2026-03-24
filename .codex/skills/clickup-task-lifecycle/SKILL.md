@@ -10,18 +10,25 @@ Apply this workflow in order.
 ## 1) Validate task and ownership
 
 1. Treat every new discussion, actionable request, work item, bug, change, follow-up, or implementation discussion as something that must be tracked in ClickUp, even if the user did not explicitly ask to create a task.
-2. Search for an existing strongly matching task first and reuse it instead of creating a duplicate.
-3. If no relevant task exists, create one by default without asking whether a task should be created.
-4. Compose the task title automatically from the request using a short, concrete implementation title.
-5. Compose the task description automatically with the request context, current repo/folder, scope, and requested outcome.
-6. Apply routing in this order:
-   - Use deterministic routing directly for `codeliver-panel`, `codeliver-sap`, `codeliver-pos`, `codeliver-app`, generic `codeliver` work, and `cloud-repos-panel`.
+2. Search for an existing strongly matching task first.
+3. If the first or strongest strong match has `created_at` within the last 12 hours, reuse it.
+4. If only strong matches older than 12 hours exist, do not write to those stale tasks. Create a new task titled `[duplicate] {matched task title}` using the first or strongest stale match title.
+5. If no relevant task exists, create one by default without asking whether a task should be created.
+6. Compose the task title automatically from the request using a short, concrete implementation title.
+7. Compose the task description automatically with the request context, current repo/folder, scope, and requested outcome.
+8. Apply routing in this order:
+   - Use deterministic routing directly for `codeliver-panel`, `codeliver-sap`, `codeliver-pos`, `codeliver-app`, generic `codeliver` work, `cloud-repos-panel`, and `cloud-fleet`.
    - If the repo or project name is different, search ClickUp Lists for exact or close matches based on the request and current repo context.
    - If one plausible List is found, use it directly without asking.
    - If multiple plausible Lists are found, ask only which of those Lists should receive the task.
    - If no plausible List exists, create a new List with the project name. Use space `CoDeliver.io` for CodeDeliver-family projects and folder `DM / Projects` for other families.
-7. Resolve assignee if unclear and ensure the task is assigned to the requesting user before any write.
-8. Treat tasks assigned to other users as read-only.
+9. Resolve assignee if unclear and ensure the task is assigned to the requesting user before any write.
+10. Treat tasks assigned to other users as read-only.
+11. Before creating or writing any task in `codeliver-panel`, `codeliver-sap`, `codeliver-pos`, `codeliver-app`, `codeliver-global-tasks`, or `cloud-fleet`, verify that the list still uses this canonical status schema:
+    - active: `to do`, `in progress`, `testing`, `update required`, `at risk`, `guidelines`
+    - closed: `complete`
+12. Read the actual list status configuration from list metadata or the ClickUp UI/API. Do not infer the full schema only from currently visible task statuses.
+13. If any of those lists drift from the canonical schema, restore the canonical statuses before continuing with task writes in that list.
 
 ## 2) Enforce write safety
 
@@ -35,9 +42,10 @@ Apply this workflow in order.
 2. Mirror task language for ClickUp descriptions/comments.
 3. Inspect list-specific statuses before any status update (never assume from another list/folder/space).
 4. When discussion starts, move the task to list-specific `in progress` if that status exists.
-5. If list has `in progress` and testing-equivalent statuses, use them and avoid direct transition to `complete`.
-6. Use `ΕΛΕΓΧΟΣ`/`ελεγχος` as testing-equivalent when list conventions match.
-7. If list appears to have only `to do` + `complete`, ask explicit user confirmation before `complete`, and document that fallback in a task comment.
+5. For `codeliver-panel`, `codeliver-sap`, `codeliver-pos`, `codeliver-app`, `codeliver-global-tasks`, and `cloud-fleet`, use `testing` as the testing-equivalent status and keep `complete` as the only closed status.
+6. If list has `in progress` and testing-equivalent statuses, use them and avoid direct transition to `complete`.
+7. Use `ΕΛΕΓΧΟΣ`/`ελεγχος` as testing-equivalent only when a non-canonical list actually uses that convention.
+8. If a non-canonical list appears to have only `to do` + `complete`, ask explicit user confirmation before `complete`, and document that fallback in a task comment.
 
 ## 4) Apply timing and transition rules
 
