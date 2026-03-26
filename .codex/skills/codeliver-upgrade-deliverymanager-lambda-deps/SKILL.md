@@ -21,17 +21,22 @@ The skill:
 - requires a post-upgrade code compatibility audit for any upgraded dependency that is actually used at runtime
 - restores the previous repo state if a candidate fails
 - stops with a failure if any package has no compatible version
+- by default runs in place on the repo's current checked-out branch with local changes only
+- treats a plain skill invocation as an explicit request for that in-place mode and should not ask again whether to use `--dry-run`
+- does not create or switch branches, commit, push, or deploy unless the user explicitly asks outside this skill
 
 Eligible dependency specs are standard registry semver specs such as exact (`1.2.3`), caret (`^1.2.3`), and tilde (`~1.2.3`). Non-registry specs such as `file:`, `workspace:`, git URLs, or other unsupported formats are reported as skipped.
 
 ## Run
 
-Default root:
+Default in-place run on the current checked-out branch:
 
 ```bash
 python3 ~/.codex/skills/codeliver-upgrade-deliverymanager-lambda-deps/scripts/main.py \
   --lambda codeliver-panel-login
 ```
+
+When the user invokes this skill without extra flags, run this in-place mode directly. Use `--dry-run` only when the user explicitly requests a temp-copy execution.
 
 Dry run against a temp copy:
 
@@ -61,16 +66,23 @@ python3 ~/.codex/skills/codeliver-upgrade-deliverymanager-lambda-deps/scripts/ma
 
 Compatibility means:
 
-1. `npm install` succeeds
+1. `npm install --strict-peer-deps` succeeds
 2. the best available local validator succeeds
 3. if the dependency is used by the lambda at runtime, a code-level compatibility audit does not reveal an API or behavior break for the repo's actual usage
 4. if the latest version fails, the skill retries progressively older versions until one passes or the package is exhausted
 
 Validator selection:
 
+- always reject candidates that leave an invalid dependency tree by checking `npm ls --depth=0`
+- treat npm peer-conflict warnings such as `ERESOLVE overriding peer dependency` as incompatibility, even when npm exits 0
 - use `npm test` only when `scripts.test` exists and is not a placeholder
 - placeholder examples include `no test specified` and `console.log('no tests')`
-- otherwise run `node --check` on top-level `*.js`, `*.cjs`, and `*.mjs` files
+- otherwise run `node --check` on top-level `*.js`, `*.cjs`, and `*.mjs` files after the dependency-tree check passes
+
+Recovery note for browser-downloading postinstalls:
+
+- If `npm install` stalls inside a transitive Playwright browser download (for example through `nativefier`), retry with `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1`.
+- If the package's postinstall is confirmed to only fetch Playwright test browsers and the target package versions are already present in `node_modules`, a final `npm install --ignore-scripts --no-audit --no-fund` is an acceptable recovery to settle `package-lock.json` and finish validation.
 
 ## Post-upgrade Code Audit
 
@@ -107,6 +119,7 @@ The closeout should explicitly distinguish:
   - `^1.0.6` stays caret-based
   - `~1.0.6` stays tilde-based
   - `1.0.6` stays exact
+- Without `--dry-run`, the skill updates the target repo in place on the currently checked-out branch and leaves all changes local.
 - The skill processes packages in deterministic alphabetical order.
 - On a failed candidate, it restores `package.json` and existing npm lockfiles before trying the next older version.
 - On `--dry-run`, it works on a temp copy and leaves the original repo unchanged.

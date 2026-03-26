@@ -146,20 +146,21 @@
   - `ShowRouteRoutedMapModalComponent`
   - `ShowRouteCompletedMapModalComponent`
 
-## 0.8) Cross-project parity rules (Control Panel: Panel ↔ SAP)
+## 0.8) Cross-project parity rules (Control Panel: Panel ↔ POS)
 
-- Keep these components/lambdas in **lockstep** between `projects/codeliver/codeliver-panel` and `projects/codeliver/codeliver-sap` for Control Panel behavior (UI/logic, HTML/SCSS/global classes and backend validation/behavior):
-  - `projects/codeliver/codeliver-panel/src/app/control-panel/control-panel.page.ts` ↔ `projects/codeliver/codeliver-sap/src/app/shared/modals/show-group-control-panel-modal/show-group-control-panel-modal.component.ts` (parity entry-point)
-  - `projects/codeliver/codeliver-panel/src/app/control-panel/control-panel.page.html` ↔ `projects/codeliver/codeliver-sap/src/app/shared/modals/show-group-control-panel-modal/show-group-control-panel-modal.component.html`
-  - `projects/codeliver/codeliver-panel/src/app/control-panel/control-panel.page.scss` ↔ `projects/codeliver/codeliver-sap/src/app/shared/modals/show-group-control-panel-modal/show-group-control-panel-modal.component.scss`
-  - `projects/codeliver/codeliver-panel/src/app/shared/common/map-route-requests-info-cards/map-route-requests-info-cards.component.ts` ↔ `projects/codeliver/codeliver-sap/src/app/shared/common/map-route-requests-info-cards/map-route-requests-info-cards.component.ts`
-  - `projects/codeliver/codeliver-panel/src/app/shared/common/map-route-requests-info-cards/map-route-requests-info-cards.component.html` ↔ `projects/codeliver/codeliver-sap/src/app/shared/common/map-route-requests-info-cards/map-route-requests-info-cards.component.html`
-  - `projects/codeliver/codeliver-panel/src/app/shared/common/map-route-requests-info-cards/map-route-requests-info-cards.component.scss` ↔ `projects/codeliver/codeliver-sap/src/app/shared/common/map-route-requests-info-cards/map-route-requests-info-cards.component.scss`
-  - `projects/codeliver/codeliver-panel/src/app/shared/modals/show-route-active-map-info-modal/show-route-active-map-info-modal.component.ts` ↔ `projects/codeliver/codeliver-sap/src/app/shared/modals/show-route-active-map-info-modal/show-route-active-map-info-modal.component.ts`
-  - `projects/codeliver/codeliver-panel/src/app/shared/modals/show-route-active-map-info-modal/show-route-active-map-info-modal.component.html` ↔ `projects/codeliver/codeliver-sap/src/app/shared/modals/show-route-active-map-info-modal/show-route-active-map-info-modal.component.html`
-  - `projects/codeliver/codeliver-panel/src/app/shared/modals/show-route-active-map-info-modal/show-route-active-map-info-modal.component.scss` ↔ `projects/codeliver/codeliver-sap/src/app/shared/modals/show-route-active-map-info-modal/show-route-active-map-info-modal.component.scss`
-  - `projects/codeliver/codeliver-panel/src/app/shared/utils/route-path-map-overlays.util.ts` ↔ `projects/codeliver/codeliver-sap/src/app/shared/utils/route-path-map-overlays.util.ts`
-  - `lambdas/codeliver_all/codeliver-panel-fetch-routes` ↔ `lambdas/codeliver_all/codeliver-sap-fetch-routes`
-  - `lambdas/codeliver_all/codeliver-panel-fetch-routes-paths` ↔ `lambdas/codeliver_all/codeliver-sap-fetch-routes-paths`
-  - `lambdas/codeliver_all/codeliver-panel-handle-route` ↔ `lambdas/codeliver_all/codeliver-sap-handle-route`
-  - `lambdas/codeliver_all/codeliver-panel-fetch-delivery-requests` ↔ `lambdas/codeliver_all/codeliver-sap-fetch-delivery-requests` (route-id mode parity)
+- Keep these components/lambdas in **lockstep** between `projects/codeliver/codeliver-panel` and `projects/codeliver/codeliver-pos` for Control Panel behavior (UI/logic, HTML/SCSS/global classes and backend validation/behavior).
+- `codeliver-sap` is intentionally out of this parity set and must not be reintroduced unless explicitly requested in a future policy change.
+  - `projects/codeliver/codeliver-panel/src/app/control-panel/control-panel.page.ts` ↔ `projects/codeliver/codeliver-pos/src/app/control-panel/control-panel.page.ts` (parity entry-point)
+  - `projects/codeliver/codeliver-panel/src/app/control-panel/control-panel.page.html` ↔ `projects/codeliver/codeliver-pos/src/app/control-panel/control-panel.page.html`
+  - `projects/codeliver/codeliver-panel/src/app/control-panel/control-panel.page.scss` ↔ `projects/codeliver/codeliver-pos/src/app/control-panel/control-panel.page.scss`
+  - `projects/codeliver/codeliver-panel/src/app/shared/common/map-route-requests-info-cards/map-route-requests-info-cards.component.ts` ↔ `projects/codeliver/codeliver-pos/src/app/shared/common/map-route-requests-info-cards/map-route-requests-info-cards.component.ts`
+  - `projects/codeliver/codeliver-panel/src/app/shared/common/map-route-requests-info-cards/map-route-requests-info-cards.component.html` ↔ `projects/codeliver/codeliver-pos/src/app/shared/common/map-route-requests-info-cards/map-route-requests-info-cards.component.html`
+  - `projects/codeliver/codeliver-panel/src/app/shared/common/map-route-requests-info-cards/map-route-requests-info-cards.component.scss` ↔ `projects/codeliver/codeliver-pos/src/app/shared/common/map-route-requests-info-cards/map-route-requests-info-cards.component.scss`
+  - `projects/codeliver/codeliver-panel/src/app/shared/modals/show-route-active-map-info-modal/show-route-active-map-info-modal.component.ts` ↔ `projects/codeliver/codeliver-pos/src/app/shared/modals/show-route-active-map-info-modal/show-route-active-map-info-modal.component.ts`
+  - `projects/codeliver/codeliver-panel/src/app/shared/modals/show-route-active-map-info-modal/show-route-active-map-info-modal.component.html` ↔ `projects/codeliver/codeliver-pos/src/app/shared/modals/show-route-active-map-info-modal/show-route-active-map-info-modal.component.html`
+  - `projects/codeliver/codeliver-panel/src/app/shared/modals/show-route-active-map-info-modal/show-route-active-map-info-modal.component.scss` ↔ `projects/codeliver/codeliver-pos/src/app/shared/modals/show-route-active-map-info-modal/show-route-active-map-info-modal.component.scss`
+  - `projects/codeliver/codeliver-panel/src/app/shared/utils/route-path-map-overlays.util.ts` ↔ `projects/codeliver/codeliver-pos/src/app/shared/utils/route-path-map-overlays.util.ts`
+  - `lambdas/codeliver_all/codeliver-panel-fetch-routes` ↔ `lambdas/codeliver_all/codeliver-pos-fetch-routes`
+  - `lambdas/codeliver_all/codeliver-panel-fetch-routes-paths` ↔ `lambdas/codeliver_all/codeliver-pos-fetch-routes-paths`
+  - `lambdas/codeliver_all/codeliver-panel-handle-route` ↔ `lambdas/codeliver_all/codeliver-pos-handle-route`
+  - `lambdas/codeliver_all/codeliver-panel-fetch-delivery-requests` ↔ `lambdas/codeliver_all/codeliver-pos-fetch-delivery-requests` (route-id mode parity)

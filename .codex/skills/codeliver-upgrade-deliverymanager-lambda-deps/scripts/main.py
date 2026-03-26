@@ -63,11 +63,18 @@ class AttemptRecord:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Upgrade one lambda repo's npm dependencies to the newest compatible versions."
+        description=(
+            "Upgrade one lambda repo's npm dependencies to the newest compatible versions. "
+            "Default mode updates the target repo in place on its current checked-out branch."
+        )
     )
     parser.add_argument("--lambda", dest="lambda_name", required=True, help="Exact lambda repo folder name.")
     parser.add_argument("--root", default=str(DEFAULT_ROOT), help=f"Lambda root path. Default: {DEFAULT_ROOT}")
-    parser.add_argument("--dry-run", action="store_true", help="Run on a temp copy and leave the original repo unchanged.")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Run on a temp copy instead of updating the current checked-out branch in place.",
+    )
     parser.add_argument("--json", action="store_true", help="Print a machine-readable JSON report.")
     return parser.parse_args()
 
@@ -160,7 +167,7 @@ def load_package_json(repo_path: Path) -> dict[str, Any]:
 
 def save_package_json(repo_path: Path, payload: dict[str, Any]) -> None:
     with (repo_path / PACKAGE_JSON).open("w", encoding="utf-8") as handle:
-        json.dump(payload, handle, indent=2)
+        json.dump(payload, handle, indent=2, ensure_ascii=False)
         handle.write("\n")
 
 
@@ -244,7 +251,10 @@ def restore_repo_state(repo_path: Path, state: dict[str, bytes | None]) -> None:
 
 
 def install_dependencies(repo_path: Path) -> CommandResult:
-    return run_command(["npm", "install", "--no-audit", "--no-fund"], cwd=repo_path)
+    return run_command(
+        ["npm", "install", "--no-audit", "--no-fund", "--strict-peer-deps"],
+        cwd=repo_path,
+    )
 
 
 def is_meaningful_test(test_script: str | None) -> bool:
@@ -263,17 +273,25 @@ def top_level_js_files(repo_path: Path) -> list[Path]:
 
 
 def validate_repo(repo_path: Path) -> tuple[str, CommandResult]:
+    tree_result = run_command(["npm", "ls", "--depth=0"], cwd=repo_path)
+    if tree_result.returncode != 0:
+        return "npm ls --depth=0", tree_result
+
     package_json = load_package_json(repo_path)
     test_script = ((package_json.get("scripts") or {}) or {}).get("test")
     if isinstance(test_script, str) and is_meaningful_test(test_script):
-        return "npm test", run_command(["npm", "test"], cwd=repo_path)
+        test_result = run_command(["npm", "test"], cwd=repo_path)
+        return "npm ls --depth=0 + npm test", test_result
 
     js_files = top_level_js_files(repo_path)
     if not js_files:
-        return "no-op", CommandResult(command=[], returncode=0, stdout="No top-level JS files found.", stderr="")
+        return (
+            "npm ls --depth=0 + no-op",
+            CommandResult(command=[], returncode=0, stdout="No top-level JS files found.", stderr=""),
+        )
 
     command = ["node", "--check", *[path.name for path in js_files]]
-    return "node --check", run_command(command, cwd=repo_path)
+    return "npm ls --depth=0 + node --check", run_command(command, cwd=repo_path)
 
 
 def update_dependency_spec(repo_path: Path, section: str, package_name: str, version_spec: str) -> None:
@@ -301,6 +319,14 @@ def truncate_output(output: str, limit: int = 4000) -> str:
     return output[:limit].rstrip() + "\n...[truncated]"
 
 
+def has_peer_conflict_warning(result: CommandResult) -> bool:
+    combined = result.combined_output.lower()
+    return (
+        "eresolve overriding peer dependency" in combined
+        or "could not resolve dependency" in combined
+    )
+
+
 def upgrade_one_dependency(repo_path: Path, section: str, package_name: str, original_spec: str) -> dict[str, Any]:
     baseline_state = capture_repo_state(repo_path)
     available_versions = stable_versions_desc(package_name)
@@ -314,7 +340,7 @@ def upgrade_one_dependency(repo_path: Path, section: str, package_name: str, ori
         update_dependency_spec(repo_path, section, package_name, candidate_spec)
 
         install_result = install_dependencies(repo_path)
-        if install_result.returncode != 0:
+        if install_result.returncode != 0 or has_peer_conflict_warning(install_result):
             attempts.append(
                 AttemptRecord(
                     version=version,

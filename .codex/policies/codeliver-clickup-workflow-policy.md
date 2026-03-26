@@ -39,8 +39,8 @@ Always confirm:
 - Compose the task title automatically from the request using a short, concrete implementation title.
 - Compose the task description automatically with the request context, current repo/folder, scope, and requested outcome.
 - Known routing is deterministic and must not trigger an extra List question:
-- All routing rules in this section must be resolved in ClickUp organization workspace `DM` only.
-- Never search, route, or create these tasks under ClickUp workspace `IOANNIS CHOURPOULIADIS`.
+- All routing rules in this section must be resolved in ClickUp organization workspace `DM` by default.
+- Exact matches for `optc-team-builder` and `optc-box-exporter` must be searched, routed, and created only under ClickUp workspace `IOANNIS CHOURPOULIADIS`.
 - `codeliver-panel` only -> `codeliver-panel`
 - `codeliver-sap` only -> `codeliver-sap`
 - `codeliver-pos` only -> `codeliver-pos`
@@ -52,15 +52,18 @@ Always confirm:
 - `deliveryfleet-pos` only -> `deliveryfleet-pos`
 - `deliveryfleet-app` only -> `deliveryfleet-app`
 - changes spanning both `deliveryfleet-pos` and `deliveryfleet-app` -> `deliveryfleet-global-tasks`
+- `optc-team-builder` only -> search/create list in `IOANNIS CHOURPOULIADIS`
+- `optc-box-exporter` only -> search/create list in `IOANNIS CHOURPOULIADIS`
 - For any other project or repo name, extract the likely project identifier from the request or current repo context and search ClickUp Lists for exact or close matches first.
 - If one plausible existing List is found, use it directly without asking.
 - If multiple plausible existing Lists are found, ask only which of those Lists should receive the task.
 - If no plausible List exists, create a new List with the project name.
 - New List creation defaults:
+- `optc-team-builder` and `optc-box-exporter` -> ClickUp organization `IOANNIS CHOURPOULIADIS`
 - CodeDeliver-family projects -> space `CoDeliver.io`
 - `cloud-repos-panel` family -> folder `DM / Projects`
 - all other projects -> folder `DM / Projects`
-- Before creating or writing any task in `codeliver-panel`, `codeliver-sap`, `codeliver-pos`, `codeliver-app`, `codeliver-global-tasks`, or `cloud-fleet`, verify that the list still uses this canonical status schema:
+- Before creating or writing any task in `codeliver-panel`, `codeliver-sap`, `codeliver-pos`, `codeliver-app`, `codeliver-global-tasks`, `cloud-fleet`, `optc-team-builder`, or `optc-box-exporter`, verify that the list still uses this canonical status schema:
 - active: `to do`, `in progress`, `testing`, `update required`, `at risk`, `guidelines`
 - closed: `complete`
 - If any of those lists drift from the canonical schema, restore the canonical statuses before continuing with task writes in that list.

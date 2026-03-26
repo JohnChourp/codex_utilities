@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 DEFAULT_ROOT = str(Path.home() / "Downloads" / "lambdas" / "paneldf_all")
-DEFAULT_OUTPUT = str(Path.home() / "Downloads" / "lambdas" / "paneldf_all" / "outdated-dependencies-report.txt")
+DEFAULT_OUTPUT = str(Path.home() / "Downloads" / "lambdas" / "paneldf_all" / "outdated-dependencies-report.json")
 
 
 def _shared_scripts_dir() -> Path:

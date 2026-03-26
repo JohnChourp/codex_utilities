@@ -1,6 +1,6 @@
 ---
 name: crp-find-outdated-lambda-deps
-description: Scan all local lambda repos under crp_all and write a text report with dependencies and devDependencies that have newer stable npm versions.
+description: Scan all local lambda repos under crp_all and write a JSON report with dependencies and devDependencies that have newer stable npm versions.
 ---
 
 # CRP Find Outdated Lambda Dependencies
@@ -8,7 +8,7 @@ description: Scan all local lambda repos under crp_all and write a text report w
 ## Overview
 
 Scan every direct child repo under `~/Downloads/lambdas/crp_all` that contains a `package.json`.
-Compare `dependencies` and `devDependencies` against the latest stable npm registry version and overwrite a text report with the results.
+Compare `dependencies` and `devDependencies` against the latest stable npm registry version and overwrite a JSON report with the results.
 
 ## Run
 
@@ -27,7 +27,7 @@ Custom output:
 
 ```bash
 python3 ~/.codex/skills/crp-find-outdated-lambda-deps/scripts/main.py \
-  --output /absolute/path/to/report.txt
+  --output /absolute/path/to/report.json
 ```
 
 ## Behavior
@@ -35,6 +35,10 @@ python3 ~/.codex/skills/crp-find-outdated-lambda-deps/scripts/main.py \
 - Scan only direct child repos of the root path.
 - Read `dependencies` and `devDependencies` from each `package.json`.
 - Compare supported semver specs: exact, `^`, and `~`.
+- Write JSON output instead of text.
+- Omit repositories that have neither outdated nor skipped dependencies.
 - Skip non-registry or non-semver specs and list them in the report.
+- For private npm packages such as `@deliverymanager/*`, reuse npm auth from `NODE_AUTH_TOKEN` / `NPM_TOKEN`, then `~/.npmrc.automation`, then `~/.npmrc`.
+- On Ubuntu/Linux machines, if private packages still show `404`, refresh the workstation token with `whc npm-automation set` or `whc u` and rerun the skill.
 - Use live npm registry lookups and do not modify any repo.
-- Overwrite the report file on every run.
+- Overwrite the JSON report file on every run.

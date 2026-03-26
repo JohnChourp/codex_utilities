@@ -18,13 +18,14 @@ Apply this workflow in order.
 7. Compose the task description automatically with the request context, current repo/folder, scope, and requested outcome.
 8. Apply routing in this order:
    - Use deterministic routing directly for `codeliver-panel`, `codeliver-sap`, `codeliver-pos`, `codeliver-app`, generic `codeliver` work, `cloud-repos-panel`, and `cloud-fleet`.
+   - Treat exact matches for `optc-team-builder` and `optc-box-exporter` as `IOANNIS CHOURPOULIADIS`-only routes for list search, reuse, and creation.
    - If the repo or project name is different, search ClickUp Lists for exact or close matches based on the request and current repo context.
    - If one plausible List is found, use it directly without asking.
    - If multiple plausible Lists are found, ask only which of those Lists should receive the task.
-   - If no plausible List exists, create a new List with the project name. Use space `CoDeliver.io` for CodeDeliver-family projects and folder `DM / Projects` for other families.
+   - If no plausible List exists, create a new List with the project name. Use ClickUp organization `IOANNIS CHOURPOULIADIS` for exact matches `optc-team-builder` and `optc-box-exporter`, space `CoDeliver.io` for CodeDeliver-family projects, and folder `DM / Projects` for other families.
 9. Resolve assignee if unclear and ensure the task is assigned to the requesting user before any write.
 10. Treat tasks assigned to other users as read-only.
-11. Before creating or writing any task in `codeliver-panel`, `codeliver-sap`, `codeliver-pos`, `codeliver-app`, `codeliver-global-tasks`, or `cloud-fleet`, verify that the list still uses this canonical status schema:
+11. Before creating or writing any task in `codeliver-panel`, `codeliver-sap`, `codeliver-pos`, `codeliver-app`, `codeliver-global-tasks`, `cloud-fleet`, `optc-team-builder`, or `optc-box-exporter`, verify that the list still uses this canonical status schema:
     - active: `to do`, `in progress`, `testing`, `update required`, `at risk`, `guidelines`
     - closed: `complete`
 12. Read the actual list status configuration from list metadata or the ClickUp UI/API. Do not infer the full schema only from currently visible task statuses.
@@ -42,7 +43,7 @@ Apply this workflow in order.
 2. Mirror task language for ClickUp descriptions/comments.
 3. Inspect list-specific statuses before any status update (never assume from another list/folder/space).
 4. When discussion starts, move the task to list-specific `in progress` if that status exists.
-5. For `codeliver-panel`, `codeliver-sap`, `codeliver-pos`, `codeliver-app`, `codeliver-global-tasks`, and `cloud-fleet`, use `testing` as the testing-equivalent status and keep `complete` as the only closed status.
+5. For `codeliver-panel`, `codeliver-sap`, `codeliver-pos`, `codeliver-app`, `codeliver-global-tasks`, `cloud-fleet`, `optc-team-builder`, and `optc-box-exporter`, use `testing` as the testing-equivalent status and keep `complete` as the only closed status.
 6. If list has `in progress` and testing-equivalent statuses, use them and avoid direct transition to `complete`.
 7. Use `ΕΛΕΓΧΟΣ`/`ελεγχος` as testing-equivalent only when a non-canonical list actually uses that convention.
 8. If a non-canonical list appears to have only `to do` + `complete`, ask explicit user confirmation before `complete`, and document that fallback in a task comment.

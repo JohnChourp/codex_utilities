@@ -39,5 +39,6 @@ Load this policy when the user asks to run an existing local utility/debug skill
 ## Validation and escalation
 
 - Prefer the skill's existing defaults and only pass extra flags when the user asked for them or local context makes them necessary.
+- If a skill documents `in-place` as its default mode, treat that as the required execution mode for a plain skill invocation. Do not ask the user to choose between `in-place` and `--dry-run` unless they explicitly ask for `--dry-run` or a temp-copy run.
 - If execution fails after reasonable recovery attempts, report the concrete blocker and the shortest useful next action.
 - If the user then asks to modify the skill, repo code, or global workflow, switch back to the normal implementation workflow and re-enable the usual gates.
