@@ -39,6 +39,7 @@ ENDPOINTS = _build_endpoints(DEFAULT_API_ROUTE_PREFIX)
 
 TOKEN_HEADER = "authorization"
 DEFAULT_CONFIG_PATH = Path.home() / ".codeliver" / "config.json"
+CRP_CONFIG_PATH = Path.home() / ".crp" / "config.json"
 DEFAULT_PROJECT_NAME = "codeliver"
 DEFAULT_NAME_CONTAINS = "codeliver-"
 DEFAULT_SPECIAL_REPOS = ["codeliver-sap", "codeliver-panel", "codeliver-pos", "codeliver-app", "codeliver-cost-wizard-react", "codeliver-website", "codeliver-integration-partners", "codeliver-partners-panel", "codeliver-io"]
@@ -69,6 +70,14 @@ class LocalSyncResult:
     local_status: str
     details: str
     fallback_used: bool = False
+
+
+class ApiHttpError(RuntimeError):
+    def __init__(self, code: int, url: str, payload: str):
+        self.code = code
+        self.url = url
+        self.payload = payload
+        super().__init__(f"HTTP {code} {url}: {payload}")
 
 
 def _read_json(path: Path) -> Any:
@@ -123,6 +132,22 @@ def _compact_err(run: subprocess.CompletedProcess[str], fallback: str) -> str:
     return one_line[:600]
 
 
+def _normalize_route_prefix(value: str) -> str:
+    return (value or DEFAULT_API_ROUTE_PREFIX).strip().lower() or DEFAULT_API_ROUTE_PREFIX
+
+
+def _resolve_default_config_path(route_prefix: str) -> Path:
+    normalized = _normalize_route_prefix(route_prefix)
+    if normalized == "crp":
+        return CRP_CONFIG_PATH
+    return DEFAULT_CONFIG_PATH
+
+
+def _looks_like_github_pat(token: str) -> bool:
+    lowered = (token or "").strip().lower()
+    return lowered.startswith(("ghp_", "github_pat_"))
+
+
 def _http_post(url: str, body: dict[str, Any], token: str, timeout: int = 25) -> Any:
     raw = json.dumps(body).encode("utf-8")
     req = urllib.request.Request(
@@ -140,7 +165,25 @@ def _http_post(url: str, body: dict[str, Any], token: str, timeout: int = 25) ->
             return json.loads(resp.read().decode("utf-8"))
     except urllib.error.HTTPError as exc:
         payload = exc.read().decode("utf-8", errors="replace")
-        raise RuntimeError(f"HTTP {exc.code} {url}: {payload}") from exc
+        raise ApiHttpError(exc.code, url, payload) from exc
+    except urllib.error.URLError as exc:
+        reason = getattr(exc, "reason", exc)
+        raise RuntimeError(f"Network error {url}: {reason}") from exc
+
+
+def _load_config(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        return {}
+    raw = _read_json(path)
+    return raw if isinstance(raw, dict) else {}
+
+
+def _extract_config_token(cfg: dict[str, Any]) -> str:
+    return str(((cfg.get("api") or {}).get("auth") or {}).get("token") or "").strip()
+
+
+def _crp_auth_guidance() -> str:
+    return "Run: crp token renew || crp login"
 
 
 def _select_project(cfg: dict[str, Any], token: str, project_name: str, project_id: str) -> tuple[str, str]:
@@ -617,7 +660,7 @@ def _parse_special_repos(raw: str) -> list[str]:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Sync Codeliver cloud repos and local repositories")
-    parser.add_argument("--config", default=str(DEFAULT_CONFIG_PATH))
+    parser.add_argument("--config", default="")
     parser.add_argument("--api-route-prefix", default=os.getenv("API_ROUTE_PREFIX", DEFAULT_API_ROUTE_PREFIX))
     parser.add_argument("--project-name", default=DEFAULT_PROJECT_NAME)
     parser.add_argument("--project-id", default="")
@@ -639,22 +682,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def main() -> int:
-    global ENDPOINTS
-    args = parse_args()
-    ENDPOINTS = _build_endpoints(args.api_route_prefix)
-
-    cfg_path = Path(args.config).expanduser().resolve()
-    if not cfg_path.exists():
-        print(f"ERROR: config not found: {cfg_path}", file=sys.stderr)
-        return 2
-
-    cfg = _read_json(cfg_path)
-    token = str(((cfg.get("api") or {}).get("auth") or {}).get("token") or "").strip()
-    if not token:
-        print("ERROR: token missing. Run `codeliver login`.", file=sys.stderr)
-        return 2
-
+def _run_sync(args: argparse.Namespace, cfg: dict[str, Any], token: str) -> int:
     project_id, project_name = _select_project(cfg, token, args.project_name, args.project_id)
     github_org = _resolve_github_org(cfg, token, args.github_org)
     if not github_org:
@@ -965,6 +993,51 @@ def main() -> int:
     print(f"All cloud repos from features: {all_cloud_repos_out}")
     print(f"Report: {out_path}")
     return 0
+
+
+def main() -> int:
+    global ENDPOINTS
+    args = parse_args()
+    ENDPOINTS = _build_endpoints(args.api_route_prefix)
+
+    config_arg = (args.config or "").strip()
+    if config_arg:
+        cfg_path = Path(config_arg).expanduser().resolve()
+    else:
+        cfg_path = _resolve_default_config_path(args.api_route_prefix).expanduser().resolve()
+
+    cfg = _load_config(cfg_path)
+
+    try:
+        token = _extract_config_token(cfg)
+        if not token:
+            print(f"ERROR: token missing in {cfg_path}. Run: crp login", file=sys.stderr)
+            return 2
+        if _looks_like_github_pat(token):
+            print(
+                f"ERROR: config token looks like a GitHub PAT, not a CRP API token: {cfg_path}. Run: crp login",
+                file=sys.stderr,
+            )
+            return 2
+        return _run_sync(args, cfg, token)
+    except ApiHttpError as exc:
+        if exc.code == 401:
+            print(
+                f"ERROR: API token was rejected with 401 Unauthorized by {exc.url}. {_crp_auth_guidance()}",
+                file=sys.stderr,
+            )
+            return 1
+        print(str(exc), file=sys.stderr)
+        return 1
+    except RuntimeError as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+    except KeyboardInterrupt:
+        print("ERROR: Cancelled by user.", file=sys.stderr)
+        return 130
+    except Exception as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":

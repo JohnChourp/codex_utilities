@@ -1,6 +1,6 @@
 ---
 name: implementation-gate
-description: Enforce pre-implementation planning, ambiguity cleanup, and explicit go-ahead before coding. Use when a task needs architecture scouting, concrete implementation planning, user confirmation, and controlled transition into active development.
+description: Enforce pre-implementation planning, ambiguity cleanup, and explicit go-ahead before coding tasks. Use for implementation work, not simple Q&A or read-only analysis.
 ---
 
 # Implementation Gate
@@ -16,24 +16,21 @@ Follow this gate before coding.
    - Persist values that must survive refresh/devices or historical views.
    - Compute UI-only derived values when safe.
 
-## 2) Write implementation plan into ClickUp description
+## 2) Pick a plan mode before writing to ClickUp
 
-Include all:
-1. Goal and scope (`frontend`, `backend`, `both`).
-2. Data model changes (type/nullability).
-3. Source-of-truth writer/reader.
-4. Contract changes (API/events/websocket).
-5. UX behavior and edge cases.
-6. i18n keys and language coverage.
-7. Acceptance criteria.
-8. Test plan (automated + manual).
-9. Release plan (push-only vs deploy and environments).
+1. Default to the smallest useful mode:
+   - `small`: low-risk work, no schema/infra changes
+   - `medium`: moderate change, limited risk
+   - `large/risky`: schema, infra, multi-repo, broad refactor, or unclear/high-risk work
+2. Use the compact templates in `docs/CLICKUP_COMPACT_TEMPLATES.md`.
+3. Do not write a full implementation plan unless the task is `large/risky`.
+4. Do not restate unchanged requirements, repo context, or acceptance criteria.
 
 ## 3) Resolve ambiguity and request explicit confirmation
 
-1. Ask clarifying questions before implementation.
+1. Ask clarifying questions only when ambiguity or risk requires it.
 2. Paste a short, scannable plan to user.
-3. Ask user to review ClickUp plan and explicitly confirm.
+3. Ask user to review the ClickUp plan and explicitly confirm.
 4. Assume delivery mode `local changes only` and the current checked-out branch unless the user explicitly overrides either one.
 5. Do not ask for delivery mode or target branch again when the user has not overridden those defaults.
 6. Do not implement before explicit go-ahead (`proceed` or equivalent).

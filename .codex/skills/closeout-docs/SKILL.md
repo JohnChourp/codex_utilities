@@ -1,6 +1,6 @@
 ---
 name: closeout-docs
-description: Complete end-of-task closeout with ClickUp updates, testing-status transitions, and concise delivery summaries. Use when implementation or discussion work is done and task closure artifacts must be recorded consistently.
+description: Complete end-of-task closeout with ClickUp updates, testing-status transitions, and minimal brief summaries. Use when implementation or discussion work is done and closeout artifacts must be recorded.
 ---
 
 # Closeout Docs
@@ -10,14 +10,14 @@ Use this closeout sequence when work is complete.
 ## 1) Final ClickUp status and notes
 
 1. Discover the task List statuses before transition (do not assume names from another list).
-2. If testing-equivalent exists (e.g. `ΕΛΕΓΧΟΣ`/`ελεγχος`), move task there.
-3. If list has explicit `in progress`, ensure implementation work is not skipped directly to `complete`.
-4. If list truly has only `to do` + `complete`, ask explicit user confirmation before `complete` and record this fallback in a comment.
-5. Add a concise implementation comment covering:
-   - repos/files touched
-   - key behavior changes
-   - tests/validation run
-   - follow-ups or known limits
+2. Move the task to `testing` and keep `complete` as the only closed status.
+3. If one of the required statuses is missing, do not modify the list automatically; stop and ask the user.
+4. Ensure implementation work is not skipped directly from `in progress` to `complete`.
+5. Add the smallest useful implementation comment using:
+   - `Changed:`
+   - `Validated:`
+   - `Next:`
+6. When follow-ups or limits materially affect the handoff, append one short extra line after `Next:` instead of replacing the compact format.
 
 ## 2) Final completion note
 
@@ -33,8 +33,16 @@ Provide a concise summary with:
 2. What was pushed (if anything).
 3. What was deployed (if anything, and where).
 4. What ClickUp updates were made (status/time entry/comment).
+5. Which ClickUp List the task belongs to.
 
-## 4) Optional ClickUp Doc step
+## 4) Concern comment fallback
+
+Use this when work is blocked or risky:
+1. `Issue:`
+2. `Impact:`
+3. `Need:`
+
+## 5) Optional ClickUp Doc step
 
 After implementation and validation, ask whether to create a ClickUp Doc:
 1. How-to doc for non-dev users.

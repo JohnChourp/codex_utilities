@@ -17,25 +17,26 @@ Apply this workflow in order.
 6. Compose the task title automatically from the request using a short, concrete implementation title.
 7. Compose the task description automatically with the request context, current repo/folder, scope, and requested outcome.
 8. Apply routing in this order:
-   - Use deterministic routing directly for `codeliver-panel`, `codeliver-sap`, `codeliver-pos`, `codeliver-app`, generic `codeliver` work, `cloud-repos-panel`, and `cloud-fleet`.
-   - Treat exact matches for `optc-team-builder` and `optc-box-exporter` as `IOANNIS CHOURPOULIADIS`-only routes for list search, reuse, and creation.
-   - If the repo or project name is different, search ClickUp Lists for exact or close matches based on the request and current repo context.
-   - If one plausible List is found, use it directly without asking.
-   - If multiple plausible Lists are found, ask only which of those Lists should receive the task.
-   - If no plausible List exists, create a new List with the project name. Use ClickUp organization `IOANNIS CHOURPOULIADIS` for exact matches `optc-team-builder` and `optc-box-exporter`, space `CoDeliver.io` for CodeDeliver-family projects, and folder `DM / Projects` for other families.
+   - if the active workflow or local policy provides deterministic routing for the repo or project family, use it directly
+   - otherwise search ClickUp Lists for exact or close matches based on the request and current repo context
+   - if one plausible List is found, use it directly without asking
+   - if multiple plausible Lists are found, ask only which of those Lists should receive the task
+   - if no plausible List exists, create a new List with the project name in the workspace's default project folder or space
 9. Resolve assignee if unclear and ensure the task is assigned to the requesting user before any write.
 10. Treat tasks assigned to other users as read-only.
-11. Before creating or writing any task in `codeliver-panel`, `codeliver-sap`, `codeliver-pos`, `codeliver-app`, `codeliver-global-tasks`, `cloud-fleet`, `optc-team-builder`, or `optc-box-exporter`, verify that the list still uses this canonical status schema:
-    - active: `to do`, `in progress`, `testing`, `update required`, `at risk`, `guidelines`
+11. Verify that the task List exposes exactly these statuses:
+    - active: `to do`, `at risk`, `in progress`, `testing`
     - closed: `complete`
-12. Read the actual list status configuration from list metadata or the ClickUp UI/API. Do not infer the full schema only from currently visible task statuses.
-13. If any of those lists drift from the canonical schema, restore the canonical statuses before continuing with task writes in that list.
+12. Read the actual list status configuration from list metadata or the ClickUp UI/API. Do not infer the schema only from currently visible task statuses.
+13. If one of the required statuses is missing, do not modify the list automatically; stop and ask the user.
 
 ## 2) Enforce write safety
 
 1. Write only on tasks assigned to the requesting user.
 2. Do not change due date, priority, assignees, or move to done/closed unless explicitly requested.
 3. Use ClickUp `@Display Name` mention syntax when notification intent exists.
+4. Keep ClickUp text compact by default using `docs/CLICKUP_COMPACT_TEMPLATES.md`.
+5. Prefer fixed templates over narrative prose.
 
 ## 3) Keep language and status policy consistent
 
@@ -43,10 +44,8 @@ Apply this workflow in order.
 2. Mirror task language for ClickUp descriptions/comments.
 3. Inspect list-specific statuses before any status update (never assume from another list/folder/space).
 4. When discussion starts, move the task to list-specific `in progress` if that status exists.
-5. For `codeliver-panel`, `codeliver-sap`, `codeliver-pos`, `codeliver-app`, `codeliver-global-tasks`, `cloud-fleet`, `optc-team-builder`, and `optc-box-exporter`, use `testing` as the testing-equivalent status and keep `complete` as the only closed status.
-6. If list has `in progress` and testing-equivalent statuses, use them and avoid direct transition to `complete`.
-7. Use `ΕΛΕΓΧΟΣ`/`ελεγχος` as testing-equivalent only when a non-canonical list actually uses that convention.
-8. If a non-canonical list appears to have only `to do` + `complete`, ask explicit user confirmation before `complete`, and document that fallback in a task comment.
+5. Use `testing` as the only testing status and keep `complete` as the only closed status.
+6. Use `in progress` before `testing`, and avoid direct transition to `complete` unless the user explicitly asks.
 
 ## 4) Apply timing and transition rules
 
@@ -57,7 +56,7 @@ Apply this workflow in order.
    - `start`: now in Europe/Athens
    - `duration`: computed elapsed minutes
 5. Avoid moving tasks to done/closed without a corresponding time entry.
-6. Prefer moving completed implementation work to testing-equivalent; use `complete` only when list flow requires it and user explicitly confirms.
+6. Prefer moving completed implementation work to `testing`; use `complete` only when the user explicitly confirms.
 
 ## 5) Use these core MCP operations
 
@@ -67,3 +66,16 @@ Apply this workflow in order.
 4. Update status/fields: `clickup_update_task`.
 5. Add summary/fallback note comment: `clickup_create_task_comment`.
 6. Add elapsed manual entry: `clickup_add_time_entry`.
+
+## 6) Comment size defaults
+
+1. Work-done comments should default to:
+   - `Changed:`
+   - `Validated:`
+   - `Next:`
+2. Concern/blocker comments should default to:
+   - `Issue:`
+   - `Impact:`
+   - `Need:`
+3. Keep comments brief and direct.
+4. Do not restate unchanged context.

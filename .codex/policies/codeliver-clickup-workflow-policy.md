@@ -63,10 +63,10 @@ Always confirm:
 - CodeDeliver-family projects -> space `CoDeliver.io`
 - `cloud-repos-panel` family -> folder `DM / Projects`
 - all other projects -> folder `DM / Projects`
-- Before creating or writing any task in `codeliver-panel`, `codeliver-sap`, `codeliver-pos`, `codeliver-app`, `codeliver-global-tasks`, `cloud-fleet`, `optc-team-builder`, or `optc-box-exporter`, verify that the list still uses this canonical status schema:
-- active: `to do`, `in progress`, `testing`, `update required`, `at risk`, `guidelines`
+- Before creating or writing any task in `codeliver-panel`, `codeliver-sap`, `codeliver-pos`, `codeliver-app`, `codeliver-global-tasks`, `cloud-fleet`, `optc-team-builder`, or `optc-box-exporter`, verify that the list exposes exactly these statuses:
+- active: `to do`, `at risk`, `in progress`, `testing`
 - closed: `complete`
-- If any of those lists drift from the canonical schema, restore the canonical statuses before continuing with task writes in that list.
+- If one of the required statuses is missing, do not modify the list automatically; stop and ask the user.
 - Write only on tasks assigned to the requesting user.
 - Treat tasks assigned to others as read-only.
 - Do not change due date, priority, assignees, or move to done/closed unless explicitly requested.
@@ -92,12 +92,11 @@ Always confirm:
 
 - Manual tracking policy applies (record discussion start/end in Europe/Athens, add elapsed entry when work completes).
 - When discussion on an existing task starts, move it to the list-specific `in progress` status (if available) at that time.
-- For the canonical lists above, treat `testing` as the preferred testing-equivalent status and keep `complete` as the only closed status.
+- For the lists above, use `testing` as the only testing status and keep `complete` as the only closed status.
 - Do not move task to done/complete/closed without a corresponding time entry.
-- Move completed implementation tasks in the canonical lists to `testing`; use `ΕΛΕΓΧΟΣ` / `ελεγχος` only for non-canonical lists that actually use that convention.
+- Move completed implementation tasks to `testing`.
 - Before any status change, explicitly discover statuses for the task's List (do not assume from other Lists).
-- If the List has `in progress` and testing-equivalent statuses, use them (do not jump directly to `complete`).
-- If a List truly has only terminal flow (for example `to do` + `complete`), ask explicit user confirmation before setting `complete`, and note this limitation in a task comment.
+- Use `in progress` before `testing`, and do not jump directly to `complete` unless the user explicitly asks.
 
 ## 3) Skill routing (primary execution path)
 
@@ -148,7 +147,7 @@ Skill-only execution requests bypass this workflow and use the carve-out above.
 9. Implement minimal scoped changes, mirroring existing code style.
 10. Run targeted validation (tests/build/lint as practical).
 11. Ask `push only` vs `deploy`, then execute only what user confirms.
-12. Move task to testing-equivalent status (if available), add change summary comment, and log time entry.
+12. Move task to `testing`, add change summary comment, and log time entry.
 13. Provide concise final summary to user.
 
 ## 5) ClickUp MCP quick fallback

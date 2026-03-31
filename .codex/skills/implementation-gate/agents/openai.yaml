@@ -1,4 +1,4 @@
 interface:
   display_name: "Implementation Gate"
-  short_description: "Require plan, clarification, and explicit go-ahead."
-  default_prompt: "Use this skill to enforce architecture scouting, ClickUp planning, and approval before implementation."
+  short_description: "Require staged planning and explicit go-ahead for coding tasks."
+  default_prompt: "Use this skill for coding tasks to choose a small, medium, or large ClickUp plan, resolve ambiguity only when needed, and require approval before implementation."

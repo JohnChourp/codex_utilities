@@ -1,0 +1,4 @@
+interface:
+  display_name: "Testing Review"
+  short_description: "Run a fresh post-implementation review with optional live validation."
+  default_prompt: "Use this skill when the user wants an independent review pass on a completed branch, diff, or testing-stage task before signoff. Collect evidence first, apply relevant repo style skills after inspecting the changed files, report findings by severity with file references, and run live tests only when explicitly approved."

@@ -10,9 +10,12 @@ DEFAULT_TARGET_REPOS_FILE="${DEFAULT_CLONE_ROOT}/current-codeliver-target-repos.
 DEFAULT_CLOUD_REPORT_FILE="${DEFAULT_CLONE_ROOT}/codeliver-cloud-repos-sync-report.json"
 DEFAULT_PROJECT_REPOS_LIST_TXT="${DEFAULT_CLONE_ROOT}/current-codeliver-project-repos-full-list.txt"
 DEFAULT_PROJECT_REPOS_LIST_JSON="${DEFAULT_CLONE_ROOT}/current-codeliver-project-repos-full-list.json"
+DEFAULT_API_ROUTE_PREFIX="crp"
 DEFAULT_PROJECTS_ROOT="${DOWNLOADS_DIR}/projects"
 DEFAULT_PROJECTS_CODELIVER_ROOT="${DEFAULT_PROJECTS_ROOT}/codeliver"
 DEFAULT_SYNC_REPORT_DIR="${DOWNLOADS_DIR}/lambdas/_sync_reports"
+DEFAULT_CODELIVER_CONFIG_PATH="${HOME}/.codeliver/config.json"
+DEFAULT_CRP_CONFIG_PATH="${HOME}/.crp/config.json"
 
 temp_files=()
 temp_dirs=()
@@ -68,6 +71,32 @@ resolve_projects_root() {
   printf "%s\n" "$DEFAULT_PROJECTS_ROOT"
 }
 
+normalize_api_route_prefix() {
+  local prefix="${1:-$DEFAULT_API_ROUTE_PREFIX}"
+  prefix="${prefix,,}"
+  if [[ -z "$prefix" ]]; then
+    prefix="$DEFAULT_API_ROUTE_PREFIX"
+  fi
+  printf "%s\n" "$prefix"
+}
+
+resolve_api_config_path() {
+  local route_prefix
+  route_prefix="$(normalize_api_route_prefix "${1:-}")"
+
+  if [[ "$route_prefix" == "crp" ]]; then
+    printf "%s\n" "$DEFAULT_CRP_CONFIG_PATH"
+    return 0
+  fi
+
+  printf "%s\n" "$DEFAULT_CODELIVER_CONFIG_PATH"
+}
+
+looks_like_github_pat() {
+  local token="${1:-}"
+  [[ "$token" == ghp_* || "$token" == github_pat_* ]]
+}
+
 extract_config_token() {
   local cfg="$1"
   local token=""
@@ -110,15 +139,22 @@ PY
 }
 
 bootstrap_codeliver_config_if_possible() {
-  local cfg="${HOME}/.codeliver/config.json"
+  local cfg="$1"
   local token="${CODELIVER_AUTH_TOKEN:-}"
   local py=""
+
+  if [[ "$cfg" != "$DEFAULT_CODELIVER_CONFIG_PATH" ]]; then
+    return 1
+  fi
 
   if extract_config_token "$cfg" >/dev/null 2>&1; then
     return 0
   fi
 
   if [[ -z "$token" ]]; then
+    return 1
+  fi
+  if looks_like_github_pat "$token"; then
     return 1
   fi
 
@@ -269,7 +305,7 @@ select_python() {
 }
 
 refresh_codeliver_project_repo_lists() {
-  local cfg="${HOME}/.codeliver/config.json"
+  local cfg="$1"
   local api="https://mpq5pzhhv2.execute-api.eu-west-1.amazonaws.com/prod"
   local token project_id project_name tmp_json tmp_projects projects_response
 
@@ -281,6 +317,10 @@ refresh_codeliver_project_repo_lists() {
   token="$(jq -r '.api.auth.token // ""' "$cfg")"
   if [[ -z "$token" ]]; then
     echo "WARN: Codeliver token missing, skipping project repo list refresh." >&2
+    return 0
+  fi
+  if looks_like_github_pat "$token"; then
+    echo "WARN: Config token looks like GitHub PAT, skipping project repo list refresh." >&2
     return 0
   fi
 
@@ -446,15 +486,16 @@ resolved_projects_root="$(resolve_projects_root)"
 effective_api_route_prefix="$(get_cloud_arg_value "--api-route-prefix" "${API_ROUTE_PREFIX:-crp}")"
 API_ROUTE_PREFIX="$effective_api_route_prefix"
 export API_ROUTE_PREFIX
+resolved_config_path="$(resolve_api_config_path "$effective_api_route_prefix")"
 
 if [[ ${mode_cloud_link_clone} -eq 1 ]]; then
-  cfg="${HOME}/.codeliver/config.json"
-  bootstrap_codeliver_config_if_possible || true
+  cfg="$resolved_config_path"
+  bootstrap_codeliver_config_if_possible "$cfg" || true
 
   if extract_config_token "$cfg" >/dev/null 2>&1; then
     py_bin="$(select_python)"
     echo "Using python interpreter: ${py_bin}"
-    cloud_cmd=("${py_bin}" "${CODELIVER_CLOUD_SCRIPT}" --repos-list-out "$target_repos_file")
+    cloud_cmd=("${py_bin}" "${CODELIVER_CLOUD_SCRIPT}" --config "$cfg" --repos-list-out "$target_repos_file")
     if [[ ${user_provided_cloud_out} -eq 0 ]]; then
       cloud_cmd+=(--out "$cloud_report_out")
     fi
@@ -483,10 +524,10 @@ if [[ ${mode_cloud_link_clone} -eq 1 ]]; then
     fi
   else
     if [[ ${seen_only_cloud_link_clone} -eq 1 ]]; then
-      echo "ERROR: Missing ~/.codeliver/config.json token (or CODELIVER_AUTH_TOKEN). Cloud-link stage requires authentication." >&2
+      echo "ERROR: Missing valid auth token in ${cfg}. Cloud-link stage requires authentication." >&2
       exit 2
     fi
-    echo "WARN: Missing ~/.codeliver/config.json token. Skipping cloud-link stage and falling back to local-only sync." >&2
+    echo "WARN: Missing valid auth token in ${cfg}. Skipping cloud-link stage and falling back to local-only sync." >&2
     build_local_target_repo_list "$target_repos_file"
   fi
 fi
@@ -502,7 +543,7 @@ if [[ ${mode_sync} -eq 1 ]]; then
 fi
 
 if [[ ${generated_feature_cloud_repos_file} -eq 0 ]]; then
-  refresh_codeliver_project_repo_lists
+  refresh_codeliver_project_repo_lists "$resolved_config_path"
 else
   echo "Wrote: $DEFAULT_PROJECT_REPOS_LIST_JSON"
 fi

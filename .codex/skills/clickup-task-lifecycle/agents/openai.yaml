@@ -1,4 +1,4 @@
 interface:
   display_name: "ClickUp Task Lifecycle"
-  short_description: "Run safe ClickUp task handling and time/status workflow."
-  default_prompt: "Use this skill to manage ClickUp task ownership, write-safety, statuses, and time-entry rules."
+  short_description: "Run safe ClickUp task handling with compact updates."
+  default_prompt: "Use this skill for ClickUp task writes, statuses, and time-entry rules while keeping plans and comments compact."

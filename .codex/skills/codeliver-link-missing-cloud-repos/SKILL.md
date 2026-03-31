@@ -35,8 +35,13 @@ Default behavior:
 
 ## Auth + non-blocking behavior
 
-- Cloud-link stage requires auth token at `~/.codeliver/config.json` (`api.auth.token`).
-- If `~/.codeliver/config.json` is missing/empty but env var `CODELIVER_AUTH_TOKEN` exists, the orchestrator auto-bootstraps/updates `~/.codeliver/config.json` before cloud stage.
+- Cloud-link stage resolves auth config by API route prefix:
+  - `crp-*` endpoints use `~/.crp/config.json`
+  - other prefixes use `~/.codeliver/config.json`
+- For `crp-*` endpoints this means the skill uses the DM/CRP organization credentials by default.
+- If the selected config is `~/.codeliver/config.json` and it is missing/empty while env var `CODELIVER_AUTH_TOKEN` exists, the orchestrator auto-bootstraps/updates `~/.codeliver/config.json` before cloud stage.
+- Tokens that look like GitHub PATs (`ghp_...`, `github_pat_...`) are rejected as invalid API auth tokens.
+- If the cloud API returns `401 Unauthorized`, rerun `crp token renew` or `crp login` and then retry the skill.
 - If auth is still missing:
   - default run (`codeliver_all.sh`) does **not** block; it skips cloud-link and falls back to local-only sync using discovered local `codeliver-*` repos.
   - explicit cloud-only run (`--only-cloud-link-clone`) fails fast with a clear auth error.
