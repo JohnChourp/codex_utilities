@@ -38,6 +38,14 @@ Always provide:
   - `rg -n "DynamoDB|DocumentClient|PutCommand|UpdateCommand|QueryCommand|ScanCommand|S3" /home/dm-soft-1/Downloads/lambdas`
   - `rg -n "<topic-or-queue-or-event-or-table-name>" /home/dm-soft-1/Downloads/lambdas /home/dm-soft-1/Downloads/projects`
 
+## Mandatory validation before closeout
+
+- For every changed lintable source file inside `$HOME/Downloads/projects`, run `npx eslint <changed-file>` from the relevant project root before considering the task done.
+- Prefer the project's own `eslint.config.*` or `.eslintrc*`; if the project has no local ESLint config, use the shared fallback at `$HOME/Downloads/projects/eslint.config.mjs`.
+- Do not treat a successful `ionic build`, Angular compile, or TypeScript compile as sufficient on its own; ESLint must also pass for the changed files.
+- Treat `no-undef`, unresolved imports, and similar static-analysis failures as required fixes, not optional warnings.
+- Keep the repo's targeted validation too, such as `npm test`, `npm run lint`, or the narrowest relevant build/test command, when it is available and relevant to the touched files.
+
 ## Frontend-to-lambda mapping policy
 
 - Source of truth: `.codex/refs/codeliver-*-lambdas.md`

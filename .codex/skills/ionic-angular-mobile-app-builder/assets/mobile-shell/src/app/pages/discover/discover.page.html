@@ -13,16 +13,19 @@
       <div class="section-label">Screen two</div>
       <h1 class="section-title">__DISCOVERY_TITLE__</h1>
       <p class="section-copy">
-        This screen is a starter pattern for feature exploration, curated content, and guided actions.
+        This screen is a starter pattern for feature exploration, curated
+        content, and guided actions.
       </p>
     </section>
 
     <section class="discover-grid">
-      <article class="discover-card glass-card" *ngFor="let card of cards">
+      @for (card of cards; track card.title) {
+      <article class="discover-card glass-card">
         <ion-icon [icon]="card.icon"></ion-icon>
         <h2>{{ card.title }}</h2>
         <p>{{ card.copy }}</p>
       </article>
+      }
     </section>
   </div>
 </ion-content>

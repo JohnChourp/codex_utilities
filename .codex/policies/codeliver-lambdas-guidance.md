@@ -37,6 +37,13 @@ Use this policy file when the task is lambda-first or lambda-only.
 - Validate integration edges from code/IaC (never guess resource names, keys, env vars, IAM).
 - Keep fixes minimal and style-consistent.
 
+## Mandatory validation before closeout
+
+- For every changed JavaScript file inside `$HOME/Downloads/lambdas`, run `npx eslint <changed-file.js>` from within the lambda tree before considering the task done.
+- Use the shared config discovered from `$HOME/Downloads/lambdas/eslint.config.mjs`; do not skip lint just because `node -c` or the package test script passes.
+- Treat `no-undef`, removed helper references, and similar static-analysis failures as required fixes, not optional warnings.
+- Keep the repo's lightweight validation too, such as `npm test` or the package `test` script, when it is available and relevant to the touched files.
+
 ## Playbooks and refs usage
 
 - Never guess DynamoDB keys/indexes; use:

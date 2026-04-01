@@ -13,22 +13,26 @@
       <div class="section-label">Screen three</div>
       <h1 class="section-title">__PROFILE_TITLE__</h1>
       <p class="section-copy">
-        Use this starter screen for settings, account state, saved items, or personalization flows.
+        Use this starter screen for settings, account state, saved items, or
+        personalization flows.
       </p>
     </section>
 
     <ion-list class="settings-list glass-card" lines="none">
-      <ion-item *ngFor="let preference of preferences">
+      @for (preference of preferences; track preference.title) {
+      <ion-item>
         <ion-label>
           <h2>{{ preference.title }}</h2>
           <p>{{ preference.detail }}</p>
         </ion-label>
         <ion-toggle [checked]="preference.enabled" slot="end"></ion-toggle>
       </ion-item>
+      }
     </ion-list>
 
     <ion-note>
-      The generated app shell is intentionally small. Replace these placeholders with real flows instead of expanding them ad hoc in templates.
+      The generated app shell is intentionally small. Replace these placeholders
+      with real flows instead of expanding them ad hoc in templates.
     </ion-note>
   </div>
 </ion-content>

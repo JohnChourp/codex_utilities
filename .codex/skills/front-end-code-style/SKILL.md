@@ -18,12 +18,14 @@ Apply this style baseline before and during frontend edits.
 ## 2) Variable declaration order and naming
 
 Use this class member order in components/pages:
+
 1. `@Input` / `@Output` decorators first.
 2. `public` fields next.
 3. `private` fields after public.
 4. Constructor and methods after fields.
 
 Naming rules:
+
 1. Use `camelCase` for variables, fields, and methods.
 2. Keep API payload keys unchanged when backend contracts require snake_case.
 3. Use clear UI state names (`selectedStoreId`, `loginLoading`, `activeCoupons`).
@@ -41,6 +43,7 @@ Naming rules:
 ## 4) State management and subscriptions (NgRx)
 
 Observed shared pattern across supported Angular/Ionic repos:
+
 1. Subscribe with `this.store.select("slice")` (or selector functions).
 2. Use RxJS operators like `distinctUntilChanged`, `auditTime`, `first` where needed.
 3. Track long-lived subscriptions in `Subscription` fields or `Subscription[]`.
@@ -49,10 +52,11 @@ Observed shared pattern across supported Angular/Ionic repos:
 
 ## 5) Template performance rule
 
-1. Avoid calling non-trivial functions directly from template bindings (`*ngIf`, `*ngFor`, interpolation, `[prop]`) because they run during change detection.
-2. Compute view variables in `.ts` (during state updates/lifecycle hooks) and bind plain values in `.html`.
-3. Event handlers in templates are still valid (`(click)="openModal()"`, `(ionChange)="onChange($event)"`).
-4. If legacy code already has template function calls, avoid adding new ones and migrate touched paths to precomputed variables.
+1. For Angular 20+ repos, use built-in control flow blocks (`@if`, `@for`, `@switch`) and do not add new `*ngIf`, `*ngFor`, or `*ngSwitch` usages. Non-Angular structural directives such as `*transloco` are exempt.
+2. Avoid calling non-trivial functions directly from template bindings (`@if`, `@for`, interpolation, `[prop]`) because they run during change detection.
+3. Compute view variables in `.ts` (during state updates/lifecycle hooks) and bind plain values in `.html`.
+4. Event handlers in templates are still valid (`(click)="openModal()"`, `(ionChange)="onChange($event)"`).
+5. If legacy code already has template function calls, avoid adding new ones and migrate touched paths to precomputed variables.
 
 ## 6) Modal UI conventions (Ionic)
 
