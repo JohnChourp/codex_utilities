@@ -11,12 +11,18 @@ description: Create a LearnByzantineMusic Android release with version bump, bui
 
 ## Workflow
 
-1. Τρέξε:
+1. One-time local signing setup για νέο machine/profile:
+```bash
+./scripts/setup-release-signing.sh
+source ~/.android/learnbyzantine/release-signing.env
+```
+
+2. Τρέξε:
 ```bash
 ~/.codex/skills/learn-byzantine-android-release/scripts/run_release.sh --bump patch
 ```
 
-2. Το script εκτελεί αυτόματα:
+3. Το script εκτελεί αυτόματα:
 - `scripts/bump-version.sh`
 - `./gradlew clean assembleRelease bundleRelease`
 - `git commit` με νέο version
@@ -25,7 +31,7 @@ description: Create a LearnByzantineMusic Android release with version bump, bui
 - δημιουργία `RELEASE_NOTES.md` με συνοπτική εικόνα αλλαγών και πλήρη λίστα commits από το προηγούμενο release μέχρι το νέο
 - `gh release create/upload` για εγγυημένη δημοσίευση GitHub Release (με assets, π.χ. `apk-release.apk`) χρησιμοποιώντας τα παραπάνω notes ως release description
 
-3. Με το push του tag, παραμένει ενεργό και το GitHub Actions workflow `Android Tag Release` ως επιπλέον fallback.
+4. Με το push του tag, παραμένει ενεργό και το GitHub Actions workflow `Android Tag Release` ως επιπλέον fallback.
 
 ## Preflight που κάνει πλέον το skill (για να μη σπάει σε macOS)
 
@@ -34,6 +40,7 @@ description: Create a LearnByzantineMusic Android release with version bump, bui
   - `~/.android/learnbyzantine/release-signing.env`
 - Αν λείπουν signing vars, τρέχει:
   - `scripts/setup-release-signing.sh`
+- Μετά το setup, ξαναφορτώνει το env file αυτόματα και συνεχίζει χωρίς να χρειάζεται manual export σε κάθε release run.
 - Αν το setup script αποτύχει στο macOS `base64 -w`, δημιουργεί compatibility fallback:
   - `~/.android/learnbyzantine/release-upload-key.base64` με `base64 < keystore > file`
 - Αν λείπει `gh auth login`, κάνει αυτόματα fallback σε:
@@ -54,5 +61,5 @@ description: Create a LearnByzantineMusic Android release with version bump, bui
 - Το release script μπορεί να τρέξει και με dirty git working tree: κάνει stage/commit όλες τις αλλαγές (εκτός ignored) σε ένα ενιαίο release commit.
 - Χρησιμοποίησε `--version` μόνο όταν χρειάζεται συγκεκριμένο release number.
 - Για direct release publish απαιτείται ενεργό `gh auth login`.
-- Για Google Play production signing, πρέπει να έχουν οριστεί τα GitHub Secrets keystore.
+- Για Google Play production signing, το Learn skill υποστηρίζει και optional `--set-github-secrets` μέσω του repo setup script. Αυτό είναι Learn-specific και δεν μεταφέρεται στο `optc-team-builder` parity flow.
 - Αν έχει προηγηθεί αποτυχημένο release run μετά από bump, ξανατρέξε με explicit `--version X.Y.Z --code N` για να μη γίνει δεύτερο bump.
