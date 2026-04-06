@@ -457,6 +457,119 @@ Source: `/home/dm-soft-1/Downloads/projects/codeliver/codeliver-panel/src/app/sh
 payload
 ```
 
+Observed rating-related group fields
+
+```ts
+{
+  enable_rating_delivery_guys_from_requests?: boolean,
+  delivery_guy_request_rating_questionnaire?: {
+    schema_version: 1,
+    questionnaire_version: number,
+    detailed_scale_max: 5,
+    comment_mode: "optional",
+    quick_save_mode: "fill_active_options_with_max",
+    options: Array<{
+      option_id: string,
+      label: string,
+      order: number,
+      active: boolean,
+      created_timestamp: number | null,
+      archived_timestamp: number | null,
+    }>,
+  },
+}
+```
+
+## codeliver-panel-handle-delivery-guy-request-rating
+
+- Normalized: `codeliver-panel/prod/codeliver-panel-handle-delivery-guy-request-rating`
+
+Observed payloads (body)
+
+Source: `/home/dm-soft-1/Downloads/projects/codeliver/codeliver-panel/src/app/shared/data.storage.service.ts:832`
+```ts
+{
+  type: "get",
+  request_id,
+  delivery_guy_id?,
+}
+```
+
+Source: `/home/dm-soft-1/Downloads/projects/codeliver/codeliver-panel/src/app/shared/data.storage.service.ts:850`
+```ts
+{
+  type: "upsert",
+  request_id,
+  delivery_guy_id?,
+  overall_score,
+  save_mode: "quick" | "detailed",
+  answers?: Array<{ option_id: string; score: number }>,
+  comment?: string,
+}
+```
+
+Observed response shape (success)
+
+```ts
+{
+  success: true,
+  data: {
+    rating: {
+      group_delivery_guy_id: string,
+      request_id: string,
+      group: string,
+      delivery_guy_id: string,
+      store_id: string,
+      overall_score: number,
+      save_mode: "quick" | "detailed",
+      comment: string,
+      answers: Array<{ option_id: string; label_snapshot: string; score: number }>,
+      questionnaire_version: number,
+      questionnaire_snapshot: object,
+      request_completed_timestamp: number,
+      created_timestamp: number,
+      updated_timestamp: number,
+      rated_by_user_id: string,
+      rated_by_source: "panel",
+    } | null,
+    questionnaire: object,
+  }
+}
+```
+
+## codeliver-panel-fetch-delivery-guy-request-ratings
+
+- Normalized: `codeliver-panel/prod/codeliver-panel-fetch-delivery-guy-request-ratings`
+
+Observed payloads (body)
+
+Source: `/home/dm-soft-1/Downloads/projects/codeliver/codeliver-panel/src/app/shared/data.storage.service.ts:874`
+```ts
+{
+  type: "search",
+  date_from?,
+  date_to?,
+  store_id?,
+  delivery_guy_id?,
+}
+```
+
+Source: `/home/dm-soft-1/Downloads/projects/codeliver/codeliver-panel/src/app/shared/data.storage.service.ts:896`
+```ts
+{
+  type: "delivery-guy-summary",
+  delivery_guy_id,
+  date_from?,
+  date_to?,
+}
+```
+
+Observed response notes
+
+- `type: "search"` returns `ratings`, `summary`, `stores`, `delivery_guys`, and `current_questionnaire`.
+- `type: "delivery-guy-summary"` returns current delivery-guy info plus `range` and `lifetime` aggregates.
+- Current implementation uses direct PK query for per-delivery-guy summary and scan fallback for group/store reporting because no canonical secondary index mapping exists yet for `codeliver-rating-delivery-guys-requests`.
+
 ## codeliver-panel-handle-group-zone
 
 - Normalized: `codeliver-panel/prod/codeliver-panel-handle-group-zone`

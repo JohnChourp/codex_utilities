@@ -112,6 +112,18 @@ Secondary indexes
 - GSI: None
 - LSI: None
 
+### codeliver-rating-delivery-guys-requests
+
+Primary key
+
+- Partition key (PK): group_delivery_guy_id (String)
+- Sort key (SK): request_id (String)
+
+Secondary indexes
+
+- GSI: TBD: verify from IaC/code
+- LSI: TBD: verify from IaC/code
+
 ### codeliver-devices
 
 Primary key

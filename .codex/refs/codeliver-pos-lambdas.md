@@ -134,6 +134,62 @@ Source: `/home/dm-soft-1/Downloads/projects/codeliver/codeliver-pos/src/app/shar
 payload
 ```
 
+## codeliver-pos-handle-delivery-guy-request-rating
+
+- Normalized: `codeliver-pos/prod/codeliver-pos-handle-delivery-guy-request-rating`
+
+Observed payloads (body)
+
+Source: `/home/dm-soft-1/Downloads/projects/codeliver/codeliver-pos/src/app/shared/data.storage.service.ts:711`
+```ts
+{
+  type: "get",
+  request_id,
+  delivery_guy_id?,
+}
+```
+
+Source: `/home/dm-soft-1/Downloads/projects/codeliver/codeliver-pos/src/app/shared/data.storage.service.ts:729`
+```ts
+{
+  type: "upsert",
+  request_id,
+  delivery_guy_id?,
+  overall_score,
+  save_mode: "quick" | "detailed",
+  answers?: Array<{ option_id: string; score: number }>,
+  comment?: string,
+}
+```
+
+Observed response shape (success)
+
+```ts
+{
+  success: true,
+  data: {
+    rating: {
+      group_delivery_guy_id: string,
+      request_id: string,
+      group: string,
+      delivery_guy_id: string,
+      store_id: string,
+      overall_score: number,
+      save_mode: "quick" | "detailed",
+      comment: string,
+      answers: Array<{ option_id: string; label_snapshot: string; score: number }>,
+      questionnaire_version: number,
+      questionnaire_snapshot: object,
+      request_completed_timestamp: number,
+      created_timestamp: number,
+      updated_timestamp: number,
+      rated_by_user_id: string,
+      rated_by_source: "pos",
+    } | null,
+    questionnaire: object,
+  }
+}
+
 ## codeliver-pos-handle-route
 
 - Normalized: `codeliver-pos/prod/codeliver-pos-handle-route`

@@ -1404,6 +1404,158 @@ store charge — observed example (sanitized)
 }
 ```
 
+Table: codeliver-rating-delivery-guys-requests
+
+Source of truth
+
+Keys & indexes: .codex/playbooks/codeliver-dynamodb-keys-and-indexes.md (codeliver-rating-delivery-guys-requests)
+
+Verification notes
+
+- PK/SK are verified from implementation requirements and current writers/readers.
+- Secondary indexes are not yet canonicalized; reporting code currently uses direct PK query for per-delivery-guy lookups and scan fallback for group-wide reporting.
+
+Entity types / item categories
+
+delivery guy request rating (one editable item per group_delivery_guy_id + request_id)
+
+Non-key attributes
+
+- Required attributes:
+  - group
+  - delivery_guy_id
+  - store_id
+  - overall_score
+  - save_mode
+  - answers
+  - questionnaire_version
+  - questionnaire_snapshot
+  - request_completed_timestamp
+  - created_timestamp
+  - updated_timestamp
+  - rated_by_user_id
+  - rated_by_source
+- Optional attributes:
+  - comment
+
+Example items (DocumentClient JSON)
+
+delivery guy request rating — quick save example (sanitized)
+
+```json
+{
+  "group_delivery_guy_id": "<GROUP>_<DELIVERY_GUY_ID>",
+  "request_id": "<REQUEST_ID>",
+  "group": "<GROUP>",
+  "delivery_guy_id": "<DELIVERY_GUY_ID>",
+  "store_id": "<STORE_ID>",
+  "overall_score": 4,
+  "save_mode": "quick",
+  "comment": "",
+  "answers": [
+    {
+      "option_id": "delivery_guy_rating_option_<UUID_1>",
+      "label_snapshot": "<OPTION_LABEL_1>",
+      "score": 5
+    },
+    {
+      "option_id": "delivery_guy_rating_option_<UUID_2>",
+      "label_snapshot": "<OPTION_LABEL_2>",
+      "score": 5
+    }
+  ],
+  "questionnaire_version": 3,
+  "questionnaire_snapshot": {
+    "schema_version": 1,
+    "questionnaire_version": 3,
+    "detailed_scale_max": 5,
+    "comment_mode": "optional",
+    "quick_save_mode": "fill_active_options_with_max",
+    "options": [
+      {
+        "option_id": "delivery_guy_rating_option_<UUID_1>",
+        "label": "<OPTION_LABEL_1>",
+        "order": 0,
+        "active": true,
+        "created_timestamp": 1760000000000,
+        "archived_timestamp": null
+      },
+      {
+        "option_id": "delivery_guy_rating_option_<UUID_2>",
+        "label": "<OPTION_LABEL_2>",
+        "order": 1,
+        "active": true,
+        "created_timestamp": 1760000000000,
+        "archived_timestamp": null
+      }
+    ]
+  },
+  "request_completed_timestamp": 1760500000000,
+  "created_timestamp": 1760500100000,
+  "updated_timestamp": 1760500100000,
+  "rated_by_user_id": "<USER_ID>",
+  "rated_by_source": "panel"
+}
+```
+
+delivery guy request rating — detailed save with historical questionnaire option (sanitized)
+
+```json
+{
+  "group_delivery_guy_id": "<GROUP>_<DELIVERY_GUY_ID>",
+  "request_id": "<REQUEST_ID>",
+  "group": "<GROUP>",
+  "delivery_guy_id": "<DELIVERY_GUY_ID>",
+  "store_id": "<STORE_ID>",
+  "overall_score": 5,
+  "save_mode": "detailed",
+  "comment": "<OPTIONAL_COMMENT>",
+  "answers": [
+    {
+      "option_id": "delivery_guy_rating_option_<UUID_OLD>",
+      "label_snapshot": "<OLD_OPTION_LABEL>",
+      "score": 4
+    },
+    {
+      "option_id": "delivery_guy_rating_option_<UUID_NEW>",
+      "label_snapshot": "<NEW_OPTION_LABEL>",
+      "score": 5
+    }
+  ],
+  "questionnaire_version": 5,
+  "questionnaire_snapshot": {
+    "schema_version": 1,
+    "questionnaire_version": 5,
+    "detailed_scale_max": 5,
+    "comment_mode": "optional",
+    "quick_save_mode": "fill_active_options_with_max",
+    "options": [
+      {
+        "option_id": "delivery_guy_rating_option_<UUID_OLD>",
+        "label": "<OLD_OPTION_LABEL>",
+        "order": 0,
+        "active": false,
+        "created_timestamp": 1760000000000,
+        "archived_timestamp": 1760600000000
+      },
+      {
+        "option_id": "delivery_guy_rating_option_<UUID_NEW>",
+        "label": "<NEW_OPTION_LABEL>",
+        "order": 1,
+        "active": true,
+        "created_timestamp": 1760600000000,
+        "archived_timestamp": null
+      }
+    ]
+  },
+  "request_completed_timestamp": 1760700000000,
+  "created_timestamp": 1760700100000,
+  "updated_timestamp": 1760700200000,
+  "rated_by_user_id": "<USER_ID>",
+  "rated_by_source": "pos"
+}
+```
+
 Table: codeliver-stores
 
 Source of truth

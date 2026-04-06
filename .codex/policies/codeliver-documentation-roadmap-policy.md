@@ -11,14 +11,30 @@ Any time you:
 
 ## “Συχνές ερωτήσεις (FAQ)”
 
-### 3.0 README scope rule (KEEP IT SHORT)
+### 3.0 README-first workflow (REQUIRED)
+
+- Before any change, correction, explanation, or implementation discussion for a lambda, project, or component, read the nearest relevant `README.md` first.
+- Treat that README as the primary business-logic baseline for flows, invariants, inputs/outputs, and current behavior.
+- If the relevant README is missing or clearly stale, create or update it before changing code so it captures the current business flow as concretely as possible from the code, adjacent docs, and existing patterns.
+- For multi-component work, read and, when needed, update every impacted component README before editing implementation details.
+- Do not proceed with implementation details until the README context has been consumed or bootstrapped.
+
+### 3.0.1 README conflict resolution (REQUIRED)
+
+- When a scope has more than one relevant `README.md`, read all of them before changing anything.
+- If two or more README files disagree, or a README disagrees with the requested behavior, do not guess or merge the rules silently.
+- Surface the exact contradiction and ask the user which business logic is authoritative before proceeding.
+- For multi-lambda, multi-project, or multi-component changes, do not invent a blended interpretation when the local READMEs conflict; ask which scope should win and apply that choice consistently.
+- If the conflict can be resolved by a more specific README within the same scope hierarchy, use that only when it clearly overrides the broader README and does not contradict the user request.
+
+### 3.1 README scope rule (KEEP IT SHORT)
 
 - README files must describe the history.
 - Do **NOT** include:
   - **“How to verify” sections**
 - Keep updates minimal: only what an engineer/ops person needs to use, operate, and troubleshoot the component.
 
-### 3.1 Which README must be updated/created?
+### 3.2 Which README must be updated/created?
 
 - If the change is within a lambda folder: update/create `README.md` in that lambda’s root folder.
 - If the change is within a project (frontend/backend/tool): update/create `README.md` in that project root folder.
@@ -26,7 +42,7 @@ Any time you:
   - Update each impacted component README (minimum), and
   - Optionally add a short “Integration Notes” section in the most central README.
 
-### 3.2 README content requirements (minimum structure)
+### 3.3 README content requirements (minimum structure)
 
 The README MUST include (in this order, unless a repo convention dictates otherwise):
 
@@ -49,7 +65,7 @@ The README MUST include (in this order, unless a repo convention dictates otherw
      - (If relevant) one edge-case example
 6. **Συχνές ερωτήσεις (FAQ)** (MANDATORY, at the very end)
 
-### 3.3 FAQ requirements (ops-focused, no change tracking)
+### 3.4 FAQ requirements (ops-focused, no change tracking)
 
 The FAQ section MUST explicitly cover:
 
@@ -68,7 +84,7 @@ The FAQ section MUST explicitly cover:
 
 The FAQ should be written in Greek (since it is user-facing/ops-facing), unless the repository convention requires English.
 
-### 3.4 FAQ template (copy/paste)
+### 3.5 FAQ template (copy/paste)
 
 Append something like this at the end of the README:
 
@@ -294,4 +310,3 @@ After ROADMAP.md exists for a given lambda/project:
 - Do NOT add “How to verify” steps in ROADMAP.md (verification belongs in the assistant reply).
 
   4.7 Sticky policy: Thread-Scoped ClickUp Tracking (MANDATORY)
-
