@@ -1,0 +1,1 @@
+/home/dm-soft-1/.codex/skills/ionic-android-live-serve-inspect/scripts/run.py --project /tmp/tmp.epoD9z4Vlt/project --device-api 34 --activity .MainActivity

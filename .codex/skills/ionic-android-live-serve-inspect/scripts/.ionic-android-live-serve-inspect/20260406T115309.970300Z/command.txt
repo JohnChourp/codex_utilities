@@ -1,0 +1,1 @@
+/home/dm-soft-1/.codex/skills/ionic-android-live-serve-inspect/scripts/run.py

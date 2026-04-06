@@ -1,0 +1,16 @@
+{
+  "skill": "ionic-android-live-serve-inspect",
+  "skill_root": "/home/dm-soft-1/.codex/skills/ionic-android-live-serve-inspect",
+  "invocation_cwd": "/home/dm-soft-1/Downloads/projects/codeliver-app",
+  "invocation_cwd_basename": "codeliver-app",
+  "started_at_utc": "2026-04-06T11:47:45.180240+00:00",
+  "command": "/home/dm-soft-1/.codex/skills/ionic-android-live-serve-inspect/scripts/run.py --project /tmp/tmp.epoD9z4Vlt/project --device-api 34 --activity .MainActivity",
+  "argv": [
+    "--project",
+    "/tmp/tmp.epoD9z4Vlt/project",
+    "--device-api",
+    "34",
+    "--activity",
+    ".MainActivity"
+  ]
+}

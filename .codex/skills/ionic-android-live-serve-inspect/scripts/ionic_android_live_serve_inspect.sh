@@ -8,9 +8,10 @@ Usage:
   ionic_android_live_serve_inspect.sh [options]
 
 Options:
-  --project <path>       Ionic project root (default: current directory)
+  --project <path|name>  Ionic project root, workspace root, or fuzzy project name
   --port <number>        Ionic serve port (default: 8206)
   --serial <id>          USB ADB serial for target Android device
+  --device-api <sdk>     Android API level override for adb reverse gating
   --package <id>         Override package/applicationId detection
   --activity <name>      Activity to launch (e.g. .MainActivity)
   --open-inspect         Open chrome://inspect/#devices automatically
@@ -24,22 +25,713 @@ USAGE
 }
 
 log() {
-    printf '[ionic-android-live-serve-inspect] %s\n' "$*"
+    local line="[ionic-android-live-serve-inspect] $*"
+    printf '%s\n' "$line"
+    report_write_line "$line"
 }
 
 warn() {
-    printf '[ionic-android-live-serve-inspect] Warning: %s\n' "$*" >&2
+    local line="[ionic-android-live-serve-inspect] Warning: $*"
+    printf '%s\n' "$line" >&2
+    report_write_line "$line"
 }
 
 fail() {
-    echo "$*" >&2
+    local line="$*"
+    echo "$line" >&2
+    report_write_line "[ionic-android-live-serve-inspect] ERROR: $line"
     exit 1
 }
 
-PROJECT_DIR="$PWD"
+REPORT_DIR=""
+REPORT_FILE=""
+REPORT_LATEST_DIR=""
+REPORT_LATEST_FILE=""
+REPORT_TARGETS=()
+REPORT_INITIALIZED=0
+RUN_EXIT_STATUS=0
+SESSION_STARTED_AT_UTC="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+LAUNCH_METHOD="not-attempted"
+LAUNCH_COMPONENT=""
+ANDROID_SDK_ROOT_RESOLVED=""
+
+report_bootstrap_target() {
+    local target="$1"
+
+    [[ -n "$target" ]] || return 0
+    [[ -s "$target" ]] && return 0
+
+    {
+        printf '%s\n' '# ionic-android-live-serve-inspect report'
+        printf '\n'
+        printf '%s\n' "- Started (UTC): $SESSION_STARTED_AT_UTC"
+        printf '%s\n' "- Invoked cwd: ${IONIC_ANDROID_LIVE_SERVE_INSPECT_INVOKED_CWD:-$PWD}"
+        printf '%s\n' "- Invocation basename: ${IONIC_ANDROID_LIVE_SERVE_INSPECT_INVOCATION_BASENAME:-$(basename "$PWD")}"
+        printf '%s\n' "- Command: ${IONIC_ANDROID_LIVE_SERVE_INSPECT_COMMAND:-unknown}"
+        printf '%s\n' "- Report dir: ${REPORT_DIR:-unknown}"
+        printf '%s\n' "- Latest report: ${REPORT_LATEST_FILE:-unknown}"
+        printf '\n'
+        printf '%s\n' '## Live logs'
+        printf '%s\n' "[ionic-android-live-serve-inspect] Report file: $target"
+    } >> "$target"
+}
+
+report_write_line() {
+    local line="$*"
+    local target
+
+    [[ ${#REPORT_TARGETS[@]} -gt 0 ]] || return 0
+
+    for target in "${REPORT_TARGETS[@]}"; do
+        [[ -n "$target" ]] || continue
+        printf '%s\n' "$line" >> "$target"
+    done
+}
+
+report_write_blank_line() {
+    local target
+
+    [[ ${#REPORT_TARGETS[@]} -gt 0 ]] || return 0
+
+    for target in "${REPORT_TARGETS[@]}"; do
+        [[ -n "$target" ]] || continue
+        printf '\n' >> "$target"
+    done
+}
+
+report_append_file() {
+    local title="$1"
+    local file="$2"
+    local line=""
+
+    [[ -n "$REPORT_FILE" ]] || return 0
+    [[ -f "$file" ]] || return 0
+
+    report_write_blank_line
+    report_write_line "### $title"
+    report_write_line '```text'
+    while IFS= read -r line || [[ -n "${line:-}" ]]; do
+        report_write_line "$line"
+    done < "$file"
+    report_write_line '```'
+}
+
+report_finalize() {
+    local status="$1"
+
+    [[ ${#REPORT_TARGETS[@]} -gt 0 ]] || return 0
+
+    report_write_blank_line
+    report_write_line "## Final summary"
+    report_write_line "- Exit status: $status"
+    report_write_line "- Session started (UTC): $SESSION_STARTED_AT_UTC"
+    report_write_line "- Project root: ${PROJECT_DIR:-unknown}"
+    report_write_line "- Package: ${PACKAGE_NAME:-unknown}"
+    report_write_line "- Serial: ${ACTIVE_SERIAL:-unknown}"
+    report_write_line "- Device API: ${DEVICE_API:-unknown}"
+    report_write_line "- Android SDK root: ${ANDROID_SDK_ROOT_RESOLVED:-unknown}"
+    report_write_line "- Port: $PORT"
+    report_write_line "- Prepare mode: $PREPARE_MODE"
+    report_write_line "- Launch method: $LAUNCH_METHOD"
+    report_write_line "- Launch component: ${LAUNCH_COMPONENT:-unknown}"
+    report_write_line "- adb reverse: $([[ $ADB_REVERSE_SET -eq 1 ]] && echo applied || echo not-applied)"
+    report_write_line "- Report file: $REPORT_FILE"
+    report_write_line "- Latest report file: ${REPORT_LATEST_FILE:-unknown}"
+    report_write_line "- Command log dir: $REPORT_DIR"
+}
+
+PATH="${PATH:-/usr/bin:/bin}"
+
+append_path_dir() {
+    local dir="$1"
+    [[ -n "$dir" && -d "$dir" ]] || return 0
+
+    case ":$PATH:" in
+        *":$dir:"*) ;;
+        *) PATH="$dir:$PATH" ;;
+    esac
+}
+
+bootstrap_path() {
+    local code_home="${CODEX_HOME:-$HOME/.codex}"
+    local dir
+    local vscode_dirs=("$HOME"/.vscode/extensions/openai.chatgpt-*/bin/*)
+
+    for dir in \
+        "$HOME/.local/bin" \
+        "$HOME/bin" \
+        "$HOME/.n/bin" \
+        "/usr/local/bin" \
+        "/opt/homebrew/bin"; do
+        append_path_dir "$dir"
+    done
+
+    if [[ -n "${ANDROID_HOME:-}" ]]; then
+        append_path_dir "${ANDROID_HOME}/platform-tools"
+        append_path_dir "${ANDROID_HOME}/emulator"
+    fi
+    if [[ -n "${ANDROID_SDK_ROOT:-}" ]]; then
+        append_path_dir "${ANDROID_SDK_ROOT}/platform-tools"
+        append_path_dir "${ANDROID_SDK_ROOT}/emulator"
+    fi
+
+    if [[ -e "${vscode_dirs[0]:-}" ]]; then
+        for dir in "${vscode_dirs[@]}"; do
+            append_path_dir "$dir"
+        done
+    fi
+
+    append_path_dir "$code_home/bin"
+
+    export PATH
+    hash -r 2>/dev/null || true
+}
+
+SEARCH_TOOL=""
+
+detect_search_tool() {
+    if command -v rg >/dev/null 2>&1; then
+        SEARCH_TOOL="rg"
+        return 0
+    fi
+    if command -v grep >/dev/null 2>&1; then
+        SEARCH_TOOL="grep"
+        return 0
+    fi
+    return 1
+}
+
+search_quiet() {
+    local pattern="$1"
+    shift
+
+    if [[ "$SEARCH_TOOL" == "rg" ]]; then
+        rg -q -- "$pattern" "$@"
+        return $?
+    fi
+
+    grep -E -q -- "$pattern" "$@"
+}
+
+search_first_line() {
+    local pattern="$1"
+    shift
+
+    if [[ "$SEARCH_TOOL" == "rg" ]]; then
+        rg -n -m 1 -- "$pattern" "$@"
+        return $?
+    fi
+
+    grep -E -n -m 1 -- "$pattern" "$@"
+}
+
+canonicalize_dir() {
+    local dir="$1"
+    (
+        cd "$dir" >/dev/null 2>&1 && pwd -P
+    )
+}
+
+is_project_root() {
+    local dir="$1"
+    [[ -f "$dir/package.json" ]] || return 1
+    [[ -f "$dir/capacitor.config.ts" || -f "$dir/capacitor.config.json" ]] || return 1
+    return 0
+}
+
+find_project_root_from_path() {
+    local dir="$1"
+    local current
+
+    current="$(canonicalize_dir "$dir" 2>/dev/null)" || return 1
+
+    while [[ -n "$current" ]]; do
+        if is_project_root "$current"; then
+            printf '%s\n' "$current"
+            return 0
+        fi
+
+        [[ "$current" == "/" ]] && return 1
+        current="$(dirname "$current")"
+    done
+
+    return 1
+}
+
+to_lowercase() {
+    printf '%s' "$1" | tr '[:upper:]' '[:lower:]'
+}
+
+project_hint_matches() {
+    local candidate="$1"
+    local hint="$2"
+    local candidate_lc
+    local hint_lc
+    local base_lc
+
+    candidate_lc="$(to_lowercase "$candidate")"
+    hint_lc="$(to_lowercase "$hint")"
+    base_lc="$(to_lowercase "$(basename "$candidate")")"
+
+    [[ "$base_lc" == "$hint_lc" ]] && return 0
+
+    case "$candidate_lc" in
+        *"/$hint_lc"|*"/$hint_lc/"*|*"$hint_lc"*) return 0 ;;
+    esac
+
+    return 1
+}
+
+is_same_or_descendant() {
+    local ancestor="$1"
+    local candidate="$2"
+
+    [[ -n "$ancestor" && -n "$candidate" ]] || return 1
+
+    case "$candidate" in
+        "$ancestor"|"$ancestor"/*) return 0 ;;
+    esac
+
+    return 1
+}
+
+sort_project_candidates() {
+    local invocation_cwd="${IONIC_ANDROID_LIVE_SERVE_INSPECT_INVOKED_CWD:-}"
+    local invocation_name="${IONIC_ANDROID_LIVE_SERVE_INSPECT_INVOCATION_BASENAME:-}"
+    local sorted=()
+    local candidate
+
+    if [[ ${#PROJECT_CANDIDATES[@]} -le 1 ]]; then
+        return 0
+    fi
+
+    while IFS= read -r candidate; do
+        [[ -n "$candidate" ]] && sorted+=("$candidate")
+    done < <(node - "$invocation_cwd" "$invocation_name" "${PROJECT_CANDIDATES[@]}" <<'NODE'
+const path = require('path');
+
+const invocationCwd = process.argv[2] || '';
+const invocationName = (process.argv[3] || '').toLowerCase();
+const candidates = process.argv.slice(4).filter(Boolean);
+
+function normalize(value) {
+  try {
+    return path.resolve(value).replace(/\\/g, '/');
+  } catch (error) {
+    return String(value || '');
+  }
+}
+
+function score(candidate) {
+  const normalized = normalize(candidate);
+  const base = path.basename(normalized).toLowerCase();
+  let value = 0;
+
+  if (invocationCwd) {
+    const cwd = normalize(invocationCwd);
+    if (normalized === cwd) {
+      value += 10000;
+    } else if (cwd === normalized || cwd.startsWith(`${normalized}/`)) {
+      value += 9500;
+    }
+  }
+
+  if (invocationName) {
+    if (base === invocationName) {
+      value += 8000;
+    }
+    if (normalized.endsWith(`/${invocationName}`)) {
+      value += 7500;
+    }
+    if (normalized.includes(`/${invocationName}/`)) {
+      value += 200;
+    }
+  }
+
+  value -= normalized.split('/').length / 1000;
+  return value;
+}
+
+const ranked = candidates
+  .map(candidate => ({ candidate, score: score(candidate) }))
+  .sort((left, right) => {
+    if (right.score !== left.score) {
+      return right.score - left.score;
+    }
+    return left.candidate.localeCompare(right.candidate);
+  })
+  .map(entry => entry.candidate);
+
+process.stdout.write(ranked.join('\n'));
+NODE
+    )
+
+    PROJECT_CANDIDATES=("${sorted[@]}")
+}
+
+PROJECT_SEARCH_ROOTS=()
+PROJECT_CANDIDATES=()
+
+add_project_search_root() {
+    local root="$1"
+    local canonical
+    local existing
+
+    [[ -n "$root" && -d "$root" ]] || return 0
+    canonical="$(canonicalize_dir "$root" 2>/dev/null)" || return 0
+
+    for existing in "${PROJECT_SEARCH_ROOTS[@]}"; do
+        [[ "$existing" == "$canonical" ]] && return 0
+    done
+
+    PROJECT_SEARCH_ROOTS+=("$canonical")
+}
+
+build_project_search_roots() {
+    local extra_roots="${IONIC_PROJECT_SEARCH_ROOTS:-}"
+    local root
+    local old_ifs="$IFS"
+    local extra_root_list=()
+
+    PROJECT_SEARCH_ROOTS=()
+
+    add_project_search_root "$PWD"
+    add_project_search_root "$HOME"
+    add_project_search_root "$HOME/Downloads"
+    add_project_search_root "$HOME/Downloads/projects"
+    add_project_search_root "$HOME/Downloads/lambdas"
+    add_project_search_root "$HOME/Documents"
+    add_project_search_root "$HOME/Desktop"
+    add_project_search_root "$HOME/Projects"
+    add_project_search_root "$HOME/projects"
+    add_project_search_root "$HOME/dev"
+    add_project_search_root "$HOME/src"
+    add_project_search_root "$HOME/work"
+    add_project_search_root "$HOME/repos"
+    add_project_search_root "$HOME/Workspace"
+    add_project_search_root "$HOME/Code"
+    add_project_search_root "$HOME/Development"
+    add_project_search_root "$HOME/AndroidStudioProjects"
+
+    if [[ -n "$extra_roots" ]]; then
+        IFS=':' read -r -a extra_root_list <<< "$extra_roots"
+        for root in "${extra_root_list[@]}"; do
+            add_project_search_root "$root"
+        done
+    fi
+
+    IFS="$old_ifs"
+}
+
+discover_project_candidates() {
+    local max_depth="${IONIC_PROJECT_DISCOVERY_DEPTH:-5}"
+    local candidate
+
+    PROJECT_CANDIDATES=()
+
+    while IFS= read -r candidate; do
+        [[ -n "$candidate" ]] && PROJECT_CANDIDATES+=("$candidate")
+    done < <(node - "$max_depth" "${PROJECT_SEARCH_ROOTS[@]}" <<'NODE'
+const fs = require('fs');
+const path = require('path');
+
+const maxDepth = Number(process.argv[2] || 5);
+const roots = process.argv.slice(3).filter(Boolean);
+const ignore = new Set([
+  'node_modules',
+  'android',
+  'ios',
+  'dist',
+  'build',
+  'www',
+  'coverage',
+  '.git',
+  '.angular',
+  '.ionic',
+  '.nx',
+  '.turbo',
+  '.next',
+  '.cache',
+  '.config',
+  '.local',
+  '.gradle'
+]);
+const results = [];
+const seen = new Set();
+
+function existsFile(dir, name) {
+  try {
+    return fs.statSync(path.join(dir, name)).isFile();
+  } catch (error) {
+    return false;
+  }
+}
+
+function isProjectRoot(dir) {
+  return existsFile(dir, 'package.json')
+    && (existsFile(dir, 'capacitor.config.ts') || existsFile(dir, 'capacitor.config.json'));
+}
+
+function canonicalize(dir) {
+  try {
+    return fs.realpathSync(dir);
+  } catch (error) {
+    return path.resolve(dir);
+  }
+}
+
+function walk(dir, depth) {
+  if (depth > maxDepth) {
+    return;
+  }
+
+  let stat;
+  try {
+    stat = fs.statSync(dir);
+  } catch (error) {
+    return;
+  }
+
+  if (!stat.isDirectory()) {
+    return;
+  }
+
+  const canonical = canonicalize(dir);
+  if (seen.has(canonical)) {
+    return;
+  }
+
+  if (isProjectRoot(dir)) {
+    seen.add(canonical);
+    results.push(canonical);
+  }
+
+  if (depth === maxDepth) {
+    return;
+  }
+
+  let entries;
+  try {
+    entries = fs.readdirSync(dir, { withFileTypes: true });
+  } catch (error) {
+    return;
+  }
+
+  for (const entry of entries) {
+    if (!entry.isDirectory()) {
+      continue;
+    }
+
+    if (ignore.has(entry.name) || entry.name.startsWith('.')) {
+      continue;
+    }
+
+    walk(path.join(dir, entry.name), depth + 1);
+  }
+}
+
+for (const root of roots) {
+  if (!root) {
+    continue;
+  }
+
+  walk(path.resolve(root), 0);
+}
+
+process.stdout.write(results.join('\n'));
+NODE
+    )
+}
+
+filter_project_candidates_by_hint() {
+    local hint="$1"
+    local filtered=()
+    local candidate
+
+    for candidate in "${PROJECT_CANDIDATES[@]}"; do
+        if project_hint_matches "$candidate" "$hint"; then
+            filtered+=("$candidate")
+        fi
+    done
+
+    PROJECT_CANDIDATES=("${filtered[@]}")
+}
+
+resolve_project_choice() {
+    local choice="$1"
+    local candidate
+    local resolved
+    local filtered=()
+
+    case "$choice" in
+        q|quit|exit)
+            fail "Project selection cancelled"
+            ;;
+    esac
+
+    if [[ "$choice" =~ ^[0-9]+$ ]]; then
+        if ((choice >= 1 && choice <= ${#PROJECT_CANDIDATES[@]})); then
+            printf '%s\n' "${PROJECT_CANDIDATES[$((choice - 1))]}"
+            return 0
+        fi
+        return 1
+    fi
+
+    if [[ -d "$choice" ]]; then
+        if resolved="$(find_project_root_from_path "$choice" 2>/dev/null)"; then
+            printf '%s\n' "$resolved"
+            return 0
+        fi
+    fi
+
+    for candidate in "${PROJECT_CANDIDATES[@]}"; do
+        if project_hint_matches "$candidate" "$choice"; then
+            filtered+=("$candidate")
+        fi
+    done
+
+    if [[ ${#filtered[@]} -eq 1 ]]; then
+        printf '%s\n' "${filtered[0]}"
+        return 0
+    fi
+
+    if [[ ${#filtered[@]} -gt 1 ]]; then
+        PROJECT_CANDIDATES=("${filtered[@]}")
+        return 2
+    fi
+
+    return 1
+}
+
+prompt_for_project_selection() {
+    local choice=""
+    local resolved=""
+    local i
+
+    if [[ ! -t 0 ]]; then
+        return 1
+    fi
+
+    while true; do
+        printf '\nSelect Ionic project:\n' >&2
+        for i in "${!PROJECT_CANDIDATES[@]}"; do
+            printf '  %d) %s\n' "$((i + 1))" "${PROJECT_CANDIDATES[$i]}" >&2
+        done
+        printf 'Enter number or path [1]: ' >&2
+        IFS= read -r choice || return 1
+        [[ -z "$choice" ]] && choice=1
+
+        resolved="$(resolve_project_choice "$choice")"
+        case $? in
+            0)
+                printf '%s\n' "$resolved"
+                return 0
+                ;;
+            2)
+                continue
+                ;;
+        esac
+
+        printf 'Invalid selection. Enter a number from the list, a full path, or q to quit.\n' >&2
+    done
+}
+
+resolve_project_dir() {
+    local raw="${PROJECT_DIR_RAW:-}"
+    local explicit_root=""
+    local selected=""
+
+    if [[ -n "$raw" ]]; then
+        if [[ -d "$raw" ]]; then
+            if explicit_root="$(find_project_root_from_path "$raw" 2>/dev/null)"; then
+                PROJECT_DIR="$explicit_root"
+                log "Using project root from --project: $PROJECT_DIR"
+                return 0
+            fi
+
+            log "Searching for Ionic projects under $raw"
+            PROJECT_SEARCH_ROOTS=()
+            add_project_search_root "$raw"
+            discover_project_candidates
+        else
+            log "Searching for Ionic projects matching '$raw'"
+            build_project_search_roots
+            discover_project_candidates
+
+            filter_project_candidates_by_hint "$raw"
+            sort_project_candidates
+        fi
+    else
+        if explicit_root="$(find_project_root_from_path "$PWD" 2>/dev/null)"; then
+            PROJECT_DIR="$explicit_root"
+            log "Using project root from current directory: $PROJECT_DIR"
+            return 0
+        fi
+        build_project_search_roots
+        discover_project_candidates
+    fi
+
+    sort_project_candidates
+
+    if [[ ${#PROJECT_CANDIDATES[@]} -eq 0 ]]; then
+        if [[ -n "$raw" && -d "$raw" ]]; then
+            fail "No Ionic project root found under $raw"
+        fi
+        fail "No Ionic project root found. Pass --project <path|name> or set IONIC_PROJECT_SEARCH_ROOTS"
+    fi
+
+    if [[ ${#PROJECT_CANDIDATES[@]} -eq 1 ]]; then
+        PROJECT_DIR="${PROJECT_CANDIDATES[0]}"
+        log "Using project root: $PROJECT_DIR"
+        return 0
+    fi
+
+    selected="$(prompt_for_project_selection)" || {
+        printf 'No project selected.\n' >&2
+        exit 1
+    }
+
+    PROJECT_DIR="$selected"
+    log "Using project root: $PROJECT_DIR"
+}
+
+validate_device_api() {
+    local value="$1"
+
+    [[ "$value" =~ ^[0-9]+$ ]] || fail "Invalid device API '$value'. Use a numeric SDK level, e.g. --device-api 21"
+    if ((value < 1 || value > 1000)); then
+        fail "Device API '$value' is out of range"
+    fi
+}
+
+detect_device_api() {
+    local sdk
+
+    sdk="$("$ADB_BIN" -s "$ACTIVE_SERIAL" shell getprop ro.build.version.sdk 2>/dev/null | tr -d '\r\n')"
+    [[ -n "$sdk" ]] || return 1
+    printf '%s\n' "$sdk"
+}
+
+resolve_device_api() {
+    if [[ -n "$DEVICE_API" ]]; then
+        validate_device_api "$DEVICE_API"
+        log "Using supplied device API $DEVICE_API"
+        return 0
+    fi
+
+    DEVICE_API="$(detect_device_api)" || {
+        fail "Unable to detect device API for $ACTIVE_SERIAL. Pass --device-api <sdk>"
+    }
+    validate_device_api "$DEVICE_API"
+    log "Detected device API $DEVICE_API"
+}
+
+PROJECT_DIR=""
 PORT="8206"
 PORT_EXPLICIT=0
 SERIAL=""
+DEVICE_API=""
+DEVICE_API_EXPLICIT=0
 PACKAGE_NAME=""
 ACTIVITY_NAME=""
 SKIP_INSPECT_OPEN=1
@@ -56,10 +748,12 @@ LOG_DIR=""
 LAST_LOG_FILE=""
 SERVE_LOG_FILE=""
 
+bootstrap_path
+
 while (($# > 0)); do
     case "$1" in
         --project)
-            PROJECT_DIR="${2:-}"
+            PROJECT_DIR_RAW="${2:-}"
             shift 2
             ;;
         --port)
@@ -69,6 +763,11 @@ while (($# > 0)); do
             ;;
         --serial)
             SERIAL="${2:-}"
+            shift 2
+            ;;
+        --device-api)
+            DEVICE_API="${2:-}"
+            DEVICE_API_EXPLICIT=1
             shift 2
             ;;
         --package)
@@ -115,17 +814,15 @@ while (($# > 0)); do
     esac
 done
 
-if [[ -z "$PROJECT_DIR" ]]; then
-    fail "Project path is empty"
-fi
-
-PROJECT_DIR="$(cd "$PROJECT_DIR" && pwd -P)"
-
 if [[ ! "$PORT" =~ ^[0-9]+$ ]]; then
     fail "Invalid port '$PORT'. Use a numeric value, e.g. --port 8206"
 fi
 if ((PORT < 1 || PORT > 65535)); then
     fail "Port '$PORT' is out of range (1-65535)"
+fi
+
+if [[ -n "$DEVICE_API" && $DEVICE_API_EXPLICIT -eq 1 ]]; then
+    validate_device_api "$DEVICE_API"
 fi
 
 on_signal() {
@@ -151,11 +848,77 @@ cleanup() {
     fi
 }
 
-trap on_signal INT TERM
-trap cleanup EXIT
+on_exit() {
+    local status=$?
+
+    set +e
+    cleanup
+    report_finalize "$status"
+    set -e
+}
+
+trap on_signal INT TERM HUP
+trap on_exit EXIT
 
 init_log_dir() {
-    LOG_DIR="$(mktemp -d "${TMPDIR:-/tmp}/ionic-android-live-serve-inspect.XXXXXX")"
+    local report_file_was_provided=0
+
+    if [[ -n "${IONIC_ANDROID_LIVE_SERVE_INSPECT_REPORT_FILE:-}" ]]; then
+        report_file_was_provided=1
+        REPORT_FILE="${IONIC_ANDROID_LIVE_SERVE_INSPECT_REPORT_FILE}"
+    fi
+
+    REPORT_DIR="${IONIC_ANDROID_LIVE_SERVE_INSPECT_RUN_DIR:-}"
+    REPORT_LATEST_DIR="${IONIC_ANDROID_LIVE_SERVE_INSPECT_LATEST_RUN_DIR:-}"
+    REPORT_LATEST_FILE="${IONIC_ANDROID_LIVE_SERVE_INSPECT_LATEST_REPORT_FILE:-}"
+
+    if [[ -n "$REPORT_DIR" ]]; then
+        mkdir -p "$REPORT_DIR"
+    elif [[ -n "$REPORT_FILE" ]]; then
+        REPORT_DIR="$(dirname "$REPORT_FILE")"
+    else
+        REPORT_DIR="$(mktemp -d "${TMPDIR:-/tmp}/ionic-android-live-serve-inspect.XXXXXX")"
+    fi
+
+    if [[ -z "$REPORT_FILE" ]]; then
+        REPORT_FILE="$REPORT_DIR/report.md"
+    fi
+
+    LOG_DIR="$REPORT_DIR"
+    mkdir -p "$(dirname "$REPORT_FILE")"
+    touch "$REPORT_FILE"
+    if [[ -n "$REPORT_LATEST_DIR" ]]; then
+        mkdir -p "$REPORT_LATEST_DIR"
+        if [[ -z "$REPORT_LATEST_FILE" ]]; then
+            REPORT_LATEST_FILE="$REPORT_LATEST_DIR/report.md"
+        fi
+    elif [[ -n "$REPORT_LATEST_FILE" ]]; then
+        mkdir -p "$(dirname "$REPORT_LATEST_FILE")"
+    fi
+    if [[ -n "$REPORT_LATEST_FILE" ]]; then
+        touch "$REPORT_LATEST_FILE"
+    fi
+    REPORT_TARGETS=("$REPORT_FILE")
+    if [[ -n "$REPORT_LATEST_FILE" && "$REPORT_LATEST_FILE" != "$REPORT_FILE" ]]; then
+        REPORT_TARGETS+=("$REPORT_LATEST_FILE")
+    fi
+    export IONIC_ANDROID_LIVE_SERVE_INSPECT_REPORT_FILE="$REPORT_FILE"
+    if [[ -n "$REPORT_LATEST_FILE" ]]; then
+        export IONIC_ANDROID_LIVE_SERVE_INSPECT_LATEST_REPORT_FILE="$REPORT_LATEST_FILE"
+    fi
+
+    for target in "${REPORT_TARGETS[@]}"; do
+        report_bootstrap_target "$target"
+    done
+
+    REPORT_INITIALIZED=1
+
+    if [[ $report_file_was_provided -eq 0 ]]; then
+        log "Report file: $REPORT_FILE"
+        if [[ "$REPORT_LATEST_FILE" != "$REPORT_FILE" ]]; then
+            log "Latest report: $REPORT_LATEST_FILE"
+        fi
+    fi
 }
 
 make_log_file() {
@@ -197,6 +960,8 @@ run_logged_command() {
         set -e
     fi
 
+    report_append_file "$label (exit $status)" "$logfile"
+
     return "$status"
 }
 
@@ -213,6 +978,7 @@ run_android_command() {
 }
 
 ensure_adb() {
+    local sdk_root
     if command -v adb >/dev/null 2>&1; then
         ADB_BIN="$(command -v adb)"
         return 0
@@ -225,6 +991,9 @@ ensure_adb() {
     if [[ -n "${ANDROID_SDK_ROOT:-}" ]]; then
         candidates+=("${ANDROID_SDK_ROOT}/platform-tools/adb")
     fi
+    if sdk_root="$(resolve_android_sdk_root 2>/dev/null)"; then
+        candidates+=("${sdk_root}/platform-tools/adb")
+    fi
 
     local candidate
     for candidate in "${candidates[@]}"; do
@@ -236,6 +1005,92 @@ ensure_adb() {
     done
 
     return 1
+}
+
+resolve_android_sdk_root() {
+    local candidate
+    local sdk_dir
+
+    if [[ -n "${ANDROID_SDK_ROOT:-}" && -d "${ANDROID_SDK_ROOT:-}" ]]; then
+        printf '%s\n' "$ANDROID_SDK_ROOT"
+        return 0
+    fi
+
+    if [[ -n "${ANDROID_HOME:-}" && -d "${ANDROID_HOME:-}" ]]; then
+        printf '%s\n' "$ANDROID_HOME"
+        return 0
+    fi
+
+    if [[ -n "${PROJECT_DIR:-}" && -f "$PROJECT_DIR/android/local.properties" ]]; then
+        sdk_dir="$(sed -nE 's/^[[:space:]]*sdk\.dir[[:space:]]*=[[:space:]]*(.+)[[:space:]]*$/\1/p' "$PROJECT_DIR/android/local.properties" | head -n 1)"
+        sdk_dir="${sdk_dir//\\:/:}"
+        sdk_dir="${sdk_dir//\\\\/\\}"
+        if [[ -n "$sdk_dir" && -d "$sdk_dir" ]]; then
+            printf '%s\n' "$sdk_dir"
+            return 0
+        fi
+    fi
+
+    local home_dir="${HOME:-}"
+    local candidates=()
+    if [[ -n "$home_dir" ]]; then
+        candidates+=(
+            "$home_dir/Android/Sdk"
+            "$home_dir/Library/Android/sdk"
+            "$home_dir/.android-sdk"
+            "$home_dir/Android/sdk"
+        )
+    fi
+    candidates+=(
+        "/opt/android-sdk"
+        "/usr/local/share/android-sdk"
+        "/usr/lib/android-sdk"
+    )
+
+    for candidate in "${candidates[@]}"; do
+        [[ -d "$candidate" ]] || continue
+        printf '%s\n' "$candidate"
+        return 0
+    done
+
+    return 1
+}
+
+ensure_android_sdk_configuration() {
+    local sdk_root
+    local local_properties_file
+    local tmp_file
+
+    sdk_root="$(resolve_android_sdk_root)" || return 1
+    ANDROID_SDK_ROOT_RESOLVED="$sdk_root"
+    export ANDROID_HOME="$sdk_root"
+    export ANDROID_SDK_ROOT="$sdk_root"
+    append_path_dir "$sdk_root/platform-tools"
+    append_path_dir "$sdk_root/emulator"
+    export PATH
+
+    if [[ -n "${PROJECT_DIR:-}" ]]; then
+        local_properties_file="$PROJECT_DIR/android/local.properties"
+        mkdir -p "$(dirname "$local_properties_file")"
+        tmp_file="${local_properties_file}.tmp.$$"
+        if [[ -f "$local_properties_file" ]]; then
+            if grep -q '^sdk\.dir=' "$local_properties_file"; then
+                sed -E "s|^sdk\\.dir=.*$|sdk.dir=$sdk_root|" "$local_properties_file" > "$tmp_file"
+            else
+                {
+                    printf 'sdk.dir=%s\n' "$sdk_root"
+                    cat "$local_properties_file"
+                } > "$tmp_file"
+            fi
+            mv "$tmp_file" "$local_properties_file"
+        else
+            printf 'sdk.dir=%s\n' "$sdk_root" > "$local_properties_file"
+        fi
+        log "Using Android SDK at $sdk_root"
+        log "Ensured Android local.properties at $local_properties_file"
+    fi
+
+    return 0
 }
 
 is_port_open() {
@@ -324,7 +1179,7 @@ run_configure_if_available() {
         return 0
     fi
 
-    if rg -q "spawn pod ENOENT|Updating iOS native dependencies with pod install - failed|AccessDenied|ListObjectsV2 operation: Access Denied" "$LAST_LOG_FILE"; then
+    if search_quiet "spawn pod ENOENT|Updating iOS native dependencies with pod install - failed|AccessDenied|ListObjectsV2 operation: Access Denied" "$LAST_LOG_FILE"; then
         log "configure hit non-Android prerequisites (iOS pods/AWS). Continuing with Android flow."
         return 0
     fi
@@ -362,7 +1217,7 @@ manifest_references_resource() {
     local resource_ref="$1"
     local manifest_file="$PROJECT_DIR/android/app/src/main/AndroidManifest.xml"
     [[ -f "$manifest_file" ]] || return 1
-    rg -q "$resource_ref" "$manifest_file"
+    search_quiet "$resource_ref" "$manifest_file"
 }
 
 android_generated_resources_ready() {
@@ -371,17 +1226,17 @@ android_generated_resources_ready() {
 
     if manifest_references_resource '@string/applink_host|@string/applink_host_alternate|@string/branch_key|@string/branch_test_key|@bool/branch_test_mode'; then
         [[ -f "$strings_file" ]] || return 1
-        rg -q '<string name="branch_key">[^<]+' "$strings_file" || return 1
-        rg -q '<string name="applink_host">[^<]+' "$strings_file" || return 1
-        rg -q '<string name="applink_host_alternate">[^<]+' "$strings_file" || return 1
-        rg -q '<string name="branch_test_key">[^<]+' "$strings_file" || return 1
-        rg -q '<bool name="branch_test_mode">[^<]+' "$strings_file" || return 1
+        search_quiet '<string name="branch_key">[^<]+' "$strings_file" || return 1
+        search_quiet '<string name="applink_host">[^<]+' "$strings_file" || return 1
+        search_quiet '<string name="applink_host_alternate">[^<]+' "$strings_file" || return 1
+        search_quiet '<string name="branch_test_key">[^<]+' "$strings_file" || return 1
+        search_quiet '<bool name="branch_test_mode">[^<]+' "$strings_file" || return 1
     fi
 
     if manifest_references_resource '@string/default_notification_channel_id|@string/default_notification_channel_name'; then
         [[ -f "$strings_file" ]] || return 1
-        rg -q '<string name="default_notification_channel_id">[^<]+' "$strings_file" || return 1
-        rg -q '<string name="default_notification_channel_name">[^<]+' "$strings_file" || return 1
+        search_quiet '<string name="default_notification_channel_id">[^<]+' "$strings_file" || return 1
+        search_quiet '<string name="default_notification_channel_name">[^<]+' "$strings_file" || return 1
     fi
 
     if manifest_references_resource '@drawable/ic_tracking'; then
@@ -446,7 +1301,7 @@ repair_native_audio_patch_if_needed() {
 }
 
 ensure_branch_resources_if_needed() {
-    if ! rg -q '"capacitor-branch-deep-links"' "$PROJECT_DIR/package.json"; then
+    if ! search_quiet '"capacitor-branch-deep-links"' "$PROJECT_DIR/package.json"; then
         return 0
     fi
 
@@ -455,9 +1310,9 @@ ensure_branch_resources_if_needed() {
         return 0
     fi
 
-    if rg -q '<string name="branch_key">[^<]+' "$strings_file" \
-        && rg -q '<string name="applink_host">[^<]+' "$strings_file" \
-        && rg -q '<string name="applink_host_alternate">[^<]+' "$strings_file"; then
+    if search_quiet '<string name="branch_key">[^<]+' "$strings_file" \
+        && search_quiet '<string name="applink_host">[^<]+' "$strings_file" \
+        && search_quiet '<string name="applink_host_alternate">[^<]+' "$strings_file"; then
         return 0
     fi
 
@@ -465,7 +1320,7 @@ ensure_branch_resources_if_needed() {
     run_build_after_if_present
     sync_android_platform
 
-    if ! rg -q '<string name="branch_key">[^<]+' "$strings_file"; then
+    if ! search_quiet '<string name="branch_key">[^<]+' "$strings_file"; then
         fail "Missing Android branch_key resource in strings.xml after auto-fix. Run: npm run configure && node build-after.js && npx cap sync android"
     fi
 }
@@ -512,7 +1367,7 @@ detect_package_name() {
 
     for f in "$PROJECT_DIR/capacitor.config.ts" "$PROJECT_DIR/capacitor.config.json"; do
         if [[ -f "$f" ]]; then
-            line="$(rg -n "appId[[:space:]]*[:=][[:space:]]*['\"][^'\"]+['\"]" "$f" -m 1 | cut -d: -f2- || true)"
+            line="$(search_first_line "appId[[:space:]]*[:=][[:space:]]*['\"][^'\"]+['\"]" "$f" | cut -d: -f2- || true)"
             if [[ -n "$line" ]]; then
                 echo "$line" | sed -E "s/.*appId[[:space:]]*[:=][[:space:]]*['\"]([^'\"]+)['\"].*/\1/"
                 return 0
@@ -522,7 +1377,7 @@ detect_package_name() {
 
     for f in "$PROJECT_DIR/android/app/build.gradle.kts" "$PROJECT_DIR/android/app/build.gradle"; do
         if [[ -f "$f" ]]; then
-            line="$(rg -n '^[[:space:]]*applicationId[[:space:]]*=' "$f" -m 1 | cut -d: -f2- || true)"
+            line="$(search_first_line '^[[:space:]]*applicationId[[:space:]]*=' "$f" | cut -d: -f2- || true)"
             if [[ -n "$line" ]]; then
                 echo "$line" | sed -E 's/.*"([^"]+)".*/\1/'
                 return 0
@@ -531,7 +1386,7 @@ detect_package_name() {
     done
 
     if [[ -f "$PROJECT_DIR/android/app/src/main/AndroidManifest.xml" ]]; then
-        line="$(rg -n 'package=' "$PROJECT_DIR/android/app/src/main/AndroidManifest.xml" -m 1 | cut -d: -f2- || true)"
+        line="$(search_first_line 'package=' "$PROJECT_DIR/android/app/src/main/AndroidManifest.xml" | cut -d: -f2- || true)"
         if [[ -n "$line" ]]; then
             echo "$line" | sed -E 's/.*package="([^"]+)".*/\1/'
             return 0
@@ -701,7 +1556,7 @@ run_gradle_install() {
     set -e
 
     if [[ $status -ne 0 ]]; then
-        if rg -q "INSTALL_FAILED_UPDATE_INCOMPATIBLE|INSTALL_FAILED_VERSION_DOWNGRADE" "$LAST_LOG_FILE"; then
+        if search_quiet "INSTALL_FAILED_UPDATE_INCOMPATIBLE|INSTALL_FAILED_VERSION_DOWNGRADE" "$LAST_LOG_FILE"; then
             return 2
         fi
         show_log_excerpt "$LAST_LOG_FILE"
@@ -736,13 +1591,13 @@ attempt_gradle_install_with_recovery() {
             return 0
         fi
 
-        if [[ $did_recover_resources -eq 0 ]] && rg -q "resource string/applink_host|resource string/applink_host_alternate|resource string/branch_key|resource string/branch_test_key|resource bool/branch_test_mode|resource drawable/ic_tracking|resource string/default_notification_channel_id|resource string/default_notification_channel_name" "$LAST_LOG_FILE"; then
+        if [[ $did_recover_resources -eq 0 ]] && search_quiet "resource string/applink_host|resource string/applink_host_alternate|resource string/branch_key|resource string/branch_test_key|resource bool/branch_test_mode|resource drawable/ic_tracking|resource string/default_notification_channel_id|resource string/default_notification_channel_name" "$LAST_LOG_FILE"; then
             did_recover_resources=1
             recover_android_generated_resources
             continue
         fi
 
-        if [[ $did_repair_native_audio -eq 0 ]] && rg -q "requestAudioFocusIfNeeded\\(\\) is already defined|abandonAudioFocusIfNeeded\\(\\) is already defined" "$LAST_LOG_FILE"; then
+        if [[ $did_repair_native_audio -eq 0 ]] && search_quiet "requestAudioFocusIfNeeded\\(\\) is already defined|abandonAudioFocusIfNeeded\\(\\) is already defined" "$LAST_LOG_FILE"; then
             did_repair_native_audio=1
             repair_native_audio_patch_if_needed
             continue
@@ -752,27 +1607,120 @@ attempt_gradle_install_with_recovery() {
     done
 }
 
+normalize_component_name() {
+    local component="$1"
+
+    if [[ "$component" == */* ]]; then
+        printf '%s\n' "$component"
+        return 0
+    fi
+
+    if [[ "$component" == .* ]]; then
+        printf '%s/%s\n' "$PACKAGE_NAME" "$component"
+        return 0
+    fi
+
+    if [[ "$component" == "$PACKAGE_NAME"* ]]; then
+        printf '%s\n' "$component"
+        return 0
+    fi
+
+    if [[ "$component" == *.* ]]; then
+        printf '%s/%s\n' "$PACKAGE_NAME" "$component"
+        return 0
+    fi
+
+    printf '%s/.%s\n' "$PACKAGE_NAME" "$component"
+}
+
+detect_launcher_component_from_manifest() {
+    local manifest_file="$PROJECT_DIR/android/app/src/main/AndroidManifest.xml"
+
+    [[ -f "$manifest_file" ]] || return 1
+
+    node - "$manifest_file" <<'NODE'
+const fs = require('fs');
+const file = process.argv[2];
+const xml = fs.readFileSync(file, 'utf8');
+
+function extractName(tag) {
+  const match = tag.match(/android:name\s*=\s*"([^"]+)"/);
+  return match ? match[1] : null;
+}
+
+function hasLauncherIntent(body) {
+  return /android\.intent\.action\.MAIN/.test(body) && /android\.intent\.category\.LAUNCHER/.test(body);
+}
+
+const patterns = [
+  /<(activity|activity-alias)\b([\s\S]*?)>([\s\S]*?)<\/\1>/g,
+  /<(activity|activity-alias)\b([\s\S]*?)\/>/g,
+];
+
+for (const pattern of patterns) {
+  let match;
+  while ((match = pattern.exec(xml))) {
+    const tag = match[0];
+    const attrs = match[2] || '';
+    const body = match[3] || '';
+    if (!hasLauncherIntent(tag + body)) {
+      continue;
+    }
+    const name = extractName(attrs) || extractName(tag);
+    if (name) {
+      process.stdout.write(`${name}\n`);
+      process.exit(0);
+    }
+  }
+}
+
+process.exit(1);
+NODE
+}
+
+detect_launcher_component_via_adb() {
+    local raw_output component
+
+    raw_output="$("$ADB_BIN" -s "$ACTIVE_SERIAL" shell cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.LAUNCHER "$PACKAGE_NAME" 2>/dev/null | tr -d '\r')"
+    component="$(printf '%s\n' "$raw_output" | sed -nE 's/.*([[:alnum:]_.$]+\/[[:alnum:]_.$]+).*/\1/p' | head -n 1)"
+    [[ -n "$component" ]] || return 1
+    printf '%s\n' "$component"
+}
+
+resolve_launcher_component() {
+    local component=""
+
+    if [[ -n "$ACTIVITY_NAME" ]]; then
+        normalize_component_name "$ACTIVITY_NAME"
+        return 0
+    fi
+
+    if component="$(detect_launcher_component_from_manifest 2>/dev/null)"; then
+        normalize_component_name "$component"
+        return 0
+    fi
+
+    if component="$(detect_launcher_component_via_adb 2>/dev/null)"; then
+        printf '%s\n' "$component"
+        return 0
+    fi
+
+    return 1
+}
+
 launch_app() {
     if [[ $SKIP_LAUNCH -eq 1 ]]; then
         log "Launch skipped (--skip-launch)"
+        LAUNCH_METHOD="skipped"
         return 0
     fi
 
     local adb_cmd=("$ADB_BIN" -s "$ACTIVE_SERIAL")
     local logfile status
+    local component=""
 
     if [[ -n "$ACTIVITY_NAME" ]]; then
-        local component="$ACTIVITY_NAME"
-        if [[ "$component" != */* ]]; then
-            if [[ "$component" == .* ]]; then
-                component="${PACKAGE_NAME}/${component}"
-            elif [[ "$component" == "$PACKAGE_NAME"* ]]; then
-                component="$component"
-            else
-                component="${PACKAGE_NAME}/.${component}"
-            fi
-        fi
-
+        component="$(normalize_component_name "$ACTIVITY_NAME")"
         logfile="$(make_log_file "launch-activity")"
         LAST_LOG_FILE="$logfile"
         set +e
@@ -784,7 +1732,28 @@ launch_app() {
             return "$status"
         fi
         log "Launched component: $component"
+        LAUNCH_METHOD="activity"
+        LAUNCH_COMPONENT="$component"
         return 0
+    fi
+
+    if component="$(resolve_launcher_component 2>/dev/null)"; then
+        logfile="$(make_log_file "launch-component")"
+        LAST_LOG_FILE="$logfile"
+        set +e
+        "${adb_cmd[@]}" shell am start -W -n "$component" >"$logfile" 2>&1
+        status=$?
+        set -e
+
+        if [[ $status -eq 0 ]]; then
+            log "Launched launcher component: $component"
+            LAUNCH_METHOD="component"
+            LAUNCH_COMPONENT="$component"
+            return 0
+        fi
+
+        show_log_excerpt "$logfile"
+        warn "Launcher component start failed; falling back to monkey"
     fi
 
     logfile="$(make_log_file "launch-monkey")"
@@ -801,6 +1770,8 @@ launch_app() {
     fi
 
     log "Launch intent sent for package: $PACKAGE_NAME"
+    LAUNCH_METHOD="monkey"
+    LAUNCH_COMPONENT="$PACKAGE_NAME"
 }
 
 open_inspect_tab() {
@@ -831,20 +1802,22 @@ open_inspect_tab() {
     return 0
 }
 
+init_log_dir
+
 if ! command -v node >/dev/null 2>&1; then
     fail "node is required"
 fi
 if ! command -v npm >/dev/null 2>&1; then
     fail "npm is required"
 fi
-if ! command -v rg >/dev/null 2>&1; then
-    fail "rg (ripgrep) is required"
+if ! detect_search_tool; then
+    fail "A search tool is required (install ripgrep or ensure grep is available)"
 fi
 if ! ensure_adb; then
     fail "adb not found in PATH or common Android SDK locations"
 fi
 
-init_log_dir
+resolve_project_dir
 
 if [[ ! -f "$PROJECT_DIR/package.json" ]]; then
     fail "package.json not found in $PROJECT_DIR"
@@ -867,7 +1840,6 @@ if [[ "$PREPARE_MODE" == "skip" ]]; then
 else
     prepare_android_project
 fi
-start_ionic_serve
 
 if [[ -z "$PACKAGE_NAME" ]]; then
     if ! PACKAGE_NAME="$(detect_package_name)"; then
@@ -876,12 +1848,20 @@ if [[ -z "$PACKAGE_NAME" ]]; then
 fi
 
 select_usb_device
+resolve_device_api
+
+if ((DEVICE_API < 21)); then
+    fail "Device API $DEVICE_API does not support adb reverse. Use an API 21+ USB Android device or pass --device-api 21+"
+fi
+
+start_ionic_serve
 write_native_live_server_config
+ensure_android_sdk_configuration || fail "Android SDK not found. Set ANDROID_HOME / ANDROID_SDK_ROOT or install the Android SDK in a standard location"
 ensure_android_manifest_allows_cleartext
 
 "$ADB_BIN" -s "$ACTIVE_SERIAL" reverse "tcp:$PORT" "tcp:$PORT"
 ADB_REVERSE_SET=1
-log "Applied adb reverse tcp:$PORT tcp:$PORT on device $ACTIVE_SERIAL"
+log "Applied adb reverse tcp:$PORT tcp:$PORT on device $ACTIVE_SERIAL (API $DEVICE_API)"
 
 set +e
 attempt_gradle_install_with_recovery

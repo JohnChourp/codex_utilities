@@ -1,0 +1,121 @@
+
+> Configure project :app
+Build file '/home/dm-soft-1/Downloads/projects/codeliver-app/android/app/build.gradle': line 18
+Properties should be assigned using the 'propName = value' syntax. Setting a property via the Gradle-generated 'propName value' or 'propName(value)' syntax in Groovy DSL has been deprecated. This is scheduled to be removed in Gradle 10.0. Use assignment ('multiDexEnabled = <value>') instead. Consult the upgrading guide for further information: https://docs.gradle.org/8.14.3/userguide/upgrading_version_8.html#groovy_space_assignment_syntax
+	at build_6vxdknlkr9tvjgghu6tb7m3w8$_run_closure1$_closure4.doCall$original(/home/dm-soft-1/Downloads/projects/codeliver-app/android/app/build.gradle:18)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+	at build_6vxdknlkr9tvjgghu6tb7m3w8$_run_closure1.doCall$original(/home/dm-soft-1/Downloads/projects/codeliver-app/android/app/build.gradle:6)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+Build file '/home/dm-soft-1/Downloads/projects/codeliver-app/android/app/build.gradle': line 33
+Properties should be assigned using the 'propName = value' syntax. Setting a property via the Gradle-generated 'propName value' or 'propName(value)' syntax in Groovy DSL has been deprecated. This is scheduled to be removed in Gradle 10.0. Use assignment ('url = <value>') instead. Consult the upgrading guide for further information: https://docs.gradle.org/8.14.3/userguide/upgrading_version_8.html#groovy_space_assignment_syntax
+	at build_6vxdknlkr9tvjgghu6tb7m3w8$_run_closure2$_closure10.doCall$original(/home/dm-soft-1/Downloads/projects/codeliver-app/android/app/build.gradle:33)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+	at build_6vxdknlkr9tvjgghu6tb7m3w8$_run_closure2.doCall$original(/home/dm-soft-1/Downloads/projects/codeliver-app/android/app/build.gradle:33)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+WARNING: Using flatDir should be avoided because it doesn't support any meta-data formats.
+
+> Configure project :capacitor-branch-deep-links
+Build file '/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/capacitor-branch-deep-links/android/build.gradle': line 29
+Properties should be assigned using the 'propName = value' syntax. Setting a property via the Gradle-generated 'propName value' or 'propName(value)' syntax in Groovy DSL has been deprecated. This is scheduled to be removed in Gradle 10.0. Use assignment ('namespace = <value>') instead. Consult the upgrading guide for further information: https://docs.gradle.org/8.14.3/userguide/upgrading_version_8.html#groovy_space_assignment_syntax
+	at build_crsmz68hub52t6500kfk6noc8$_run_closure2.doCall$original(/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/capacitor-branch-deep-links/android/build.gradle:29)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+	at build_crsmz68hub52t6500kfk6noc8.run(/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/capacitor-branch-deep-links/android/build.gradle:28)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+Build file '/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/capacitor-branch-deep-links/android/build.gradle': line 53
+Properties should be assigned using the 'propName = value' syntax. Setting a property via the Gradle-generated 'propName value' or 'propName(value)' syntax in Groovy DSL has been deprecated. This is scheduled to be removed in Gradle 10.0. Use assignment ('abortOnError = <value>') instead. Consult the upgrading guide for further information: https://docs.gradle.org/8.14.3/userguide/upgrading_version_8.html#groovy_space_assignment_syntax
+	at build_crsmz68hub52t6500kfk6noc8$_run_closure2$_closure9.doCall$original(/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/capacitor-branch-deep-links/android/build.gradle:53)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+	at build_crsmz68hub52t6500kfk6noc8$_run_closure2.doCall$original(/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/capacitor-branch-deep-links/android/build.gradle:52)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+
+> Configure project :capacitor-community-background-geolocation
+Build file '/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/@capacitor-community/background-geolocation/android/build.gradle': line 20
+Properties should be assigned using the 'propName = value' syntax. Setting a property via the Gradle-generated 'propName value' or 'propName(value)' syntax in Groovy DSL has been deprecated. This is scheduled to be removed in Gradle 10.0. Use assignment ('namespace = <value>') instead. Consult the upgrading guide for further information: https://docs.gradle.org/8.14.3/userguide/upgrading_version_8.html#groovy_space_assignment_syntax
+	at build_5e0143qzxl1ofmu9adz7ozeu3$_run_closure2.doCall$original(/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/@capacitor-community/background-geolocation/android/build.gradle:20)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+	at build_5e0143qzxl1ofmu9adz7ozeu3.run(/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/@capacitor-community/background-geolocation/android/build.gradle:19)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+Build file '/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/@capacitor-community/background-geolocation/android/build.gradle': line 35
+Properties should be assigned using the 'propName = value' syntax. Setting a property via the Gradle-generated 'propName value' or 'propName(value)' syntax in Groovy DSL has been deprecated. This is scheduled to be removed in Gradle 10.0. Use assignment ('abortOnError = <value>') instead. Consult the upgrading guide for further information: https://docs.gradle.org/8.14.3/userguide/upgrading_version_8.html#groovy_space_assignment_syntax
+	at build_5e0143qzxl1ofmu9adz7ozeu3$_run_closure2$_closure7.doCall$original(/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/@capacitor-community/background-geolocation/android/build.gradle:35)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+	at build_5e0143qzxl1ofmu9adz7ozeu3$_run_closure2.doCall$original(/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/@capacitor-community/background-geolocation/android/build.gradle:34)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+
+> Configure project :capacitor-community-barcode-scanner
+Build file '/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/@capacitor-community/barcode-scanner/android/build.gradle': line 11
+The RepositoryHandler.jcenter() method has been deprecated. This is scheduled to be removed in Gradle 9.0. JFrog announced JCenter's sunset in February 2021. Use mavenCentral() instead. Consult the upgrading guide for further information: https://docs.gradle.org/8.14.3/userguide/upgrading_version_6.html#jcenter_deprecation
+	at build_3ooritp98cttcso215to6igh8$_run_closure1$_closure2.doCall$original(/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/@capacitor-community/barcode-scanner/android/build.gradle:11)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+	at build_3ooritp98cttcso215to6igh8$_run_closure1.doCall$original(/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/@capacitor-community/barcode-scanner/android/build.gradle:9)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+Build file '/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/@capacitor-community/barcode-scanner/android/build.gradle': line 21
+Properties should be assigned using the 'propName = value' syntax. Setting a property via the Gradle-generated 'propName value' or 'propName(value)' syntax in Groovy DSL has been deprecated. This is scheduled to be removed in Gradle 10.0. Use assignment ('namespace = <value>') instead. Consult the upgrading guide for further information: https://docs.gradle.org/8.14.3/userguide/upgrading_version_8.html#groovy_space_assignment_syntax
+	at build_3ooritp98cttcso215to6igh8$_run_closure2.doCall$original(/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/@capacitor-community/barcode-scanner/android/build.gradle:21)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+	at build_3ooritp98cttcso215to6igh8.run(/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/@capacitor-community/barcode-scanner/android/build.gradle:20)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+Build file '/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/@capacitor-community/barcode-scanner/android/build.gradle': line 37
+Properties should be assigned using the 'propName = value' syntax. Setting a property via the Gradle-generated 'propName value' or 'propName(value)' syntax in Groovy DSL has been deprecated. This is scheduled to be removed in Gradle 10.0. Use assignment ('abortOnError = <value>') instead. Consult the upgrading guide for further information: https://docs.gradle.org/8.14.3/userguide/upgrading_version_8.html#groovy_space_assignment_syntax
+	at build_3ooritp98cttcso215to6igh8$_run_closure2$_closure7.doCall$original(/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/@capacitor-community/barcode-scanner/android/build.gradle:37)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+	at build_3ooritp98cttcso215to6igh8$_run_closure2.doCall$original(/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/@capacitor-community/barcode-scanner/android/build.gradle:36)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+
+> Configure project :capacitor-community-native-audio
+Build file '/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/@capacitor-community/native-audio/android/build.gradle': line 21
+Properties should be assigned using the 'propName = value' syntax. Setting a property via the Gradle-generated 'propName value' or 'propName(value)' syntax in Groovy DSL has been deprecated. This is scheduled to be removed in Gradle 10.0. Use assignment ('namespace = <value>') instead. Consult the upgrading guide for further information: https://docs.gradle.org/8.14.3/userguide/upgrading_version_8.html#groovy_space_assignment_syntax
+	at build_3u902yn7st7vtx9bamcqjmsff$_run_closure2.doCall$original(/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/@capacitor-community/native-audio/android/build.gradle:21)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+	at build_3u902yn7st7vtx9bamcqjmsff.run(/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/@capacitor-community/native-audio/android/build.gradle:20)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+Build file '/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/@capacitor-community/native-audio/android/build.gradle': line 37
+Properties should be assigned using the 'propName = value' syntax. Setting a property via the Gradle-generated 'propName value' or 'propName(value)' syntax in Groovy DSL has been deprecated. This is scheduled to be removed in Gradle 10.0. Use assignment ('abortOnError = <value>') instead. Consult the upgrading guide for further information: https://docs.gradle.org/8.14.3/userguide/upgrading_version_8.html#groovy_space_assignment_syntax
+	at build_3u902yn7st7vtx9bamcqjmsff$_run_closure2$_closure7.doCall$original(/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/@capacitor-community/native-audio/android/build.gradle:37)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+	at build_3u902yn7st7vtx9bamcqjmsff$_run_closure2.doCall$original(/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/@capacitor-community/native-audio/android/build.gradle:36)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+
+> Configure project :capacitor-cordova-android-plugins
+WARNING: Using flatDir should be avoided because it doesn't support any meta-data formats.
+
+> Configure project :capacitor-firebase-messaging
+Build file '/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/@capacitor-firebase/messaging/android/build.gradle': line 22
+Properties should be assigned using the 'propName = value' syntax. Setting a property via the Gradle-generated 'propName value' or 'propName(value)' syntax in Groovy DSL has been deprecated. This is scheduled to be removed in Gradle 10.0. Use assignment ('namespace = <value>') instead. Consult the upgrading guide for further information: https://docs.gradle.org/8.14.3/userguide/upgrading_version_8.html#groovy_space_assignment_syntax
+	at build_6zjxz3ply24xr44qdsoavyb7x$_run_closure2.doCall$original(/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/@capacitor-firebase/messaging/android/build.gradle:22)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+	at build_6zjxz3ply24xr44qdsoavyb7x.run(/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/@capacitor-firebase/messaging/android/build.gradle:21)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+Build file '/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/@capacitor-firebase/messaging/android/build.gradle': line 38
+Properties should be assigned using the 'propName = value' syntax. Setting a property via the Gradle-generated 'propName value' or 'propName(value)' syntax in Groovy DSL has been deprecated. This is scheduled to be removed in Gradle 10.0. Use assignment ('abortOnError = <value>') instead. Consult the upgrading guide for further information: https://docs.gradle.org/8.14.3/userguide/upgrading_version_8.html#groovy_space_assignment_syntax
+	at build_6zjxz3ply24xr44qdsoavyb7x$_run_closure2$_closure7.doCall$original(/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/@capacitor-firebase/messaging/android/build.gradle:38)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+	at build_6zjxz3ply24xr44qdsoavyb7x$_run_closure2.doCall$original(/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/@capacitor-firebase/messaging/android/build.gradle:37)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+
+> Configure project :deliverymanager-dm-check-get-plugin
+The StartParameter.isConfigurationCacheRequested property has been deprecated. This is scheduled to be removed in Gradle 10.0. Please use 'configurationCache.requested' property on 'BuildFeatures' service instead. Consult the upgrading guide for further information: https://docs.gradle.org/8.14.3/userguide/upgrading_version_8.html#deprecated_startparameter_is_configuration_cache_requested
+	at build_4gvi0x2azphcrs0dbhwxaewkv.run(/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/@deliverymanager/dm-check-get-plugin/android/build.gradle:16)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+Build file '/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/@deliverymanager/dm-check-get-plugin/android/build.gradle': line 20
+Properties should be assigned using the 'propName = value' syntax. Setting a property via the Gradle-generated 'propName value' or 'propName(value)' syntax in Groovy DSL has been deprecated. This is scheduled to be removed in Gradle 10.0. Use assignment ('namespace = <value>') instead. Consult the upgrading guide for further information: https://docs.gradle.org/8.14.3/userguide/upgrading_version_8.html#groovy_space_assignment_syntax
+	at build_4gvi0x2azphcrs0dbhwxaewkv$_run_closure1.doCall$original(/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/@deliverymanager/dm-check-get-plugin/android/build.gradle:20)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+	at build_4gvi0x2azphcrs0dbhwxaewkv.run(/home/dm-soft-1/Downloads/projects/codeliver-app/node_modules/@deliverymanager/dm-check-get-plugin/android/build.gradle:18)
+	(Run with --stacktrace to get the full stack trace of this deprecation warning.)
+
+[Incubating] Problems report is available at: file:///home/dm-soft-1/Downloads/projects/codeliver-app/android/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Could not determine the dependencies of task ':app:compileDebugJavaWithJavac'.
+> SDK location not found. Define a valid SDK location with an ANDROID_HOME environment variable or by setting the sdk.dir path in your project's local properties file at '/home/dm-soft-1/Downloads/projects/codeliver-app/android/local.properties'.
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 854ms

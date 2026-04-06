@@ -54,13 +54,6 @@
         "install_hint": {
           "default": "Install Ionic CLI and ensure ionic is in PATH."
         }
-      },
-      {
-        "type": "tool",
-        "name": "rg",
-        "install_hint": {
-          "default": "Install ripgrep and ensure rg is in PATH."
-        }
       }
     ]
   },
@@ -133,17 +126,6 @@
       ],
       "windows": [
         "ionic"
-      ]
-    },
-    "rg": {
-      "macos": [
-        "rg"
-      ],
-      "linux": [
-        "rg"
-      ],
-      "windows": [
-        "rg"
       ]
     }
   },

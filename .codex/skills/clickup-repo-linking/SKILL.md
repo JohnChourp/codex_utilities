@@ -11,8 +11,8 @@ Use this skill before implementation starts.
 
 1. Identify all repos that will be changed.
 2. For each repo, search repo-registry list `901502503337` for an existing repo task.
-3. If missing, create a repo task named exactly as the GitHub repository name.
-4. Set/select `repo_type` from existing list options. Ask user when uncertain.
+3. If no repo task exists, skip linking for that repo and continue with the remaining repos.
+4. When a matching repo task exists, set/select `repo_type` from existing list options if needed. Ask user when uncertain.
 
 ## 2) Validate source task write eligibility
 
@@ -40,3 +40,4 @@ Use this skill before implementation starts.
 2. Scope to list when known: `filters.location.subcategories=["<list_id>"]`.
 3. Read and verify: `clickup_get_task`.
 4. Update source task fallback text: `clickup_update_task`.
+5. Do not auto-create missing repo registry tasks.
