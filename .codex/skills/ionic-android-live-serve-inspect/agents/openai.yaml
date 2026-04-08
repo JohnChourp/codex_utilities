@@ -1,4 +1,4 @@
 interface:
   display_name: "Ionic Android Live Serve Inspect"
   short_description: "Run fast Android-only ionic serve and USB app launch for live mobile debugging"
-  default_prompt: "Start fast Android live serve on port 8206 for the current Ionic project, use the Android-only path by default, connect my USB device with adb reverse, and install/launch the app without opening browser inspect unless I ask."
+  default_prompt: "Start fast Android live serve on port 8206 for the current Ionic project, run npm run configure before Android sync/install/serve, use the Android-only path by default, connect my USB device with adb reverse, and install/launch the app without opening browser inspect unless I ask."

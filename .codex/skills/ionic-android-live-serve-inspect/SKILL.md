@@ -7,7 +7,7 @@ description: Start Ionic live serve, wire Android debugging, and optionally open
 
 ## Overview
 
-Run one command to start an Ionic live server, connect a USB Android phone to that server via `adb reverse`, and install/launch the Capacitor app. Chrome device inspect is opt-in only.
+Run one command to start an Ionic live server, run `npm run configure` before Android sync/install when available, connect a USB Android phone to that server via `adb reverse`, and install/launch the Capacitor app. Chrome device inspect is opt-in only.
 
 When `--project` is omitted, the launcher auto-discovers Ionic/Capacitor projects from the current working directory, the user's home tree, and common workspace roots. If more than one project matches, it opens an interactive terminal chooser.
 The chooser ranks the current repo/invocation match first, so a `codeliver-app` checkout appears at the top when it is present.
@@ -44,7 +44,7 @@ Fallback local entrypoints:
 - Validate Ionic/Capacitor project shape.
 - Auto-discover the Ionic project when `--project` is omitted; accept either a path or a fuzzy project name.
 - Prefer a fast Android-only path by default when the project already has `node_modules/` and `android/`.
-- Run `npm install` and `npm run configure` only when the fast path is unavailable or the user explicitly requests full prepare.
+- Run `npm install` only when the fast path is unavailable or the user explicitly requests full prepare. Always run `npm run configure` before Android sync/install and live serve when the script exists.
 - Ensure Android platform exists (`npx cap add android` when needed).
 - If available, refresh Android icons via `npm run push_icons_android`.
 - If `build-after.js` exists, run it to apply native post-processing (e.g. Branch resources).
@@ -73,8 +73,8 @@ Fallback local entrypoints:
 - `--package <applicationId>`: override package detection
 - `--activity <activity>`: launch specific activity
 - `--open-inspect`: open `chrome://inspect/#devices` automatically; never implied by default
-- `--full-prepare`: force the heavy prepare flow (`npm install` / `configure` / icons / `build-after.js`)
-- `--skip-prepare`: force skipping the heavy prepare flow
+- `--full-prepare`: force the heavy prepare flow (`npm install` / icons / `build-after.js`); `npm run configure` still runs
+- `--skip-prepare`: force skipping the heavy prepare flow (`npm install` / icons / `build-after.js`); `npm run configure` still runs
 - `--skip-inspect-open`: keep browser closed explicitly (default behavior)
 - `--skip-launch`: install only, do not launch app
 - `--verbose`: stream detailed command output instead of quiet mode
@@ -90,7 +90,7 @@ Fallback local entrypoints:
 - `Port already in use`: if using default port, the script auto-selects a nearby free port; if you passed `--port`, choose another one manually (e.g. `--port 8210`).
 - `Project prompt not appearing`: pass a more specific `--project <path>` or set `IONIC_PROJECT_SEARCH_ROOTS` to narrow the search roots.
 - `inspect tab not opening`: install Chrome/Chromium and retry; app session keeps running even if inspect open fails.
-- Want the old heavier behavior: rerun with `--full-prepare`.
+- Want the heavier prepare behavior (`npm install` + icons + `build-after.js`): rerun with `--full-prepare`.
 - `Device API 20 or lower`: the skill stops before `adb reverse`; use an API 21+ USB Android device or pass `--device-api 21+` only if you know the target supports reverse.
 - `SDK location not found`: the skill auto-detects the Android SDK from env/common paths and writes `android/local.properties`; if it still cannot find a valid SDK, set `ANDROID_HOME` or `ANDROID_SDK_ROOT`.
 - `INSTALL_FAILED_UPDATE_INCOMPATIBLE`: script retries uninstall/install automatically.

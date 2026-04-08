@@ -20,6 +20,7 @@ Load this policy when a task needs non-MCP, non-ClickUp, non-lambda-hardening be
 - Translation completion gate (mandatory): for every change that adds/updates translation key usage (`| translate`, `translate.instant`, `translate.get`, `translate.stream`), run a key-coverage check against all `src/assets/i18n/*.json` files of the impacted frontend project before completing the task.
   - If any used key is missing from at least one locale file, the task is **not complete**.
   - Final reply must include: (a) the checked key set, and (b) the locale files where keys were added/updated.
+- Broken translation audit (mandatory): after any frontend project change, scan for unresolved translate usage and raw key leaks such as `groups.informations`; if a key is missing or a dotted parent collides with a string key, fix the locale files or key structure in every impacted `src/assets/i18n/*.json` file before closeout.
 - Translation key safety: do not introduce dotted translation keys that collide with existing **string** keys (e.g. avoid `statistics.week-grouping-hint` if `statistics` is already a string). Prefer flat keys like `statistics-week-grouping-hint`, or ensure the parent key is an object in all locales.
 - UI affordance rule (chips): do **not** render `ion-chip` elements that look clickable but perform no action on tap/click. If the content is informational only, use `ion-badge`, `ion-text`, `ion-label`, or plain text containers instead.
 

@@ -1,0 +1,9 @@
+{
+  "skill": "ionic-android-live-serve-inspect",
+  "skill_root": "/home/dm-soft-1/.codex/skills/ionic-android-live-serve-inspect",
+  "invocation_cwd": "/home/dm-soft-1/.codex/skills/ionic-android-live-serve-inspect/scripts",
+  "invocation_cwd_basename": "scripts",
+  "started_at_utc": "2026-04-07T10:49:30.025237+00:00",
+  "command": "/home/dm-soft-1/.codex/skills/ionic-android-live-serve-inspect/scripts/run.py",
+  "argv": []
+}

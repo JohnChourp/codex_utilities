@@ -15,8 +15,8 @@ Options:
   --package <id>         Override package/applicationId detection
   --activity <name>      Activity to launch (e.g. .MainActivity)
   --open-inspect         Open chrome://inspect/#devices automatically
-  --full-prepare         Force full prepare flow (npm install/configure/icons/build-after)
-  --skip-prepare         Skip project prepare flow (npm install/configure/icons/build-after)
+  --full-prepare         Force heavy prepare flow (npm install/icons/build-after); configure still runs
+  --skip-prepare         Skip heavy prepare flow (npm install/icons/build-after); configure still runs
   --skip-inspect-open    Do not open chrome://inspect/#devices
   --skip-launch          Install only, do not launch app
   --verbose              Stream detailed command output
@@ -1365,19 +1365,9 @@ resolve_prepare_mode() {
 detect_package_name() {
     local f line
 
-    for f in "$PROJECT_DIR/capacitor.config.ts" "$PROJECT_DIR/capacitor.config.json"; do
-        if [[ -f "$f" ]]; then
-            line="$(search_first_line "appId[[:space:]]*[:=][[:space:]]*['\"][^'\"]+['\"]" "$f" | cut -d: -f2- || true)"
-            if [[ -n "$line" ]]; then
-                echo "$line" | sed -E "s/.*appId[[:space:]]*[:=][[:space:]]*['\"]([^'\"]+)['\"].*/\1/"
-                return 0
-            fi
-        fi
-    done
-
     for f in "$PROJECT_DIR/android/app/build.gradle.kts" "$PROJECT_DIR/android/app/build.gradle"; do
         if [[ -f "$f" ]]; then
-            line="$(search_first_line '^[[:space:]]*applicationId[[:space:]]*=' "$f" | cut -d: -f2- || true)"
+            line="$(search_first_line '^[[:space:]]*applicationId([[:space:]]*=)?[[:space:]]*"[^"]+"' "$f" | cut -d: -f2- || true)"
             if [[ -n "$line" ]]; then
                 echo "$line" | sed -E 's/.*"([^"]+)".*/\1/'
                 return 0
@@ -1392,6 +1382,16 @@ detect_package_name() {
             return 0
         fi
     fi
+
+    for f in "$PROJECT_DIR/capacitor.config.ts" "$PROJECT_DIR/capacitor.config.json"; do
+        if [[ -f "$f" ]]; then
+            line="$(search_first_line "appId[[:space:]]*[:=][[:space:]]*['\"][^'\"]+['\"]" "$f" | cut -d: -f2- || true)"
+            if [[ -n "$line" ]]; then
+                echo "$line" | sed -E "s/.*appId[[:space:]]*[:=][[:space:]]*['\"]([^'\"]+)['\"].*/\1/"
+                return 0
+            fi
+        fi
+    done
 
     return 1
 }
@@ -1832,6 +1832,7 @@ resolve_prepare_mode
 
 if [[ "$PREPARE_MODE" == "skip" ]]; then
     log "Project prepare skipped ($PREPARE_LOG_LABEL)"
+    run_configure_if_available
     ensure_android_platform
     sync_android_platform
     if ! android_generated_resources_ready; then

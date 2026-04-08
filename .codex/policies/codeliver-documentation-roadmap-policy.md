@@ -14,7 +14,12 @@ Any time you:
 ### 3.0 README-first workflow (REQUIRED)
 
 - Before any change, correction, explanation, or implementation discussion for a lambda, project, or component, read the nearest relevant `README.md` first.
+- Before proposing or implementing a change, first check whether the requested behavior already exists. Do not assume absence before auditing docs and code.
 - Treat that README as the primary business-logic baseline for flows, invariants, inputs/outputs, and current behavior.
+- Required audit order:
+  - Lambda work: read the lambda root `README.md` first, then audit the relevant handler/helpers/tests/wiring in code.
+  - Project work: read the project root `README.md` first, then the nearest component/module `README.md` when it exists, then audit the relevant code/helpers/tests/wiring.
+- If the requested behavior is already implemented, say that clearly to the user and avoid duplicating the change plan.
 - If the relevant README is missing or clearly stale, create or update it before changing code so it captures the current business flow as concretely as possible from the code, adjacent docs, and existing patterns.
 - For multi-component work, read and, when needed, update every impacted component README before editing implementation details.
 - Do not proceed with implementation details until the README context has been consumed or bootstrapped.
@@ -23,6 +28,7 @@ Any time you:
 
 - When a scope has more than one relevant `README.md`, read all of them before changing anything.
 - If two or more README files disagree, or a README disagrees with the requested behavior, do not guess or merge the rules silently.
+- If the README says a behavior exists but the code does not, or the code shows an implementation missing from the README, treat that as an inconsistency and surface it explicitly before proceeding.
 - Surface the exact contradiction and ask the user which business logic is authoritative before proceeding.
 - For multi-lambda, multi-project, or multi-component changes, do not invent a blended interpretation when the local READMEs conflict; ask which scope should win and apply that choice consistently.
 - If the conflict can be resolved by a more specific README within the same scope hierarchy, use that only when it clearly overrides the broader README and does not contradict the user request.
