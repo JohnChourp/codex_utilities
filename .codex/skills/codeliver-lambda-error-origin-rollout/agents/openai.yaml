@@ -1,3 +1,0 @@
-interface:
-  display_name: "Codeliver Lambda Error Origin Rollout"
-  short_description: "Audit and apply canonical error-origin logging to a CodeDeliver lambda repo"

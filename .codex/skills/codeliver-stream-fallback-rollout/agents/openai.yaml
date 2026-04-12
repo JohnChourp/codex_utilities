@@ -1,4 +1,0 @@
-interface:
-  display_name: "Codeliver Stream Fallback Rollout"
-  short_description: "Roll out CodeDeliver stream fallback safely"
-  default_prompt: "Use $codeliver-stream-fallback-rollout for /abs/path/to/lambda to add NDJSON streaming with buffered fallback and backward compatibility."

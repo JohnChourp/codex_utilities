@@ -1,4 +1,0 @@
-interface:
-  display_name: "CodeDeliver Sync Global Modal Styles"
-  short_description: "Sync modal global.scss selectors from panel to sap/pos with dry-run reports"
-  default_prompt: "Use $codeliver-sync-global-modal-styles to audit/apply panel->sap,pos global.scss modal selector parity with exact-name matching and safe report output."

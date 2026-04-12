@@ -1,4 +1,0 @@
-interface:
-  display_name: "Codeliver Upgrade Lambda Deps"
-  short_description: "Upgrade one lambda's @deliverymanager packages with version fallback"
-  default_prompt: "Use $codeliver-upgrade-deliverymanager-lambda-deps for one lambda at a time. Resolve all @deliverymanager/* packages from the lambda's package.json, try the newest stable npm version first, fall back to older versions until local validation passes, restore repo state on failed attempts, and stop with a failure if any package has no compatible version."
