@@ -1,7 +1,7 @@
 # AGENTS.md
 
 <INSTRUCTIONS>
-`codex_utilities/.codex` is no longer the canonical home for CodeDeliver or CRP domain guidance.
+Global Codex state is still stored in `~/.codex`, but CodeDeliver and CRP domain guidance no longer lives here.
 
 ## Canonical domain homes
 
@@ -10,9 +10,9 @@
 - Cloud Repos Panel / CRP (`cloud-repos-panel`, `crp-*` lambdas):
   - `$HOME/Downloads/projects/cloud-repos-panel-brain/.codex`
 
-## Legacy repo role
+## Global role
 
-- Keep only non-domain utility assets here.
-- Do not recreate or restore CodeDeliver/CRP domain `playbooks`, `refs`, or `policies` in this legacy `.codex`.
-- When working in one of the domains above, use the corresponding brain-local `.codex/AGENTS.md` and local `.codex/{policies,playbooks,refs}`.
+- Keep only operational Codex state and machine-local overlays here.
+- Do not recreate or restore CodeDeliver/CRP domain `playbooks`, `refs`, or `policies` in `~/.codex`.
+- When working in one of the domains above, load the local brain `.codex/AGENTS.md` and the corresponding local `.codex/{policies,playbooks,refs}`.
 </INSTRUCTIONS>

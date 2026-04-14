@@ -1,4 +1,0 @@
-interface:
-  display_name: "OPTC Enemy JSON Import"
-  short_description: "Turn OPTC enemy notes or screenshots into import-ready enemy JSON."
-  default_prompt: "Use $optc-enemy-json-import to convert this OPTC enemy description, screenshots, or quest guide notes into canonical JSON for the saved-enemies Import Enemy flow."

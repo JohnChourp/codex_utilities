@@ -1,4 +1,0 @@
-interface:
-  display_name: "OPTC Custom Character Upsert"
-  short_description: "Add or update a custom OPTC character from template plus image"
-  default_prompt: "Add or update a custom OPTC character in optc-team-builder using the fixed template and an image path or URL, then reapply the local dataset."

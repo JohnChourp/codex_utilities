@@ -1,4 +1,0 @@
-interface:
-  display_name: "OPTC Release"
-  short_description: "Build, tag, and publish an Android GitHub release for OPTC Team Builder"
-  default_prompt: "Create a new OPTC Team Builder Android release with patch bump, tag push, release notes, and APK asset upload."
