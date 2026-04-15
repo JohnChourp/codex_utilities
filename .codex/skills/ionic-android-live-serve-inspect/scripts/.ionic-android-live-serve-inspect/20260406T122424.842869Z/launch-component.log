@@ -1,7 +1,0 @@
-Starting: Intent { cmp=io.codeliver.driver/.MainActivity }
-Status: ok
-LaunchState: COLD
-Activity: io.codeliver.driver/.MainActivity
-TotalTime: 2185
-WaitTime: 2213
-Complete

@@ -18,7 +18,7 @@ Use this skill for `~/Downloads/projects/optc-box-exporter` when the goal is to 
 
 2. Run:
 ```bash
-~/.codex/skills/optc-box-browser-run/scripts/run.sh
+$CODEX_HOME/skills/optc-box-browser-run/scripts/run.sh
 ```
 
 3. The script will:

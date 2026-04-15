@@ -13,7 +13,7 @@ Run the deployment script to execute the full debug cycle automatically: detect 
 
 1. Run the script:
 ```bash
-~/.codex/skills/android-debug-deploy/scripts/android_debug_deploy.sh --project <android-project-root>
+$CODEX_HOME/skills/android-debug-deploy/scripts/android_debug_deploy.sh --project <android-project-root>
 ```
 
 2. Let the script do:
@@ -32,19 +32,19 @@ Run the deployment script to execute the full debug cycle automatically: detect 
 
 1. One-time executable permission:
 ```bash
-chmod +x ~/.codex/skills/android-debug-deploy/scripts/android_debug_deploy.sh
+chmod +x $CODEX_HOME/skills/android-debug-deploy/scripts/android_debug_deploy.sh
 ```
 
 2. Deploy:
 ```bash
-~/.codex/skills/android-debug-deploy/scripts/android_debug_deploy.sh --project <android-project-root>
+$CODEX_HOME/skills/android-debug-deploy/scripts/android_debug_deploy.sh --project <android-project-root>
 ```
 
 ## macOS Troubleshooting
 
 - `permission denied` on script:
 ```bash
-bash ~/.codex/skills/android-debug-deploy/scripts/android_debug_deploy.sh --project <android-project-root>
+bash $CODEX_HOME/skills/android-debug-deploy/scripts/android_debug_deploy.sh --project <android-project-root>
 ```
 
 - `adb not found`:

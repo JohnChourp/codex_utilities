@@ -13,6 +13,7 @@ import tempfile
 import urllib.error
 import urllib.parse
 import zipfile
+from pathlib import Path
 
 from github_utils import github_request
 DEFAULT_REF = "main"
@@ -42,8 +43,15 @@ class InstallError(Exception):
     pass
 
 
+def _default_codex_home() -> str:
+    for candidate in Path(__file__).resolve().parents:
+        if candidate.name == ".codex":
+            return str(candidate)
+    return str(Path.cwd().resolve() / ".codex")
+
+
 def _codex_home() -> str:
-    return os.environ.get("CODEX_HOME", os.path.expanduser("~/.codex"))
+    return os.environ.get("CODEX_HOME", _default_codex_home())
 
 
 def _tmp_root() -> str:

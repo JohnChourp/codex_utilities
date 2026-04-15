@@ -1,4 +1,0 @@
-Serving HTTP on 127.0.0.1 port 8206 (http://127.0.0.1:8206/) ...
-127.0.0.1 - - [06/Apr/2026 14:47:15] "GET / HTTP/1.1" 200 -
-
-Keyboard interrupt received, exiting.

@@ -12,14 +12,14 @@ Use this skill for `~/Downloads/projects/optc-box-exporter` when the user wants 
 Default local case-folder location is the skill directory itself:
 
 ```text
-~/.codex/skills/optc-box-audit-loop
+$CODEX_HOME/skills/optc-box-audit-loop
 ```
 
 So by default the skill reads images and JSON from:
 
-- `~/.codex/skills/optc-box-audit-loop/input`
-- `~/.codex/skills/optc-box-audit-loop/output`
-- `~/.codex/skills/optc-box-audit-loop/meta`
+- `$CODEX_HOME/skills/optc-box-audit-loop/input`
+- `$CODEX_HOME/skills/optc-box-audit-loop/output`
+- `$CODEX_HOME/skills/optc-box-audit-loop/meta`
 
 ## Case folder contract (strict)
 
@@ -61,12 +61,12 @@ When the user sends assets progressively:
 ~/Downloads/projects/optc-box-exporter
 ```
 
-2. If the user did not provide a case-folder path, use the default skill directory case folder (`~/.codex/skills/optc-box-audit-loop`).
+2. If the user did not provide a case-folder path, use the default skill directory case folder (`$CODEX_HOME/skills/optc-box-audit-loop`).
 If `meta/notes.txt` is missing and the prompt has no failure context, ask for a short failure note.
 
 3. Run:
 ```bash
-~/.codex/skills/optc-box-audit-loop/scripts/run.sh [case-folder]
+$CODEX_HOME/skills/optc-box-audit-loop/scripts/run.sh [case-folder]
 ```
 
 4. Inspect generated files in the same case folder:

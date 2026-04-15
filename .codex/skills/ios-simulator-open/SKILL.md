@@ -13,7 +13,7 @@ Run a single command to ensure an iPhone 17 Pro Max simulator exists, boot it, a
 
 1. Run:
 ```bash
-~/.codex/skills/ios-simulator-open/scripts/ios_simulator_open.sh
+$CODEX_HOME/skills/ios-simulator-open/scripts/ios_simulator_open.sh
 ```
 
 2. The script will:

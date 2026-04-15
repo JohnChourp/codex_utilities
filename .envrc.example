@@ -1,0 +1,10 @@
+export CODEX_HOME="$PWD/.codex"
+PATH_add "$CODEX_HOME/bin"
+
+if [ -d "$HOME/Downloads/lambdas/codeliver_all/dm-codeliver-brain/.codex" ]; then
+  export CODEDELIVER_BRAIN_CODEX="$HOME/Downloads/lambdas/codeliver_all/dm-codeliver-brain/.codex"
+fi
+
+if [ -d "$HOME/Downloads/projects/cloud-repos-panel-brain/.codex" ]; then
+  export CRP_BRAIN_CODEX="$HOME/Downloads/projects/cloud-repos-panel-brain/.codex"
+fi

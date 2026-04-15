@@ -414,5 +414,5 @@ log "Capacitor: $CAPACITOR_VERSION ($CAPACITOR_CHANNEL)"
 log "Next steps:"
 printf '  cd %s\n' "$PROJECT_DIR"
 printf '  npm run build\n'
-printf '  ~/.codex/skills/ionic-android-codex-deploy/scripts/ionic_android_codex_deploy.sh --project %s\n' "$PROJECT_DIR"
-printf '  ~/.codex/skills/ionic-ios-codex-deploy/scripts/ionic_ios_codex_deploy.sh --project %s\n' "$PROJECT_DIR"
+printf '  $CODEX_HOME/skills/ionic-android-codex-deploy/scripts/ionic_android_codex_deploy.sh --project %s\n' "$PROJECT_DIR"
+printf '  $CODEX_HOME/skills/ionic-ios-codex-deploy/scripts/ionic_ios_codex_deploy.sh --project %s\n' "$PROJECT_DIR"

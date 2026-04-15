@@ -26,15 +26,15 @@ Use this skill to bootstrap a new Ionic Angular app when the user provides only 
 1. Normalize the project type into a safe project slug.
 2. Resolve current package versions:
 ```bash
-python3 ~/.codex/skills/ionic-angular-mobile-app-builder/scripts/resolve_versions.py
+python3 $CODEX_HOME/skills/ionic-angular-mobile-app-builder/scripts/resolve_versions.py
 ```
 3. Check local prerequisites:
 ```bash
-bash ~/.codex/skills/ionic-angular-mobile-app-builder/scripts/post_setup_checks.sh
+bash $CODEX_HOME/skills/ionic-angular-mobile-app-builder/scripts/post_setup_checks.sh
 ```
 4. Scaffold the app:
 ```bash
-python3 ~/.codex/skills/ionic-angular-mobile-app-builder/scripts/main.py scaffold \
+python3 $CODEX_HOME/skills/ionic-angular-mobile-app-builder/scripts/main.py scaffold \
   --project-type "travel planner app" \
   --destination /absolute/path/for/new/project
 ```
@@ -45,34 +45,34 @@ npm run build
 npx cap sync
 ```
 6. Reuse the existing deploy skills after scaffold:
-   - Android: `~/.codex/skills/ionic-android-codex-deploy/scripts/ionic_android_codex_deploy.sh --project <project-root>`
-   - iOS: `~/.codex/skills/ionic-ios-codex-deploy/scripts/ionic_ios_codex_deploy.sh --project <project-root>`
+   - Android: `$CODEX_HOME/skills/ionic-android-codex-deploy/scripts/ionic_android_codex_deploy.sh --project <project-root>`
+   - iOS: `$CODEX_HOME/skills/ionic-ios-codex-deploy/scripts/ionic_ios_codex_deploy.sh --project <project-root>`
 
 ## Commands
 
 ### Resolve versions
 
 ```bash
-python3 ~/.codex/skills/ionic-angular-mobile-app-builder/scripts/main.py versions
+python3 $CODEX_HOME/skills/ionic-angular-mobile-app-builder/scripts/main.py versions
 ```
 
 ### Run environment checks
 
 ```bash
-python3 ~/.codex/skills/ionic-angular-mobile-app-builder/scripts/main.py check
+python3 $CODEX_HOME/skills/ionic-angular-mobile-app-builder/scripts/main.py check
 ```
 
 ### Scaffold a project with defaults
 
 ```bash
-python3 ~/.codex/skills/ionic-angular-mobile-app-builder/scripts/main.py scaffold \
+python3 $CODEX_HOME/skills/ionic-angular-mobile-app-builder/scripts/main.py scaffold \
   --project-type "recipe app"
 ```
 
 ### Scaffold with explicit names
 
 ```bash
-python3 ~/.codex/skills/ionic-angular-mobile-app-builder/scripts/main.py scaffold \
+python3 $CODEX_HOME/skills/ionic-angular-mobile-app-builder/scripts/main.py scaffold \
   --project-type "fitness tracker" \
   --project-name pulse-path \
   --app-name "Pulse Path" \
@@ -83,7 +83,7 @@ python3 ~/.codex/skills/ionic-angular-mobile-app-builder/scripts/main.py scaffol
 ### Opt into preview Capacitor
 
 ```bash
-python3 ~/.codex/skills/ionic-angular-mobile-app-builder/scripts/main.py scaffold \
+python3 $CODEX_HOME/skills/ionic-angular-mobile-app-builder/scripts/main.py scaffold \
   --project-type "creator app" \
   --capacitor-channel next
 ```

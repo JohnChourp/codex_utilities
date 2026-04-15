@@ -12,7 +12,7 @@ This file is for the fallback CLI mode only. Read it only after the user explici
 Real API calls require **network access** + `OPENAI_API_KEY`. `--dry-run` does not.
 
 ## Quick start (works from any repo)
-Set a stable path to the skill CLI (default `CODEX_HOME` is `~/.codex`):
+Set a stable path to the skill CLI (default `CODEX_HOME` is `$CODEX_HOME`):
 
 ```
 export CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"

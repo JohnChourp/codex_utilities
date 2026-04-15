@@ -23,7 +23,7 @@ For each repo, act only when uncommitted changes are exclusively `.DS_Store` fil
 ## Run
 
 ```bash
-~/.codex/skills/repos-dsstore-auto-commit-push/scripts/fix_ds_store_and_commit_push.sh
+$CODEX_HOME/skills/repos-dsstore-auto-commit-push/scripts/fix_ds_store_and_commit_push.sh
 ```
 
 ## Optional env vars

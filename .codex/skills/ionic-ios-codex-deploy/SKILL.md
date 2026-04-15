@@ -13,7 +13,7 @@ Run one command to build an Ionic app, sync Capacitor iOS, build the simulator a
 
 1. Run:
 ```bash
-~/.codex/skills/ionic-ios-codex-deploy/scripts/ionic_ios_codex_deploy.sh --project <ionic-project-root>
+$CODEX_HOME/skills/ionic-ios-codex-deploy/scripts/ionic_ios_codex_deploy.sh --project <ionic-project-root>
 ```
 
 2. The script will:

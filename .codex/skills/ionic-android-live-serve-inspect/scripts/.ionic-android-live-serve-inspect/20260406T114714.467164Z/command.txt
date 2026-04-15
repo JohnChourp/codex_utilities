@@ -1,1 +1,0 @@
-/home/dm-soft-1/.codex/skills/ionic-android-live-serve-inspect/scripts/run.py --project /tmp/tmp.jjYSmyBSQ9/project --skip-launch --device-api 34

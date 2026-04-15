@@ -22,6 +22,17 @@ def _current_os_key() -> str:
 def _load_runtime_config(skill_root: Path) -> dict:
     runtime_path = skill_root / "skill.runtime.json"
     if not runtime_path.is_file():
+        if (skill_root / "SKILL.md").is_file():
+            return {
+                "schema_version": 2,
+                "skill_name": skill_root.name,
+                "execution_mode": "guidance",
+                "supported_os": [],
+                "unsupported_behavior": "fail_fast",
+                "preflight": {"checks": []},
+                "tooling": {},
+                "commands": [],
+            }
         raise SystemExit(f"Missing skill.runtime.json in {skill_root}")
     return json.loads(runtime_path.read_text(encoding="utf-8"))
 
@@ -67,6 +78,13 @@ def _resolve_command(runtime: dict, argv: list[str]) -> tuple[dict, list[str]]:
 
     available = ", ".join(sorted(commands))
     raise SystemExit(f"Unknown skill command. Available commands: {available}")
+
+
+def _guidance_only_message(skill_root: Path) -> str:
+    return (
+        f"Skill '{skill_root.name}' is guidance-only. "
+        f"Read {skill_root / 'SKILL.md'} for the workflow."
+    )
 
 
 def _tool_candidates(runtime: dict, tool_name: str) -> list[str]:
@@ -141,6 +159,9 @@ def _build_exec_command(command: dict, skill_root: Path, passthrough_args: list[
 
 def launch_skill_root(skill_root: Path, argv: list[str]) -> int:
     runtime = _load_runtime_config(skill_root)
+    if runtime.get("execution_mode") == "guidance" and not runtime.get("commands"):
+        print(_guidance_only_message(skill_root))
+        return 0
     _check_preflight(runtime, argv)
     command, passthrough_args = _resolve_command(runtime, argv)
     exec_argv = _build_exec_command(command, skill_root, passthrough_args)

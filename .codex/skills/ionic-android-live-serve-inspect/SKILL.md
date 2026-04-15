@@ -31,13 +31,13 @@ When the first path fails, prefer internal recovery over chat narration: inspect
 
 1. Run:
 ```bash
-~/.codex/bin/ionic-android-live-serve-inspect --project <ionic-project-root>
+$CODEX_HOME/bin/ionic-android-live-serve-inspect --project <ionic-project-root>
 ```
 
 Fallback local entrypoints:
-- Generic launcher: `~/.codex/bin/run-skill ionic-android-live-serve-inspect --project <ionic-project-root>`
-- Direct wrapper: `python3 ~/.codex/skills/ionic-android-live-serve-inspect/scripts/run.py --project <ionic-project-root>`
-- Direct shell launcher: `~/.codex/skills/ionic-android-live-serve-inspect/scripts/ionic_android_live_serve_inspect.sh --project <ionic-project-root>`
+- Generic launcher: `$CODEX_HOME/bin/run-skill ionic-android-live-serve-inspect --project <ionic-project-root>`
+- Direct wrapper: `python3 $CODEX_HOME/skills/ionic-android-live-serve-inspect/scripts/run.py --project <ionic-project-root>`
+- Direct shell launcher: `$CODEX_HOME/skills/ionic-android-live-serve-inspect/scripts/ionic_android_live_serve_inspect.sh --project <ionic-project-root>`
 
 2. The script will:
 - Validate required tools (`node`, `npm`, `adb`) and use `rg` when available with `grep` fallback.
@@ -83,7 +83,7 @@ Fallback local entrypoints:
 ## Troubleshooting
 
 - `adb not found`: install Android platform-tools and ensure `adb` is in `PATH`.
-- `run.py` says `Unable to locate shared skill runtime support`: the local shared runtime under `~/.codex/skills/.system/skill-runtime-lib` is missing or incomplete.
+- `run.py` says `Unable to locate shared skill runtime support`: the local shared runtime under `$CODEX_HOME/skills/.system/skill-runtime-lib` is missing or incomplete.
 - Need the full logs after a run: open the `report.md` file next to `run.py` and inspect it directly.
 - If the shell exits early before the live session starts, `run.py` still leaves a bootstrap `report.md` and appends a final summary there.
 - `No USB Android device found`: enable developer options + USB debugging and reconnect phone.

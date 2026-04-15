@@ -13,20 +13,20 @@ Compare `dependencies` and `devDependencies` against the latest stable npm regis
 ## Run
 
 ```bash
-python3 ~/.codex/skills/paneldf-find-outdated-lambda-deps/scripts/main.py
+python3 $CODEX_HOME/skills/paneldf-find-outdated-lambda-deps/scripts/main.py
 ```
 
 Custom root:
 
 ```bash
-python3 ~/.codex/skills/paneldf-find-outdated-lambda-deps/scripts/main.py \
+python3 $CODEX_HOME/skills/paneldf-find-outdated-lambda-deps/scripts/main.py \
   --root /absolute/path/to/lambdas
 ```
 
 Custom output:
 
 ```bash
-python3 ~/.codex/skills/paneldf-find-outdated-lambda-deps/scripts/main.py \
+python3 $CODEX_HOME/skills/paneldf-find-outdated-lambda-deps/scripts/main.py \
   --output /absolute/path/to/report.json
 ```
 

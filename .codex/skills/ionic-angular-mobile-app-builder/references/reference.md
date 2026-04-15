@@ -46,9 +46,9 @@ npx cap sync ios
 ## Existing Deploy Skills
 
 1. Android deploy script:
-   `~/.codex/skills/ionic-android-codex-deploy/scripts/ionic_android_codex_deploy.sh`
+   `$CODEX_HOME/skills/ionic-android-codex-deploy/scripts/ionic_android_codex_deploy.sh`
 2. iOS deploy script:
-   `~/.codex/skills/ionic-ios-codex-deploy/scripts/ionic_ios_codex_deploy.sh`
+   `$CODEX_HOME/skills/ionic-ios-codex-deploy/scripts/ionic_ios_codex_deploy.sh`
 
 ## Known Limits
 

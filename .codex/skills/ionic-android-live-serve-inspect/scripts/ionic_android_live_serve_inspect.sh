@@ -153,9 +153,15 @@ append_path_dir() {
 }
 
 bootstrap_path() {
-    local code_home="${CODEX_HOME:-$HOME/.codex}"
+    local script_dir
+    local code_home_default
+    local code_home
     local dir
     local vscode_dirs=("$HOME"/.vscode/extensions/openai.chatgpt-*/bin/*)
+
+    script_dir="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    code_home_default="$(cd -- "$script_dir/../../.." && pwd)"
+    code_home="${CODEX_HOME:-$code_home_default}"
 
     for dir in \
         "$HOME/.local/bin" \

@@ -15,7 +15,7 @@
   "tooling": {},
   "recording": {
     "enabled_by_default": false,
-    "output_dir_template": "~/.codex/tmp/skill-runs/{skill}/{timestamp}",
+    "output_dir_template": "$CODEX_HOME/tmp/skill-runs/{skill}/{timestamp}",
     "artifacts": [
       "run.json",
       "command.txt",

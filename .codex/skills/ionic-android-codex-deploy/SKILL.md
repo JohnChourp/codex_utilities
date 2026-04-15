@@ -13,7 +13,7 @@ Run one command to build an Ionic app, sync Capacitor Android, install debug APK
 
 1. Run:
 ```bash
-~/.codex/skills/ionic-android-codex-deploy/scripts/ionic_android_codex_deploy.sh --project <ionic-project-root>
+$CODEX_HOME/skills/ionic-android-codex-deploy/scripts/ionic_android_codex_deploy.sh --project <ionic-project-root>
 ```
 
 2. The script will:

@@ -12,8 +12,15 @@ def _usage() -> str:
     return "Usage: run-skill <skill-name> [args...]"
 
 
+def _default_codex_home() -> Path:
+    for candidate in Path(__file__).resolve().parents:
+        if candidate.name == ".codex":
+            return candidate
+    return Path.cwd().resolve() / ".codex"
+
+
 def _resolve_skill_root(skill_name: str) -> Path:
-    codex_home = Path(os.environ.get("CODEX_HOME", str(Path.home() / ".codex"))).expanduser()
+    codex_home = Path(os.environ.get("CODEX_HOME", str(_default_codex_home()))).expanduser()
     candidates = [
         codex_home / "skills" / skill_name,
         codex_home / "skills" / ".system" / skill_name,

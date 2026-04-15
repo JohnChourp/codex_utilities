@@ -4,11 +4,22 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 import sys
 
 
-SKILLS_ROOT = Path.home() / ".codex" / "skills"
+def _skills_root() -> Path:
+    env_value = os.environ.get("CODEX_HOME", "").strip()
+    if env_value:
+        return Path(env_value).expanduser().resolve() / "skills"
+    for candidate in Path(__file__).resolve().parents:
+        if candidate.name == ".codex":
+            return candidate / "skills"
+    return Path.cwd().resolve() / ".codex" / "skills"
+
+
+SKILLS_ROOT = _skills_root()
 
 
 def yaml_quote(value: str) -> str:

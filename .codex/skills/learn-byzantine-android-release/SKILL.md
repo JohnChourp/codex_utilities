@@ -19,7 +19,7 @@ source ~/.android/learnbyzantine/release-signing.env
 
 2. Τρέξε:
 ```bash
-~/.codex/skills/learn-byzantine-android-release/scripts/run_release.sh --bump patch
+$CODEX_HOME/skills/learn-byzantine-android-release/scripts/run_release.sh --bump patch
 ```
 
 3. Το script εκτελεί αυτόματα:
