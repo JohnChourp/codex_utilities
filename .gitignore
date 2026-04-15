@@ -1,6 +1,8 @@
 .DS_Store
 .envrc
 
+Downloads/lambdas/node_modules
+Downloads/projects/node_modules
 .codex/.codexDevAgent-*
 .codex/.personality_migration
 .codex/.tmp/
