@@ -1,0 +1,4 @@
+interface:
+  display_name: "Sync Brain Core Home"
+  short_description: "Sync a brain repo to a shared core with fallback resolution"
+  default_prompt: "Sync the specified brain repo to the specified shared core repo. Resolve shared assets in the order declared core, existing brain-defined core, then ~/.codex. Update only the brain AGENTS managed block plus .codex/core-home.json and .codex/refs/shared-core-resolution.generated.md."
