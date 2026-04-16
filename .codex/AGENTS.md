@@ -26,6 +26,12 @@ This repo is the canonical shared engine for portable Codex assets.
 - Do not keep CodeDeliver-specific skill folders here; those belong in the CodeDeliver brain `.codex/skills`.
 - When working in one of the domains above, load the local brain `.codex/AGENTS.md` and the corresponding local `.codex/{policies,playbooks,refs}`.
 - Do not depend on `~/.codex` for shared skills, launchers, or rules.
+- Shared lambda dependency rule:
+  - Treat `$HOME/Downloads/projects/codex_utilities/Downloads/lambdas` as the canonical shared npm home for `@aws-sdk/*` packages.
+  - Before adding or reinstalling `@aws-sdk/*` inside an individual lambda repo, first check whether the needed package is already available from the shared `Downloads/lambdas/node_modules` install.
+  - If a required `@aws-sdk/*` package is missing, add it once to the shared `Downloads/lambdas/package.json` and install it there instead of repeating the install in every lambda.
+  - Only add per-lambda `@aws-sdk/*` installs when a repo has an explicit isolated-runtime requirement and that requirement is documented in the repo.
+  - Prefer running shells through `source ./activate-codex-home.sh` so `NODE_PATH` includes the shared `Downloads/lambdas/node_modules` location.
 - After code changes, always run repo-native validation for the affected project.
 - For TypeScript repos, do not treat a successful framework build as sufficient proof that TypeScript is healthy; run an explicit typecheck step in addition to repo-native validation.
 - Prefer an existing repo-native typecheck entrypoint such as `npm run typecheck` when available.
