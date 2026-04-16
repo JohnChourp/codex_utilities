@@ -26,4 +26,12 @@ This repo is the canonical shared engine for portable Codex assets.
 - Do not keep CodeDeliver-specific skill folders here; those belong in the CodeDeliver brain `.codex/skills`.
 - When working in one of the domains above, load the local brain `.codex/AGENTS.md` and the corresponding local `.codex/{policies,playbooks,refs}`.
 - Do not depend on `~/.codex` for shared skills, launchers, or rules.
+- After code changes, always run repo-native validation for the affected project.
+- For TypeScript repos, do not treat a successful framework build as sufficient proof that TypeScript is healthy; run an explicit typecheck step in addition to repo-native validation.
+- Prefer an existing repo-native typecheck entrypoint such as `npm run typecheck` when available.
+- When there is no dedicated typecheck script, choose the most specific valid `tsconfig` for the changed runtime instead of blindly using the root `tsconfig.json`.
+- For Angular/Ionic application repos, default to `tsconfig.app.json` for app-level typecheck and only run spec/test `tsconfig` validation when the repo already has a working spec typing setup or an existing spec validation command.
+- Treat the root `tsconfig.json` as a fallback only when it is clearly the correct compile target for the changed area.
+- Example: in `codeliver-panel`, `npm run build` and `ionic build --prod` can pass while `npx tsc -p tsconfig.json --noEmit` still reports spec-related diagnostics; the safe default app check there is `npx tsc -p tsconfig.app.json --noEmit`.
+- If validation exposes limited, clear pre-existing issues, try to fix them in the same session. If it exposes broad unrelated debt, stop and present a separate plan instead of silently expanding scope.
 </INSTRUCTIONS>
