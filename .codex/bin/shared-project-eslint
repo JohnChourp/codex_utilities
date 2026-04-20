@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CODEX_UTILITIES_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+SHARED_PROJECTS_ROOT="$CODEX_UTILITIES_ROOT/Downloads/projects"
+ESLINT_BIN="$SHARED_PROJECTS_ROOT/node_modules/.bin/eslint"
+ESLINT_CONFIG="$SHARED_PROJECTS_ROOT/eslint.config.mjs"
+
+usage() {
+  cat <<'EOF'
+Usage: shared-project-eslint <target-project-dir> [eslint args...]
+
+Examples:
+  shared-project-eslint /path/to/codeliver-app
+  shared-project-eslint /path/to/codeliver-app src/app/home/home.page.ts
+  shared-project-eslint /path/to/codeliver-app --fix src/app/home/home.page.ts
+EOF
+}
+
+if [[ "${1:-}" == "" || "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  usage
+  exit 1
+fi
+
+TARGET_PROJECT_DIR="$1"
+shift || true
+
+if [[ ! -d "$TARGET_PROJECT_DIR" ]]; then
+  echo "shared-project-eslint: target project dir not found: $TARGET_PROJECT_DIR" >&2
+  exit 1
+fi
+
+if [[ ! -x "$ESLINT_BIN" ]]; then
+  echo "shared-project-eslint: shared eslint binary not found: $ESLINT_BIN" >&2
+  exit 1
+fi
+
+if [[ ! -f "$ESLINT_CONFIG" ]]; then
+  echo "shared-project-eslint: shared eslint config not found: $ESLINT_CONFIG" >&2
+  exit 1
+fi
+
+TARGET_PROJECT_DIR="$(cd "$TARGET_PROJECT_DIR" && pwd)"
+
+if [[ "$#" -eq 0 ]]; then
+  set -- .
+fi
+
+cd "$TARGET_PROJECT_DIR"
+exec "$ESLINT_BIN" --no-config-lookup --config "$ESLINT_CONFIG" "$@"

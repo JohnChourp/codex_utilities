@@ -21,6 +21,25 @@ This exports:
 
 For `direnv`, copy [`.envrc.example`](./.envrc.example) to `.envrc`.
 
+## Shared Lint Wrappers
+
+After `source ./activate-codex-home.sh`, the following wrappers are available from `PATH`:
+
+- `shared-project-eslint <target-project-dir> [eslint args...]`
+- `shared-lambda-eslint <target-lambda-dir> [eslint args...]`
+
+Examples:
+
+```bash
+shared-project-eslint ~/Downloads/projects/codeliver-app src/app/home/home.page.ts
+shared-lambda-eslint ~/Downloads/lambdas/codeliver_all/codeliver-routes-merge plans/simple_plan.js
+```
+
+These wrappers force the canonical shared ESLint installs/configs from:
+
+- `./Downloads/projects` for Angular/Ionic/web projects
+- `./Downloads/lambdas` for lambda repos
+
 ## Ownership
 
 - Shared engine assets live in [`./.codex`](./.codex).

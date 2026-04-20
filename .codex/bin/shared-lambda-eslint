@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CODEX_UTILITIES_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+SHARED_LAMBDAS_ROOT="$CODEX_UTILITIES_ROOT/Downloads/lambdas"
+ESLINT_BIN="$SHARED_LAMBDAS_ROOT/node_modules/.bin/eslint"
+ESLINT_CONFIG="$SHARED_LAMBDAS_ROOT/eslint.config.mjs"
+
+usage() {
+  cat <<'EOF'
+Usage: shared-lambda-eslint <target-lambda-dir> [eslint args...]
+
+Examples:
+  shared-lambda-eslint /path/to/codeliver-routes-merge
+  shared-lambda-eslint /path/to/codeliver-routes-merge plans/simple_plan.js
+  shared-lambda-eslint /path/to/codeliver-routes-merge --fix index.js
+EOF
+}
+
+if [[ "${1:-}" == "" || "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  usage
+  exit 1
+fi
+
+TARGET_LAMBDA_DIR="$1"
+shift || true
+
+if [[ ! -d "$TARGET_LAMBDA_DIR" ]]; then
+  echo "shared-lambda-eslint: target lambda dir not found: $TARGET_LAMBDA_DIR" >&2
+  exit 1
+fi
+
+if [[ ! -x "$ESLINT_BIN" ]]; then
+  echo "shared-lambda-eslint: shared eslint binary not found: $ESLINT_BIN" >&2
+  exit 1
+fi
+
+if [[ ! -f "$ESLINT_CONFIG" ]]; then
+  echo "shared-lambda-eslint: shared eslint config not found: $ESLINT_CONFIG" >&2
+  exit 1
+fi
+
+TARGET_LAMBDA_DIR="$(cd "$TARGET_LAMBDA_DIR" && pwd)"
+
+if [[ "$#" -eq 0 ]]; then
+  set -- .
+fi
+
+cd "$TARGET_LAMBDA_DIR"
+exec "$ESLINT_BIN" --no-config-lookup --config "$ESLINT_CONFIG" "$@"
