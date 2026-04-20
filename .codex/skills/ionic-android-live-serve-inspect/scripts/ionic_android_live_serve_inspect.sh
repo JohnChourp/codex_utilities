@@ -57,6 +57,8 @@ ANDROID_SDK_ROOT_RESOLVED=""
 
 report_bootstrap_target() {
     local target="$1"
+    local invoked_cwd="${IONIC_ANDROID_LIVE_SERVE_INSPECT_INVOKED_CWD:-${CODEX_SKILL_INVOKED_CWD:-$PWD}}"
+    local invocation_basename="${IONIC_ANDROID_LIVE_SERVE_INSPECT_INVOCATION_BASENAME:-${CODEX_SKILL_INVOKED_BASENAME:-$(basename "$invoked_cwd")}}"
 
     [[ -n "$target" ]] || return 0
     [[ -s "$target" ]] && return 0
@@ -65,8 +67,8 @@ report_bootstrap_target() {
         printf '%s\n' '# ionic-android-live-serve-inspect report'
         printf '\n'
         printf '%s\n' "- Started (UTC): $SESSION_STARTED_AT_UTC"
-        printf '%s\n' "- Invoked cwd: ${IONIC_ANDROID_LIVE_SERVE_INSPECT_INVOKED_CWD:-$PWD}"
-        printf '%s\n' "- Invocation basename: ${IONIC_ANDROID_LIVE_SERVE_INSPECT_INVOCATION_BASENAME:-$(basename "$PWD")}"
+        printf '%s\n' "- Invoked cwd: $invoked_cwd"
+        printf '%s\n' "- Invocation basename: $invocation_basename"
         printf '%s\n' "- Command: ${IONIC_ANDROID_LIVE_SERVE_INSPECT_COMMAND:-unknown}"
         printf '%s\n' "- Report dir: ${REPORT_DIR:-unknown}"
         printf '%s\n' "- Latest report: ${REPORT_LATEST_FILE:-unknown}"
@@ -302,8 +304,8 @@ is_same_or_descendant() {
 }
 
 sort_project_candidates() {
-    local invocation_cwd="${IONIC_ANDROID_LIVE_SERVE_INSPECT_INVOKED_CWD:-}"
-    local invocation_name="${IONIC_ANDROID_LIVE_SERVE_INSPECT_INVOCATION_BASENAME:-}"
+    local invocation_cwd="${IONIC_ANDROID_LIVE_SERVE_INSPECT_INVOKED_CWD:-${CODEX_SKILL_INVOKED_CWD:-}}"
+    local invocation_name="${IONIC_ANDROID_LIVE_SERVE_INSPECT_INVOCATION_BASENAME:-${CODEX_SKILL_INVOKED_BASENAME:-}}"
     local sorted=()
     local candidate
 
@@ -394,6 +396,7 @@ add_project_search_root() {
 }
 
 build_project_search_roots() {
+    local invocation_cwd="${IONIC_ANDROID_LIVE_SERVE_INSPECT_INVOKED_CWD:-${CODEX_SKILL_INVOKED_CWD:-}}"
     local extra_roots="${IONIC_PROJECT_SEARCH_ROOTS:-}"
     local root
     local old_ifs="$IFS"
@@ -401,6 +404,7 @@ build_project_search_roots() {
 
     PROJECT_SEARCH_ROOTS=()
 
+    add_project_search_root "$invocation_cwd"
     add_project_search_root "$PWD"
     add_project_search_root "$HOME"
     add_project_search_root "$HOME/Downloads"
@@ -645,6 +649,7 @@ prompt_for_project_selection() {
 resolve_project_dir() {
     local raw="${PROJECT_DIR_RAW:-}"
     local explicit_root=""
+    local invocation_cwd="${IONIC_ANDROID_LIVE_SERVE_INSPECT_INVOKED_CWD:-${CODEX_SKILL_INVOKED_CWD:-}}"
     local selected=""
 
     if [[ -n "$raw" ]]; then
@@ -668,6 +673,11 @@ resolve_project_dir() {
             sort_project_candidates
         fi
     else
+        if [[ -n "$invocation_cwd" ]] && explicit_root="$(find_project_root_from_path "$invocation_cwd" 2>/dev/null)"; then
+            PROJECT_DIR="$explicit_root"
+            log "Using project root from invocation directory: $PROJECT_DIR"
+            return 0
+        fi
         if explicit_root="$(find_project_root_from_path "$PWD" 2>/dev/null)"; then
             PROJECT_DIR="$explicit_root"
             log "Using project root from current directory: $PROJECT_DIR"
@@ -1175,11 +1185,14 @@ run_configure_if_available() {
         return 0
     fi
 
+    local status=0
+
     log "Running npm run configure (resilient mode)"
-    set +e
-    run_project_command "npm-run-configure" "npm run configure"
-    local status=$?
-    set -e
+    if run_project_command "npm-run-configure" "npm run configure"; then
+        status=0
+    else
+        status=$?
+    fi
 
     if [[ $status -eq 0 ]]; then
         return 0
@@ -1556,10 +1569,13 @@ NODE
 }
 
 run_gradle_install() {
-    set +e
-    run_android_command "gradlew-install-debug" "./gradlew installDebug --warning-mode all"
-    local status=$?
-    set -e
+    local status=0
+
+    if run_android_command "gradlew-install-debug" "./gradlew installDebug --warning-mode all"; then
+        status=0
+    else
+        status=$?
+    fi
 
     if [[ $status -ne 0 ]]; then
         if search_quiet "INSTALL_FAILED_UPDATE_INCOMPATIBLE|INSTALL_FAILED_VERSION_DOWNGRADE" "$LAST_LOG_FILE"; then
@@ -1578,10 +1594,11 @@ attempt_gradle_install_with_recovery() {
     local did_repair_native_audio=0
 
     while true; do
-        set +e
-        run_gradle_install
-        install_status=$?
-        set -e
+        if run_gradle_install; then
+            install_status=0
+        else
+            install_status=$?
+        fi
 
         if [[ $install_status -eq 0 ]]; then
             return 0
@@ -1870,10 +1887,11 @@ ensure_android_manifest_allows_cleartext
 ADB_REVERSE_SET=1
 log "Applied adb reverse tcp:$PORT tcp:$PORT on device $ACTIVE_SERIAL (API $DEVICE_API)"
 
-set +e
-attempt_gradle_install_with_recovery
-gradle_status=$?
-set -e
+if attempt_gradle_install_with_recovery; then
+    gradle_status=0
+else
+    gradle_status=$?
+fi
 
 if [[ $gradle_status -ne 0 ]]; then
     exit "$gradle_status"

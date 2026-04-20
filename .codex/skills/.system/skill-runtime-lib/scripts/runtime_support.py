@@ -167,8 +167,14 @@ def launch_skill_root(skill_root: Path, argv: list[str]) -> int:
     exec_argv = _build_exec_command(command, skill_root, passthrough_args)
 
     env = os.environ.copy()
+    invocation_cwd = Path.cwd().resolve()
     env.setdefault("CODEX_HOME", str(_detect_codex_home(skill_root)))
-    completed = subprocess.run(exec_argv, cwd=skill_root, env=env, check=False)
+    env.setdefault("CODEX_SKILL_INVOKED_CWD", str(invocation_cwd))
+    env.setdefault("CODEX_SKILL_INVOKED_BASENAME", invocation_cwd.name)
+    try:
+        completed = subprocess.run(exec_argv, cwd=skill_root, env=env, check=False)
+    except KeyboardInterrupt:
+        return 130
     return completed.returncode
 
 

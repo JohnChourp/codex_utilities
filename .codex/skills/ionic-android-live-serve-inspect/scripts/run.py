@@ -56,7 +56,11 @@ def _bootstrap_run_artifacts(skill_root: Path) -> tuple[Path, Path]:
     artifact_root = _artifact_root()
     artifact_root.mkdir(parents=True, exist_ok=True)
 
-    invocation_cwd = Path.cwd().resolve()
+    invocation_cwd_raw = (
+        os.environ.get('IONIC_ANDROID_LIVE_SERVE_INSPECT_INVOKED_CWD')
+        or os.environ.get('CODEX_SKILL_INVOKED_CWD')
+    )
+    invocation_cwd = Path(invocation_cwd_raw).expanduser().resolve() if invocation_cwd_raw else Path.cwd().resolve()
     command = ' '.join(quote(arg) for arg in [str(Path(__file__).resolve()), *sys.argv[1:]])
     metadata = {
         'skill': 'ionic-android-live-serve-inspect',
