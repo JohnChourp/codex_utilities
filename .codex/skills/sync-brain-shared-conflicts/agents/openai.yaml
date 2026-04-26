@@ -1,0 +1,4 @@
+interface:
+  display_name: "Sync Brain Shared Conflicts"
+  short_description: "Sync shared-agent conflict policy across brain repos"
+  default_prompt: "Use $sync-brain-shared-conflicts to dry-run and apply the shared-agent conflict policy across the CRP, OPTC, and CodeDeliver brain repos."
