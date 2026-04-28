@@ -15,8 +15,8 @@ Options:
   --package <id>         Override package/applicationId detection
   --activity <name>      Activity to launch (e.g. .MainActivity)
   --open-inspect         Open chrome://inspect/#devices automatically
-  --full-prepare         Force heavy prepare flow (npm install/icons/build-after); configure still runs
-  --skip-prepare         Skip heavy prepare flow (npm install/icons/build-after); configure still runs
+  --full-prepare         Force heavy prepare flow (npm install/icons/build-after)
+  --skip-prepare         Skip heavy prepare flow (npm install/icons/build-after)
   --skip-inspect-open    Do not open chrome://inspect/#devices
   --skip-launch          Install only, do not launch app
   --verbose              Stream detailed command output
@@ -1180,34 +1180,6 @@ sync_android_platform() {
     }
 }
 
-run_configure_if_available() {
-    if ! has_npm_script "configure"; then
-        return 0
-    fi
-
-    local status=0
-
-    log "Running npm run configure (resilient mode)"
-    if run_project_command "npm-run-configure" "npm run configure"; then
-        status=0
-    else
-        status=$?
-    fi
-
-    if [[ $status -eq 0 ]]; then
-        return 0
-    fi
-
-    if search_quiet "spawn pod ENOENT|Updating iOS native dependencies with pod install - failed|AccessDenied|ListObjectsV2 operation: Access Denied" "$LAST_LOG_FILE"; then
-        log "configure hit non-Android prerequisites (iOS pods/AWS). Continuing with Android flow."
-        return 0
-    fi
-
-    warn "configure exited with status $status. Continuing with Android flow."
-    show_log_excerpt "$LAST_LOG_FILE"
-    return 0
-}
-
 run_push_icons_android_if_available() {
     if ! has_npm_script "push_icons_android"; then
         return 0
@@ -1346,7 +1318,6 @@ ensure_branch_resources_if_needed() {
 
 prepare_android_project() {
     run_npm_install
-    run_configure_if_available
     ensure_android_platform
     run_push_icons_android_if_available
     run_build_after_if_present
@@ -1855,7 +1826,6 @@ resolve_prepare_mode
 
 if [[ "$PREPARE_MODE" == "skip" ]]; then
     log "Project prepare skipped ($PREPARE_LOG_LABEL)"
-    run_configure_if_available
     ensure_android_platform
     sync_android_platform
     if ! android_generated_resources_ready; then

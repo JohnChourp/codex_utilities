@@ -7,7 +7,7 @@ description: Start Ionic live serve, wire Android debugging, and optionally open
 
 ## Overview
 
-Run one command to start an Ionic live server, run `npm run configure` before Android sync/install when available, connect a USB Android phone to that server via `adb reverse`, and install/launch the Capacitor app. Chrome device inspect is opt-in only.
+Run one command to start an Ionic live server, connect a USB Android phone to that server via `adb reverse`, and install/launch the Capacitor app. Chrome device inspect is opt-in only.
 
 When `--project` is omitted, the launcher auto-discovers Ionic/Capacitor projects from the current working directory, the user's home tree, and common workspace roots. If more than one project matches, it opens an interactive terminal chooser.
 The chooser ranks the current repo/invocation match first, so a `codeliver-app` checkout appears at the top when it is present.
@@ -44,7 +44,7 @@ Fallback local entrypoints:
 - Validate Ionic/Capacitor project shape.
 - Auto-discover the Ionic project when `--project` is omitted; accept either a path or a fuzzy project name.
 - Prefer a fast Android-only path by default when the project already has `node_modules/` and `android/`.
-- Run `npm install` only when the fast path is unavailable or the user explicitly requests full prepare. Always run `npm run configure` before Android sync/install and live serve when the script exists.
+- Run `npm install` only when the fast path is unavailable or the user explicitly requests full prepare. Do not run `npm run configure`; the user runs it manually when needed.
 - Ensure Android platform exists (`npx cap add android` when needed).
 - If available, refresh Android icons via `npm run push_icons_android`.
 - If `build-after.js` exists, run it to apply native post-processing (e.g. Branch resources).
@@ -73,8 +73,8 @@ Fallback local entrypoints:
 - `--package <applicationId>`: override package detection
 - `--activity <activity>`: launch specific activity
 - `--open-inspect`: open `chrome://inspect/#devices` automatically; never implied by default
-- `--full-prepare`: force the heavy prepare flow (`npm install` / icons / `build-after.js`); `npm run configure` still runs
-- `--skip-prepare`: force skipping the heavy prepare flow (`npm install` / icons / `build-after.js`); `npm run configure` still runs
+- `--full-prepare`: force the heavy prepare flow (`npm install` / icons / `build-after.js`)
+- `--skip-prepare`: force skipping the heavy prepare flow (`npm install` / icons / `build-after.js`)
 - `--skip-inspect-open`: keep browser closed explicitly (default behavior)
 - `--skip-launch`: install only, do not launch app
 - `--verbose`: stream detailed command output instead of quiet mode
@@ -94,7 +94,7 @@ Fallback local entrypoints:
 - `Device API 20 or lower`: the skill stops before `adb reverse`; use an API 21+ USB Android device or pass `--device-api 21+` only if you know the target supports reverse.
 - `SDK location not found`: the skill auto-detects the Android SDK from env/common paths and writes `android/local.properties`; if it still cannot find a valid SDK, set `ANDROID_HOME` or `ANDROID_SDK_ROOT`.
 - `INSTALL_FAILED_UPDATE_INCOMPATIBLE`: script retries uninstall/install automatically.
-- `npm run configure` fails with `pod ENOENT` or AWS `AccessDenied`: prefer Android-only continuation instead of rerunning the full prepare path.
+- If native resources are stale after config changes, run `npm run configure` manually before rerunning this skill.
 - App opens then immediately crashes with `Resources$NotFoundException String resource ID #0x0`: this is commonly missing Branch Android strings; script now auto-runs `build-after.js` + `npx cap sync android` when needed.
 - `installDebug` fails with missing Android resources (`branch_*`, notification channel strings, `ic_tracking`): regenerate Android-only resources before retrying install.
 - `installDebug` fails with duplicate `requestAudioFocusIfNeeded` / `abandonAudioFocusIfNeeded`: re-run the repo's native-audio patch script and retry once.
