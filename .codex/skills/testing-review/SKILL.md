@@ -63,9 +63,9 @@ Then inspect:
 
 After inspecting the changed files, load the most relevant repo style skills for evaluation.
 
-1. Use `front-end-code-style` when the touched files are primarily Angular/Ionic frontend code such as `mobileorder` or `dmpanel`.
-2. Use `back-end-lambda-code-style` when the touched files are primarily lambda/backend code such as `dm_lambda_functions/paneldelivery`.
-3. Use both when the change spans frontend and backend concerns.
+1. Use `front-end-code-style` when the touched files are primarily Angular/Ionic frontend code covered by this shared baseline.
+2. For domain-specific lambda/backend code, load the relevant local brain policy or skill instead of relying on a shared backend style skill.
+3. Combine shared frontend guidance with the local brain backend guidance when the change spans frontend and backend concerns.
 4. Use `implementation-gate` only when the user wants plan, scope, or release-process compliance checked.
 5. Use `closeout-docs` only when the user asks to record a review outcome back after the review is complete.
 

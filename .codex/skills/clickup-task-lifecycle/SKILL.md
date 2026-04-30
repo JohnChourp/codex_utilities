@@ -20,24 +20,16 @@ Apply this workflow in order.
    - Under `workspace_id=9015329079`, `DM` is a space: `space_id=90151066397`.
    - Under `workspace_id=9014849358`, live-confirmed `ionic angular` space is `space_id=90144305724`.
    - Use deterministic ids directly for these live-confirmed targets:
-     - `codeliver-panel` -> `901506309888`
-     - `codeliver-app` -> `901506309882`
-     - `codeliver-pos` -> `901506319729`
-     - `codeliver-sap` -> `901508601568`
-     - generic or multi-repo `codeliver` work -> `901515418339` (`codeliver-global-tasks`)
-     - `cloud-repos-panel` -> `901506686257`
      - `cloud-fleet` or `Cloud Fleet` -> `901502564110`
      - `deliveryfleet-pos` -> `901514051062`
      - `deliveryfleet-app` -> `901514051088`
-   - Treat `CoDeliver.io` (`90151073880`) as deprecated legacy state and never create new tasks there.
    - Treat live `Delivery Feet` (`90156023875`) as the canonical routing target for the `Delivery Fleet` alias.
    - Treat `Cloud Fleet Integrations` (`901502619784`) as distinct from `cloud-fleet`.
    - Treat workspace and space labels separately: `IOANNIS CHOURPOULIADIS's Workspace` is a workspace; `DM` is a space under `workspace_id=9015329079`, not a workspace label.
    - Do not deterministically auto-route any target inside `workspace_id=9014849358` until its exact `space_id` and `list_id` are re-verified live.
    - Under `workspace_id=9014849358`, treat these as workspace-scoped provisional targets until live ids are re-verified:
-     - under `ionic angular` (`space_id=90144305724`): `LearnByzantineMusic`, `optc-team-builder`, `Do-not-disturb-controller`, `orologion-mega`, `create-fonts-from-ocr-photos`, `oseth-bus-route-planner`
-     - under `Jupiter Notebok` (space id still unconfirmed): `optc-box-exporter`
-   - Do not auto-route or auto-create other provisional targets until live ids are re-verified: `codeliver-tasks-to-day`, `deliveryfleet-global-tasks`.
+     - under `ionic angular` (`space_id=90144305724`): `LearnByzantineMusic`, `Do-not-disturb-controller`, `orologion-mega`, `create-fonts-from-ocr-photos`, `oseth-bus-route-planner`
+   - Do not auto-route or auto-create other provisional targets until live ids are re-verified: `deliveryfleet-global-tasks`.
    - Otherwise search ClickUp Lists for exact or close matches based on the request and current repo context.
    - If one plausible List is found, use it directly without asking.
    - If multiple plausible Lists are found, ask only which of those Lists should receive the task.

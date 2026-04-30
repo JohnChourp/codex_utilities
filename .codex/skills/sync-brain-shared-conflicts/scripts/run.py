@@ -46,12 +46,14 @@ BRAINS: dict[str, BrainConfig] = {
             "and repo routing rules."
         ),
         source_truth_bullet=(
-            "Keep CRP local ClickUp, repo routing, and domain policies from this brain "
-            "repo as the source of truth; use `codexDevAgent` only as generic fallback guidance."
+            "CRP-specific routing, repo lookup, validation, frontend, lambda, and "
+            "harden rules must live in this brain repo; shared sources are pointers "
+            "or generic utilities only."
         ),
         clickup_row=(
-            "Keep CRP ClickUp and repo-routing behavior governed by local CRP policies "
-            "in this brain repo. Do not copy OPTC opt-in ClickUp behavior into CRP."
+            "Use the local `.codex/policies/codeliver-clickup-workflow-policy.md`; "
+            "`codex_utilities` must not define CRP list ids, routing, or status "
+            "lifecycle behavior."
         ),
         skill_only_row=(
             "When `.codex/policies/codeliver-skill-execution-policy.md` classifies a "
@@ -59,14 +61,13 @@ BRAINS: dict[str, BrainConfig] = {
             "lifecycle for that run."
         ),
         validation_row=(
-            "For CRP project or lambda code changes, use the canonical sibling repos "
-            "`$HOME/Downloads/projects/cloud-repos-panel` and "
-            "`$HOME/Downloads/lambdas/crp_all/*` as the source of truth and run the "
-            "targeted validation required by local CRP guidance. Shared generic "
-            "validation rules can add checks but cannot weaken local CRP requirements."
+            "For CRP project or lambda code changes, use the local CRP policies in "
+            "this brain repo for repo lookup and validation. Shared generic "
+            "validation rules can add checks but cannot define or weaken "
+            "CRP-specific requirements."
         ),
         conflict_extra_bullets=(
-            "Keep CRP ClickUp and repo-routing behavior governed by local CRP policies; do not replace it with OPTC opt-in ClickUp behavior.",
+            "Keep CRP ClickUp and repo-routing behavior governed by local CRP policies; `codex_utilities` must not define CRP list ids, routing, status lifecycle, or harden behavior.",
             "Local skill-only execution policy overrides the general ClickUp workflow for requests that qualify as skill-only runs.",
         ),
     ),
@@ -74,10 +75,14 @@ BRAINS: dict[str, BrainConfig] = {
         key="optc",
         domain="OPTC",
         repo=home_repo("Downloads", "projects", "optc-team-builder-brain"),
-        source_role="Canonical OPTC domain guidance, local skills, refs, and app compatibility rules.",
+        source_role=(
+            "Canonical OPTC domain guidance, local skills, refs, app compatibility "
+            "rules, and companion repo workflows."
+        ),
         source_truth_bullet=(
-            "Keep OPTC local workflow, skill routing, and app-compatibility rules from "
-            "this brain repo as the source of truth; use `codexDevAgent` only as generic fallback guidance."
+            "OPTC-specific workflow, skill routing, repo lookup, app compatibility, "
+            "and box-exporter rules must live in this brain repo; shared sources are "
+            "pointers or generic utilities only."
         ),
         clickup_row=(
             "ClickUp is opt-in for OPTC. Use ClickUp rules only when the user provides "
@@ -85,11 +90,9 @@ BRAINS: dict[str, BrainConfig] = {
         ),
         skill_only_row=None,
         validation_row=(
-            "For app/code changes, use the sibling app repo "
-            "`$HOME/Downloads/projects/optc-team-builder` as the source of truth and "
-            "run the targeted validation required by local OPTC guidance. Shared "
-            "generic validation rules can add checks but cannot weaken the local OPTC "
-            "requirements."
+            "For OPTC app/code changes, use the local OPTC guidance in this brain "
+            "repo for repo lookup and validation. Shared generic validation rules "
+            "can add checks but cannot define or weaken OPTC-specific requirements."
         ),
         conflict_extra_bullets=(
             "ClickUp is opt-in for OPTC work. Apply ClickUp rules only when the user provides a task/link or explicitly asks for ClickUp handling.",
@@ -104,14 +107,14 @@ BRAINS: dict[str, BrainConfig] = {
             "refs, ClickUp routing, and system maps."
         ),
         source_truth_bullet=(
-            "CodeDeliver ClickUp routing and auto-task rules in this file override "
-            "`codexDevAgent`'s generic rule to confirm the target List first when the "
-            "request matches a deterministic CodeDeliver route."
+            "CodeDeliver-specific routing, repo lookup, validation, frontend, and "
+            "lambda rules must live in this brain repo; shared sources are pointers "
+            "or generic utilities only."
         ),
         clickup_row=(
-            "Keep the mandatory CodeDeliver ClickUp workflow and deterministic "
-            "auto-routing from this brain repo. When a deterministic CodeDeliver route "
-            "matches, do not ask for the target List just because `codexDevAgent` would."
+            "Use the local `.codex/policies/codeliver-clickup-workflow-policy.md`; "
+            "`codex_utilities` must not define CodeDeliver list ids, routing, or "
+            "status lifecycle behavior."
         ),
         skill_only_row=(
             "When `.codex/policies/codeliver-skill-execution-policy.md` classifies a "
@@ -119,22 +122,13 @@ BRAINS: dict[str, BrainConfig] = {
             "lifecycle for that run."
         ),
         validation_row=(
-            "For CodeDeliver project or lambda code changes, use the canonical sibling "
-            "repos `$HOME/Downloads/projects/codeliver-*` and "
-            "`$HOME/Downloads/lambdas/codeliver_all/*` as the source of truth and run "
-            "the targeted validation required by local CodeDeliver guidance. Shared "
-            "generic validation rules can add checks but cannot weaken local "
-            "CodeDeliver requirements."
+            "For CodeDeliver project or lambda code changes, use the local "
+            "CodeDeliver policies in this brain repo for repo lookup and validation. "
+            "Shared generic validation rules can add checks but cannot define or "
+            "weaken CodeDeliver-specific requirements."
         ),
         conflict_extra_bullets=(
             "Local skill-only execution policy overrides the general ClickUp workflow for requests that qualify as skill-only runs.",
-        ),
-        working_replacements=(
-            (
-                "- Unless the user explicitly says otherwise, create a new ClickUp task for the conversation using that workflow.",
-                "- For skill-only execution requests, apply `.codex/policies/codeliver-skill-execution-policy.md` as the local carve-out from the default ClickUp workflow.\n"
-                "- For non-skill-only requests, unless the user explicitly says otherwise, create a new ClickUp task for the conversation using the default ClickUp workflow.",
-            ),
         ),
     ),
 }
@@ -214,6 +208,31 @@ def conflict_ref_text(config: BrainConfig) -> str:
                 "then global `~/.codex` only when necessary.",
             ),
             ("Validation", config.validation_row),
+            *(
+                [
+                    (
+                        f"{config.domain} behavior in shared assets",
+                        "If a shared `codex_utilities` skill or script contains "
+                        f"{config.domain}-specific routing, frontend, lambda, "
+                        "validation, harden, or repo lookup rules, move the durable "
+                        "rule into this brain repo and reduce the shared asset to "
+                        "generic wording or a pointer back here.",
+                    )
+                ]
+                if config.key in {"codeliver", "crp"}
+                else [
+                    (
+                        "OPTC behavior in shared assets",
+                        "If a shared `codex_utilities` skill or script contains "
+                        "OPTC-specific workflow, skill routing, app compatibility, "
+                        "box-exporter, validation, or repo lookup rules, move the "
+                        "durable rule into this brain repo and reduce the shared "
+                        "asset to generic wording or a pointer back here.",
+                    )
+                ]
+                if config.key == "optc"
+                else []
+            ),
             (
                 "Branch, PR, push, release, deploy",
                 "Generic `codexDevAgent` gates apply only when the user requests "
@@ -238,7 +257,7 @@ This reference resolves recurring conflicts between the {config.domain} brain, `
 | Source | Role in {config.domain} work | Conflict behavior |
 | --- | --- | --- |
 | `{config.repo.name}/.codex` | {config.source_role} | Wins for all {config.domain} domain behavior. |
-| `codex_utilities/.codex` | Shared executable/core asset source, including shared skills, scripts, rules, and resolved configs. | Use for shared assets and core lookup, not for overriding {config.domain} domain rules. |
+| `codex_utilities/.codex` | Shared executable/core asset source, including shared skills, scripts, rules, and resolved configs. | Use for shared assets and core lookup only; it must not define {config.domain} behavior. |
 | `codexDevAgent/AGENTS.md` | Generic workflow and skill-routing guidance. | Use only as fallback where {config.domain} guidance is silent. |
 
 ## Conflict Matrix

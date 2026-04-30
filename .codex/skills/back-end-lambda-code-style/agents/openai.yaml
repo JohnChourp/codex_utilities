@@ -1,4 +1,0 @@
-interface:
-  display_name: "Back End Lambda Code Style"
-  short_description: "Apply paneldelivery lambda backend coding style."
-  default_prompt: "Use $back-end-lambda-code-style to implement paneldelivery lambda changes with lodash/Bluebird iteration, deliveryManager helpers, and existing DynamoDB/error-response patterns."

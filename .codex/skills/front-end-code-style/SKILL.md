@@ -9,7 +9,7 @@ Apply this style baseline before and during frontend edits.
 
 ## 1) App and stack context
 
-1. Treat `mobileorder`, `dmpanel`, `codeliver-sap`, `codeliver-panel`, `codeliver-pos`, `codeliver-app`, and `cloud-repos-panel` as supported Angular + Ionic apps for this baseline.
+1. Treat `mobileorder` and `dmpanel` as supported Angular + Ionic apps for this shared baseline. Domain-specific app lists belong in their local brain repos.
 2. Use `mobileorder` and `dmpanel` as canonical style references, but apply the same frontend baseline across the supported Angular/Ionic repos above.
 3. When work happens from the shared `~/Downloads/projects` workspace, apply this baseline to touched Angular/Ionic frontend repos within that workspace rather than treating it as repo-specific guidance.
 4. Follow existing Angular/Ionic and NgRx patterns from nearby components.

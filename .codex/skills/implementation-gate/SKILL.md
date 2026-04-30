@@ -51,7 +51,6 @@ Follow this gate before coding.
 4. Prefer an existing repo script such as `npm run typecheck`. Otherwise choose the most specific valid `tsconfig` for the changed runtime instead of defaulting to the root `tsconfig.json`.
 5. For Angular/Ionic application repos, prefer `tsconfig.app.json` for application changes and only run spec/test `tsconfig` validation when the repo already has a working test typing setup or an existing spec validation path.
 6. Treat the root `tsconfig.json` as a fallback only when it is clearly the correct compile target for the changed area.
-7. Example: in `codeliver-panel`, `npm run build` and `ionic build --prod` pass, but `npx tsc -p tsconfig.json --noEmit` is not a safe default because it pulls in current spec-related diagnostics; `npx tsc -p tsconfig.app.json --noEmit` is the correct default app-level typecheck.
-8. If unrelated failures block the full suite, run the relevant subset and report limits. If the extra validation reveals limited, clear pre-existing issues, try to fix them in the same session; if it reveals broad unrelated debt, stop and present a separate plan instead of silently expanding scope.
-9. Ask user explicitly: push only or deploy.
-10. Never push/deploy without explicit confirmation.
+7. If unrelated failures block the full suite, run the relevant subset and report limits. If the extra validation reveals limited, clear pre-existing issues, try to fix them in the same session; if it reveals broad unrelated debt, stop and present a separate plan instead of silently expanding scope.
+8. Ask user explicitly: push only or deploy.
+9. Never push/deploy without explicit confirmation.

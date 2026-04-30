@@ -1,4 +1,0 @@
-interface:
-  display_name: "OPTC Box Browser Run"
-  short_description: "Bootstrap the OPTC Box Exporter and open it in the browser"
-  default_prompt: "Run the OPTC Box Exporter repo, install what is needed for the browser UI, start the local server, and open it in the browser."

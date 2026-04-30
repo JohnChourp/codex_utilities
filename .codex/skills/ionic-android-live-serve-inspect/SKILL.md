@@ -10,7 +10,7 @@ description: Start Ionic live serve, wire Android debugging, and optionally open
 Run one command to start an Ionic live server, connect a USB Android phone to that server via `adb reverse`, and install/launch the Capacitor app. Chrome device inspect is opt-in only.
 
 When `--project` is omitted, the launcher auto-discovers Ionic/Capacitor projects from the current working directory, the user's home tree, and common workspace roots. If more than one project matches, it opens an interactive terminal chooser.
-The chooser ranks the current repo/invocation match first, so a `codeliver-app` checkout appears at the top when it is present.
+The chooser ranks the current repo/invocation match first, so the active app checkout appears at the top when it is present.
 
 Every run writes the visible `report.md` file in the same `scripts/` folder as `run.py`, and keeps the per-run logs in a hidden `.ionic-android-live-serve-inspect/<timestamp>/` artifact directory beside it. The report is created immediately and kept up to date by both the Python bootstrap and the shell launcher. The launcher also auto-detects the Android SDK, writes `android/local.properties` when needed, and keeps the foreground session alive after the app launch.
 `run.py` prints the exact `report.md` path immediately, and the launcher keeps appending a final summary even on early failures or `Ctrl+C` exits.

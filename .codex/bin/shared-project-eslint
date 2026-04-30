@@ -12,9 +12,9 @@ usage() {
 Usage: shared-project-eslint <target-project-dir> [eslint args...]
 
 Examples:
-  shared-project-eslint /path/to/codeliver-app
-  shared-project-eslint /path/to/codeliver-app src/app/home/home.page.ts
-  shared-project-eslint /path/to/codeliver-app --fix src/app/home/home.page.ts
+  shared-project-eslint /path/to/project
+  shared-project-eslint /path/to/project src/app/home/home.page.ts
+  shared-project-eslint /path/to/project --fix src/app/home/home.page.ts
 EOF
 }
 

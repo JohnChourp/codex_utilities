@@ -1,4 +1,0 @@
-interface:
-  display_name: "CRP harden-deploy"
-  short_description: "Runbook for CRP harden-deploy flow"
-  default_prompt: "Explain or execute the workflow behind crp repos harden-deploy REPO, using safe defaults (prefer auto flow; use handoff to avoid nested Codex) and do merge+deploy only with explicit approval."

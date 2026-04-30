@@ -12,9 +12,9 @@ usage() {
 Usage: shared-lambda-eslint <target-lambda-dir> [eslint args...]
 
 Examples:
-  shared-lambda-eslint /path/to/codeliver-routes-merge
-  shared-lambda-eslint /path/to/codeliver-routes-merge plans/simple_plan.js
-  shared-lambda-eslint /path/to/codeliver-routes-merge --fix index.js
+  shared-lambda-eslint /path/to/lambda-repo
+  shared-lambda-eslint /path/to/lambda-repo plans/simple_plan.js
+  shared-lambda-eslint /path/to/lambda-repo --fix index.js
 EOF
 }
 

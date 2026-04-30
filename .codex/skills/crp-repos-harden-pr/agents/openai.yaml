@@ -1,3 +1,0 @@
-interface:
-  display_name: "CRP repos harden-pr"
-  short_description: "PR-only harden flow for Lambda repos"

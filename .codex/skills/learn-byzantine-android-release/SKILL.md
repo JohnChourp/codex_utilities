@@ -61,5 +61,5 @@ $CODEX_HOME/skills/learn-byzantine-android-release/scripts/run_release.sh --bump
 - Το release script μπορεί να τρέξει και με dirty git working tree: κάνει stage/commit όλες τις αλλαγές (εκτός ignored) σε ένα ενιαίο release commit.
 - Χρησιμοποίησε `--version` μόνο όταν χρειάζεται συγκεκριμένο release number.
 - Για direct release publish απαιτείται ενεργό `gh auth login`.
-- Για Google Play production signing, το Learn skill υποστηρίζει και optional `--set-github-secrets` μέσω του repo setup script. Αυτό είναι Learn-specific και δεν μεταφέρεται στο `optc-team-builder` parity flow.
+- Για Google Play production signing, το Learn skill υποστηρίζει και optional `--set-github-secrets` μέσω του repo setup script. Αυτό είναι Learn-specific και δεν μεταφέρεται σε άλλα project parity flows.
 - Αν έχει προηγηθεί αποτυχημένο release run μετά από bump, ξανατρέξε με explicit `--version X.Y.Z --code N` για να μη γίνει δεύτερο bump.
